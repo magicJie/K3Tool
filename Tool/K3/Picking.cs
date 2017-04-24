@@ -129,7 +129,7 @@ namespace Tool.K3
             /// <summary>
             /// 发料仓库字段
             /// </summary>
-            protected string Fdcstockid;
+            protected string FscStockId;
             #endregion
             #region 属性
             /// <summary>
@@ -147,11 +147,11 @@ namespace Tool.K3
             /// <summary>
             /// 单位
             /// </summary>
-            public string FUnitID { get { return Getfunitid(); } set { Fitemid = value; } }
+            public string FUnitID { get { return Getfunitid(); } set { Funitid = value; } }
             /// <summary>
             /// 发料仓库
             /// </summary>
-            public string FDCStockID { get { return GetFdcstockid(); } set { Fdcstockid = value; } }
+            public string FSCStockID { get { return GetFdcstockid(); } set { FscStockId = value; } }
 
             /// <summary>
             /// 基本单位发数量
@@ -181,7 +181,7 @@ namespace Tool.K3
             /// <returns></returns>
             protected virtual string GetFdcstockid()
             {
-                return Fdcstockid;
+                return FscStockId;
             }
 
             #endregion

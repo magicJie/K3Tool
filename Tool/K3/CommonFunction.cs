@@ -8,24 +8,47 @@ namespace Tool.K3
     public static class CommonFunction
     {
         /// <summary>
-        /// 根据物料属性，找物料内码
+        /// 根据属性，找金蝶内码
         /// </summary>
         /// <param name="conn"></param>
-        /// <param name="columnname"></param>        
-        /// <param name="value"></param>
+        /// <param name="fitemclassid"></param>
+        /// <param name="where"></param>
         /// <returns></returns>
-        public static string GetMaterielIsnByCode(string conn,string columnname,string value)
+        public static string Getfitemid(string conn,Fitemclassid fitemclassid, string where)
         {
-            string sqlstring = string.Format("select fitemid from t_ICItemCore where {0}='{1}'", columnname, value);
+            int type = 0;            
+            switch (fitemclassid)
+            {
+                case Fitemclassid.客户:
+                    type = 1;
+                    break;
+                case Fitemclassid.部门:
+                    type = 2;
+                    break;
+                case Fitemclassid.职员:
+                    type = 3;
+                    break;
+                case  Fitemclassid.物料:
+                    type = 4;
+                    break;
+                case Fitemclassid.仓库:
+                    type = 5;
+                    break;               
+                case Fitemclassid.单位:
+                    type = 7;
+                    break;
+                case Fitemclassid.供应商:
+                    type = 8;
+                    break;
+               
+            }
+            var sqlstring = string.Format("select FItemID from t_item where FItemClassID='{0}' and {1}", type,where);
             var datatable = SqlHelper.Query(conn, sqlstring);
             if (datatable.Rows.Count > 0)
             {
                 return datatable.Rows[0][0].ToString();
             }
-            else
-            {
-                throw new Exception("物料:" + value + "不存在！");
-            }
+            throw new Exception(fitemclassid+":"+@where+"不存在！");
         }
         /// <summary>
         /// 获取某个表的最大编码

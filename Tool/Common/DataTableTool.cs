@@ -17,18 +17,21 @@ namespace Tool.Common
         public static DataTable GetDataTableByClass<T>(List<T> tList)
         {
             DataTable dataTable = new DataTable();
-            foreach (PropertyInfo info in typeof(T).GetProperties())
+            if (tList.Count > 0)
             {
-                dataTable.Columns.Add(info.Name, info.PropertyType);
-            }
-            foreach (var item in tList)
-            {
-                DataRow newrow = dataTable.NewRow();
-                foreach (PropertyInfo info in typeof(T).GetProperties())
+                foreach (PropertyInfo info in tList[0].GetType().GetProperties())
                 {
-                    newrow[info.Name] = info.GetValue(item, null);
+                    dataTable.Columns.Add(info.Name, info.PropertyType);
                 }
-                dataTable.Rows.Add(newrow);
+                foreach (var item in tList)
+                {
+                    DataRow newrow = dataTable.NewRow();
+                    foreach (PropertyInfo info in tList[0].GetType().GetProperties())
+                    {
+                        newrow[info.Name] = info.GetValue(item, null);
+                    }
+                    dataTable.Rows.Add(newrow);
+                }
             }
             return dataTable;
         }
