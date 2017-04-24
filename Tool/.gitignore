@@ -1,0 +1,6 @@
+/obj/
+MagicBox.csproj.user
+Web.config
+/bin/
+/_ReSharper.MagicBox/
+*.DotSettings.user

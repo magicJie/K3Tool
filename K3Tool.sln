@@ -1,0 +1,28 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2013
+VisualStudioVersion = 12.0.40629.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "K3Tool", "K3Tool\K3Tool.csproj", "{78823173-9CC8-43F8-9F93-0B191EE12E8D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tool", "Tool\Tool.csproj", "{3EBC7DB7-FCD8-4C87-8D11-78E33BD60AB6}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{78823173-9CC8-43F8-9F93-0B191EE12E8D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{78823173-9CC8-43F8-9F93-0B191EE12E8D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{78823173-9CC8-43F8-9F93-0B191EE12E8D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{78823173-9CC8-43F8-9F93-0B191EE12E8D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3EBC7DB7-FCD8-4C87-8D11-78E33BD60AB6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3EBC7DB7-FCD8-4C87-8D11-78E33BD60AB6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3EBC7DB7-FCD8-4C87-8D11-78E33BD60AB6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3EBC7DB7-FCD8-4C87-8D11-78E33BD60AB6}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
