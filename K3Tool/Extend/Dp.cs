@@ -49,6 +49,12 @@ namespace K3Tool.Extend
                     var filter = string.Format("FNumber='{0}'", Fbillerid);
                     return CommonFunction.Getfitemid(RelatedConn, Fitemclassid.职员, filter);
                 }
+
+                protected override string GetFdcstockid()
+                {
+                    var filter = string.Format("FNumber='{0}'", Fdcstockid);
+                    return CommonFunction.Getfitemid(RelatedConn, Fitemclassid.仓库, filter);
+                }
             }
 
             public class Body : PurchasedWarehouse.Body
@@ -65,11 +71,11 @@ namespace K3Tool.Extend
                     return CommonFunction.Getfitemid(RelatedConn, Fitemclassid.单位, filter);
                 }
 
-                protected override string GetFdcstockid()
-                {
-                    var filter = string.Format("FNumber='{0}'", Fdcstockid);
-                    return CommonFunction.Getfitemid(RelatedConn, Fitemclassid.仓库, filter);  
-                }
+                //protected override string GetFdcstockid()
+                //{
+                //    var filter = string.Format("FNumber='{0}'", Fdcstockid);
+                //    return CommonFunction.Getfitemid(RelatedConn, Fitemclassid.仓库, filter);  
+                //}
             }
             public static int Work()
             {
