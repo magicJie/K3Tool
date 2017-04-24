@@ -151,7 +151,7 @@ namespace Tool.K3
             /// <summary>
             /// 发料仓库
             /// </summary>
-            public string FSCStockID { get { return GetFdcstockid(); } set { FscStockId = value; } }
+            public string FSCStockID { get { return GetFscstockid(); } set { FscStockId = value; } }
 
             /// <summary>
             /// 基本单位发数量
@@ -179,7 +179,7 @@ namespace Tool.K3
             /// 获取发料仓库
             /// </summary>
             /// <returns></returns>
-            protected virtual string GetFdcstockid()
+            protected virtual string GetFscstockid()
             {
                 return FscStockId;
             }
