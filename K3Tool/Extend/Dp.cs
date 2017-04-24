@@ -55,6 +55,12 @@ namespace K3Tool.Extend
                     var filter = string.Format("FNumber='{0}'", Fdcstockid);
                     return CommonFunction.Getfitemid(RelatedConn, Fitemclassid.仓库, filter);
                 }
+
+                protected override string GetFsupplyid()
+                {
+                    var filter = string.Format("FNumber='{0}'", Fsupplyid);
+                    return CommonFunction.Getfitemid(RelatedConn, Fitemclassid.供应商, filter);
+                }
             }
 
             public class Body : PurchasedWarehouse.Body
