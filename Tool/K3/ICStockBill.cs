@@ -10,6 +10,10 @@ namespace Tool.K3
         /// 单据类型字段
         /// </summary>
         protected int Ftrantype;
+        /// <summary>
+        /// 制单人字段
+        /// </summary>
+        protected string Fbillerid;
         #endregion
         #region 属性
         /// <summary>
@@ -32,6 +36,10 @@ namespace Tool.K3
         /// </summary>
         public DateTime Fdate { get; set; }
         /// <summary>
+        /// 制单人
+        /// </summary>
+        public string FBillerID { get { return GetFbillerid(); } set { Fbillerid = value; } }
+        /// <summary>
         /// 单据类型
         /// </summary>
         public int FTranType { get { return GetFTranType(); } set { Ftrantype = value; } }
@@ -44,6 +52,14 @@ namespace Tool.K3
         protected virtual int GetFTranType()
         {
             return Ftrantype;
+        }
+        /// <summary>
+        /// 获取制单人
+        /// </summary>
+        /// <returns></returns>
+        protected virtual string GetFbillerid()
+        {
+            return Fbillerid;
         }
         #endregion
     }

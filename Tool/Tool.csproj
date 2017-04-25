@@ -50,7 +50,9 @@
     <Compile Include="K3\ICStockBill.cs" />
     <Compile Include="K3\ICStockBillEntry.cs" />
     <Compile Include="K3\Picking.cs" />
+    <Compile Include="K3\ProductInventory.cs" />
     <Compile Include="K3\PurchasedWarehouse.cs" />
+    <Compile Include="K3\RequisitionSlip.cs" />
     <Compile Include="K3\SalesOutLet.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Sql\SqlHelper.cs" />
