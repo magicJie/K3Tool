@@ -183,7 +183,7 @@ namespace K3Tool.Extend
 
                 protected override string Getfunitid()
                 {
-                    var filter = string.Format("FNumber='{0}'", Funitid);
+                    var filter = string.Format("FName='{0}'",Funitid);
                     return CommonFunction.Getfitemid(RelatedConn, Fitemclassid.单位, filter);
                 }
             }
@@ -213,10 +213,6 @@ namespace K3Tool.Extend
                     var j = 1;
                     foreach (DataRow bodyitemRow in bodytable.Select(string.Format("处方号='{0}'",head.FBillNo)))
                     {
-                        if (bodyitemRow["收费项目id"].ToString() == "g")
-                        {
-                            log4net.LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType).Error(head.FBillNo+"1213");
-                        }
                         Body body = new Body
                         {
                             FItemID = bodyitemRow["收费项目id"].ToString(),                            

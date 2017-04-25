@@ -135,7 +135,7 @@
             /// <summary>
             /// 单位
             /// </summary>
-            public string FUnitID { get { return Getfunitid(); } set { Fitemid = value; } }
+            public string FUnitID { get { return Getfunitid(); } set { Funitid = value; } }
             /// <summary>
             /// 发货仓库
             /// </summary>
