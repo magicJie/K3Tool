@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Configuration;
 using System.Data;
+using System.Reflection;
 using Tool.K3;
 using Tool.Sql;
 
@@ -152,20 +153,39 @@ namespace K3Tool.Extend
                     return 100;
                 }
 
-                protected override string GetFsupplyid()
-                {
-                    return "20";
-                }
+                //protected override string GetFbillerid()
+                //{
+                //    //return "16398";
+                //    var filter = string.Format("FNumber='{0}'", Fbillerid);
+                //    return CommonFunction.Getfitemid(RelatedConn, Fitemclassid.职员, filter);
+                //}
 
-                protected override string GetFbillerid()
+                protected override string Getfdeptid()
                 {
-                    return "16398";
+                    var filter = string.Format("FNumber='{0}'", Fdeptid);
+                    return CommonFunction.Getfitemid(RelatedConn, Fitemclassid.部门, filter);
                 }
             }
 
             public class Body : SalesOutLet.Body
             {
+                protected override string GetFItemId()
+                {
+                    var filter = string.Format("FNumber='{0}'", Fitemid);
+                    return CommonFunction.Getfitemid(RelatedConn, Fitemclassid.物料, filter);
+                }
 
+                protected override string GetFdcstockid()
+                {
+                    var filter = string.Format("FNumber='{0}'", Fdcstockid);
+                    return CommonFunction.Getfitemid(RelatedConn, Fitemclassid.仓库, filter);
+                }
+
+                protected override string Getfunitid()
+                {
+                    var filter = string.Format("FNumber='{0}'", Funitid);
+                    return CommonFunction.Getfitemid(RelatedConn, Fitemclassid.单位, filter);
+                }
             }
             public static int Work()
             {
@@ -189,10 +209,14 @@ namespace K3Tool.Extend
                         FInterID = number + i
                     };
                     headliList.Add(head);
-                    recordlist.Add(string.Format("update cmis_chufang_detail set kindeestate='1' where 处方号='{0}'", itemRow["处方号"]));                    
+                    recordlist.Add(string.Format("update cmis_chufang_detail set kindeestate='1' where 处方号='{0}'", itemRow["处方号"]));            
                     var j = 1;
                     foreach (DataRow bodyitemRow in bodytable.Select(string.Format("处方号='{0}'",head.FBillNo)))
                     {
+                        if (bodyitemRow["收费项目id"].ToString() == "g")
+                        {
+                            log4net.LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType).Error(head.FBillNo+"1213");
+                        }
                         Body body = new Body
                         {
                             FItemID = bodyitemRow["收费项目id"].ToString(),                            

@@ -40,7 +40,6 @@ namespace Tool.K3
                 case Fitemclassid.供应商:
                     type = 8;
                     break;
-               
             }
             var sqlstring = string.Format("select FItemID from t_item where FItemClassID='{0}' and {1}", type,where);
             var datatable = SqlHelper.Query(conn, sqlstring);
@@ -48,6 +47,7 @@ namespace Tool.K3
             {
                 return datatable.Rows[0][0].ToString();
             }
+            log4net.LogManager.GetLogger("logger").Error(sqlstring);
             throw new Exception(fitemclassid+":"+@where+"不存在！");
         }
         /// <summary>
@@ -95,8 +95,6 @@ namespace Tool.K3
                     "if not exists(select * from syscolumns where id=object_id('{0}') and name='kindeestate') alter table {0} add kindeestate int", tablename);            
             sqlList.Add(sqlstring);
             SqlHelper.ExecuteSqlTran(conn, sqlList);
-        }
-
-        
+        } 
     }
 }
