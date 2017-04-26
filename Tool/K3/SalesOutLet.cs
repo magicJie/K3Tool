@@ -144,7 +144,7 @@
             /// 发货仓库字段
             /// </summary>
             protected string Fdcstockid;
-           
+            
            
            
             #endregion

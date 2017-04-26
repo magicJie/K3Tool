@@ -20,6 +20,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <LangVersion>5</LangVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -45,6 +46,7 @@
   <ItemGroup>
     <Compile Include="Class1.cs" />
     <Compile Include="Common\DataTableTool.cs" />
+    <Compile Include="Common\LoggerHelper.cs" />
     <Compile Include="K3\CommonField.cs" />
     <Compile Include="K3\CommonFunction.cs" />
     <Compile Include="K3\ICStockBill.cs" />

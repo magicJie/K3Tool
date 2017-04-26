@@ -36,6 +36,18 @@ namespace K3Tool
             var number = Dp.DpPicking.Work();
             MessageBox.Show("成功新增" + number);
         }
+
+        private void button4_Click(object sender, EventArgs e)
+        {
+            var number = Dp.DpProductInventory.Work();
+            MessageBox.Show("成功新增" + number);
+        }
+
+        private void button5_Click(object sender, EventArgs e)
+        {
+            var number = Dp.DpRequisitionSlip.Work();
+            MessageBox.Show("成功新增" + number);
+        }
     }
 
 
