@@ -20,6 +20,14 @@
             /// </summary>
             protected string Fbillerid;
             /// <summary>
+            /// 保管字段
+            /// </summary>
+            protected string Fsmanagerid;
+            /// <summary>
+            /// 发货字段
+            /// </summary>
+            protected string Ffmanagerid;
+            /// <summary>
             /// 部门字段
             /// </summary>
             protected string Fdeptid;
@@ -37,6 +45,18 @@
             /// 制单人
             /// </summary>
             public string FBillerID { get { return GetFbillerid(); } set { Fbillerid = value; } }
+
+            /// <summary>
+            /// 保管
+            /// </summary>
+            public string FSManagerID { get { return GetFsmanagerid(); } set { Fsmanagerid = value; } }
+
+
+            /// <summary>
+            /// 保管
+            /// </summary>
+            public string FFManagerID { get { return GetFfmanagerid(); } set { Ffmanagerid = value; } }
+
             /// <summary>
             /// 部门
             /// </summary>
@@ -62,7 +82,24 @@
             protected virtual string GetFbillerid()
             {
                 return Fbillerid;
-            } 
+            }
+            /// <summary>
+            /// 获取保管
+            /// </summary>
+            /// <returns></returns>
+            protected virtual string GetFsmanagerid()
+            {
+                return Fsmanagerid;
+            }
+
+            /// <summary>
+            /// 获取发货
+            /// </summary>
+            /// <returns></returns>
+            protected virtual string GetFfmanagerid()
+            {
+                return Ffmanagerid;
+            }
             /// <summary>
             /// 获取部门
             /// </summary>

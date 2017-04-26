@@ -37,9 +37,8 @@ namespace Tool.Sql
                 }
                 catch(Exception ex)
                 {
+                    log4net.LogManager.GetLogger("logger").Error(cmd.CommandText);
                     tx.Rollback();
-                    var log = log4net.LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
-                    log.Debug(cmd.CommandText);
                     throw new Exception(ex.Message);
                 }
             }
