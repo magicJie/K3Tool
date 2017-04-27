@@ -175,7 +175,7 @@ namespace K3Tool.Extend
                 protected override string GetFsupplyid()
                 {
                     var filter = string.Format("FNumber='{0}'", Fsupplyid);
-                    return CommonFunction.Getfitemid(RelatedConn, Fitemclassid.供应商, filter);
+                    return CommonFunction.Getfitemid(RelatedConn, Fitemclassid.客户, filter);
                 }
 
             }
@@ -220,8 +220,7 @@ namespace K3Tool.Extend
                         Fdate = DateTime.Parse(itemRow["录入时间"].ToString()),
                         FDeptID = itemRow["科室id"].ToString(),
                         FInterID = number + i,
-                        FSManagerID = itemRow["录入人"].ToString(),
-                        FFManagerID = itemRow["录入人"].ToString()
+                        FSupplyID = itemRow["科室id"].ToString()
                     };
                     headliList.Add(head);
                     recordlist.Add(string.Format("update cmis_chufang_detail set kindeestate='1' where 处方号='{0}'", itemRow["处方号"]));
@@ -591,9 +590,9 @@ namespace K3Tool.Extend
                 headsqlstringlist.AddRange(bodysqlstringlist);
                 var resultnumber = SqlHelper.ExecuteSqlTran(RelatedConn, headsqlstringlist);
                 SqlHelper.ExecuteSqlTran(SourceConn, recordlist);
-                //事务提交了才写日志
-                logList.ForEach(x=> LoggerHelper.WriteWarnInfo(ICStockBillEntry.TableName, "单据号", x.Item1,x.Item2));
                 CommonFunction.UpdateMaxNum(RelatedConn, ICStockBill.TableName, number + i);
+                //事务提交了才写日志
+                logList.ForEach(x => LoggerHelper.WriteWarnInfo(ICStockBillEntry.TableName, "单据号", x.Item1, x.Item2));
                 return resultnumber;
             }
         }
