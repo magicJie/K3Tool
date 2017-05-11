@@ -34,13 +34,15 @@
             this.button3 = new System.Windows.Forms.Button();
             this.button4 = new System.Windows.Forms.Button();
             this.button5 = new System.Windows.Forms.Button();
+            this.button6 = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // button1
             // 
-            this.button1.Location = new System.Drawing.Point(29, 33);
+            this.button1.Location = new System.Drawing.Point(39, 41);
+            this.button1.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.button1.Name = "button1";
-            this.button1.Size = new System.Drawing.Size(111, 35);
+            this.button1.Size = new System.Drawing.Size(148, 44);
             this.button1.TabIndex = 0;
             this.button1.Text = "一键导入入库单";
             this.button1.UseVisualStyleBackColor = true;
@@ -48,9 +50,10 @@
             // 
             // button2
             // 
-            this.button2.Location = new System.Drawing.Point(189, 33);
+            this.button2.Location = new System.Drawing.Point(252, 41);
+            this.button2.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.button2.Name = "button2";
-            this.button2.Size = new System.Drawing.Size(111, 35);
+            this.button2.Size = new System.Drawing.Size(148, 44);
             this.button2.TabIndex = 1;
             this.button2.Text = "一键导入出库单";
             this.button2.UseVisualStyleBackColor = true;
@@ -58,9 +61,10 @@
             // 
             // button3
             // 
-            this.button3.Location = new System.Drawing.Point(29, 96);
+            this.button3.Location = new System.Drawing.Point(39, 120);
+            this.button3.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.button3.Name = "button3";
-            this.button3.Size = new System.Drawing.Size(111, 35);
+            this.button3.Size = new System.Drawing.Size(148, 44);
             this.button3.TabIndex = 2;
             this.button3.Text = "一键导入领料单";
             this.button3.UseVisualStyleBackColor = true;
@@ -68,9 +72,10 @@
             // 
             // button4
             // 
-            this.button4.Location = new System.Drawing.Point(188, 99);
+            this.button4.Location = new System.Drawing.Point(251, 124);
+            this.button4.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.button4.Name = "button4";
-            this.button4.Size = new System.Drawing.Size(123, 35);
+            this.button4.Size = new System.Drawing.Size(164, 44);
             this.button4.TabIndex = 3;
             this.button4.Text = "一键导入产品入库单";
             this.button4.UseVisualStyleBackColor = true;
@@ -78,25 +83,39 @@
             // 
             // button5
             // 
-            this.button5.Location = new System.Drawing.Point(30, 151);
+            this.button5.Location = new System.Drawing.Point(40, 189);
+            this.button5.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.button5.Name = "button5";
-            this.button5.Size = new System.Drawing.Size(111, 35);
+            this.button5.Size = new System.Drawing.Size(148, 44);
             this.button5.TabIndex = 4;
             this.button5.Text = "一键导入调拨单";
             this.button5.UseVisualStyleBackColor = true;
             this.button5.Click += new System.EventHandler(this.button5_Click);
             // 
+            // button6
+            // 
+            this.button6.Location = new System.Drawing.Point(251, 189);
+            this.button6.Margin = new System.Windows.Forms.Padding(4);
+            this.button6.Name = "button6";
+            this.button6.Size = new System.Drawing.Size(148, 44);
+            this.button6.TabIndex = 5;
+            this.button6.Text = "一键导入收款单";
+            this.button6.UseVisualStyleBackColor = true;
+            this.button6.Click += new System.EventHandler(this.button6_Click);
+            // 
             // Form1
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(342, 232);
+            this.ClientSize = new System.Drawing.Size(456, 290);
+            this.Controls.Add(this.button6);
             this.Controls.Add(this.button5);
             this.Controls.Add(this.button4);
             this.Controls.Add(this.button3);
             this.Controls.Add(this.button2);
             this.Controls.Add(this.button1);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
+            this.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.MaximizeBox = false;
             this.MinimizeBox = false;
             this.Name = "Form1";
@@ -113,6 +132,7 @@
         private System.Windows.Forms.Button button3;
         private System.Windows.Forms.Button button4;
         private System.Windows.Forms.Button button5;
+        private System.Windows.Forms.Button button6;
     }
 }
 

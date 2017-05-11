@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Tool.K3
 {
@@ -14,118 +10,204 @@ namespace Tool.K3
         /// <summary>
         /// 表头
         /// </summary>
-        public class Head 
+        public class Head
         {
             public static string TableName = "t_RP_NewReceiveBill";
 
             #region 字段
             /// <summary>
-            /// 打印次数
-            /// </summary>
-            protected string Fbillerid;
-            /// <summary>
             /// 单据号
             /// </summary>
-            protected string Fdeptid;
+            protected string _FNumber;
             /// <summary>
             /// 单据日期
             /// </summary>
-            protected string FsmanagerId;
+            protected DateTime _FDate;
             /// <summary>
             /// 财务日期
             /// </summary>
-            protected string FfmanagerId;
+            protected DateTime _FFincDate;
             /// <summary>
             /// 汇率类型
             /// </summary>
-            protected string FPurposeId;
+            protected int _FExchangeRateType;
             /// <summary>
             /// 币别
             /// </summary>
-            protected string FPurposeId;
+            protected int _FCurrencyID;
             /// <summary>
             /// 汇率
             /// </summary>
-            protected string FPurposeId;
+            protected float _FExchangeRate;
             /// <summary>
             /// 核算项目
             /// </summary>
-            protected string FPurposeId;
+            protected int _FCustomer;
             /// <summary>
-            /// 单据金额
+            /// 系统类型
             /// </summary>
-            protected string FPurposeId;
+            protected int _FRP;
             /// <summary>
-            /// 制单人
+            /// 内码
             /// </summary>
-            protected string FPurposeId;
+            protected int _FBillID;
             #endregion
-            #region 属性           
+            #region 属性
             /// <summary>
-            /// 制单人
+            /// 打印次数
             /// </summary>
-            public string FBillerID { get { return GetFbillerid(); } set { Fbillerid = value; } }
+            public int FPrintCount
+            {
+                get { return 0; }
+            }
             /// <summary>
-            /// 部门
+            /// 单据号
             /// </summary>
-            public string FDeptID { get { return Getfdeptid(); } set { Fdeptid = value; } }
+            public string FNumber
+            {
+                get { return GetFNumber(); }
+                set { _FNumber = value; }
+            }
             /// <summary>
-            /// 领料人
+            /// 单据日期
             /// </summary>
-            public string FSManagerID { get { return GetFsManagerId(); } set { FsmanagerId = value; } }
+            public DateTime FDate
+            {
+                get { return GetFDate(); }
+                set { _FDate = value; }
+            }
             /// <summary>
-            /// 发料人
+            /// 财务日期
             /// </summary>
-            public string FFManagerID { get { return GetFfmanagerId(); } set { FfmanagerId = value; } }
+            public DateTime FFincDate
+            {
+                get { return GetFFincDate(); }
+                set { _FFincDate = value; }
+            }
             /// <summary>
-            /// 领料类型
+            /// 汇率类型
             /// </summary>
-            public string FPurposeID { get { return GetFPurposeId(); } set { FPurposeId = value; } }
+            public int FExchangeRateType
+            {
+                get { return GetFExchangeRateType(); }
+                set { _FExchangeRateType = value; }
+            }
+            /// <summary>
+            /// 币别
+            /// </summary>
+            public int FCurrencyID
+            {
+                get { return GetFCurrencyID(); }
+                set { _FCurrencyID = value; }
+            }
+            /// <summary>
+            /// 汇率
+            /// </summary>
+            public float FExchangeRate
+            {
+                get { return GetFExchangeRate(); }
+                set { _FExchangeRate = value; }
+            }
+            /// <summary>
+            /// 核算项目
+            /// </summary>
+            public int FCustomer
+            {
+                get { return GetFCustomer(); }
+                set { _FCustomer = value; }
+            }
+            /// <summary>
+            /// 系统类型
+            /// </summary>
+            public int FRP
+            {
+                get { return GetFRP(); }
+                set { _FRP = value; }
+            }
 
-            #endregion
-            #region 虚方法 
+            //下面属性非金蝶表结构要求必填但是业务上要求必填
             /// <summary>
-            /// 获取制单人
+            /// 内码
             /// </summary>
-            /// <returns></returns>
-            protected virtual string GetFbillerid()
+            public int FBillID
             {
-                return Fbillerid;
-            }
-            /// <summary>
-            /// 获取部门
-            /// </summary>
-            /// <returns></returns>
-            protected virtual string Getfdeptid()
-            {
-                return Fdeptid;
-            }
-            /// <summary>
-            /// 获取领料人
-            /// </summary>
-            /// <returns></returns>
-            protected virtual string GetFsManagerId()
-            {
-                return FsmanagerId;
-            }
-            /// <summary>
-            /// 获取发料人
-            /// </summary>
-            /// <returns></returns>
-            protected virtual string GetFfmanagerId()
-            {
-                return FfmanagerId;
-            }
-            /// <summary>
-            /// 获取领料类型
-            /// </summary>
-            /// <returns></returns>
-            protected virtual string GetFPurposeId()
-            {
-                return FPurposeId;
+                get { return GetFBillID(); }
+                set { _FBillID = value; }
             }
             #endregion
-            #region 实现
+            #region 虚方法
+            /// <summary>
+            /// 获取单据号
+            /// </summary>
+            /// <returns></returns>
+            protected virtual string GetFNumber()
+            {
+                return _FNumber;
+            }
+            /// <summary>
+            /// 获取制单日期
+            /// </summary>
+            /// <returns></returns>
+            protected virtual DateTime GetFDate()
+            {
+                return _FDate;
+            }
+            /// <summary>
+            /// 获取财务日期
+            /// </summary>
+            /// <returns></returns>
+            protected virtual DateTime GetFFincDate()
+            {
+                return _FFincDate;
+            }
+            /// <summary>
+            /// 获取汇率类型
+            /// </summary>
+            /// <returns></returns>
+            protected virtual int GetFExchangeRateType()
+            {
+                return _FExchangeRateType;
+            }
+            /// <summary>
+            /// 获取币别
+            /// </summary>
+            /// <returns></returns>
+            protected virtual int GetFCurrencyID()
+            {
+                return _FCurrencyID;
+            }
+            /// <summary>
+            /// 获取汇率
+            /// </summary>
+            /// <returns></returns>
+            protected virtual float GetFExchangeRate()
+            {
+                return _FExchangeRate;
+            }
+            /// <summary>
+            /// 获取核算项目
+            /// </summary>
+            /// <returns></returns>
+            protected virtual int GetFCustomer()
+            {
+                return _FCustomer;
+            }
+            /// <summary>
+            /// 获取系统类型
+            /// </summary>
+            /// <returns></returns>
+            protected virtual int GetFRP()
+            {
+                return _FRP;
+            }
+            /// <summary>
+            /// 获取内码
+            /// </summary>
+            /// <returns></returns>
+            protected int GetFBillID()
+            {
+                return _FBillID;
+            }
             #endregion
         }
         /// <summary>
@@ -133,75 +215,176 @@ namespace Tool.K3
         /// </summary>
         public class Body
         {
-            public static string TableName = "t_RP_Contact";
+            public static string TableName = "t_RP_ARBillOfSH";
 
             #region 字段
             /// <summary>
-            /// 产品代码字段
+            /// 
             /// </summary>
-            protected string Fitemid;
+            protected int _FBillID;
+            ///// <summary>
+            ///// 
+            ///// </summary>
+            //protected int _FEntryID;
             /// <summary>
-            /// 单位字段
+            /// 
             /// </summary>
-            protected string Funitid;
+            protected int _FReceiveCyID;
             /// <summary>
-            /// 发料仓库字段
+            /// 
             /// </summary>
-            protected string FscStockId;
+            protected decimal _FReceiveAmount;
+            /// <summary>
+            /// 
+            /// </summary>
+            protected decimal _FReceiveAmountFor;
+            /// <summary>
+            /// 
+            /// </summary>
+            protected float _FReceiveExchangeRate;
+            /// <summary>
+            /// 
+            /// </summary>
+            protected int _FSettleCyID;
+            /// <summary>
+            /// 
+            /// </summary>
+            protected decimal _FSettleAmountFor;
+            /// <summary>
+            /// 
+            /// </summary>
+            protected decimal _FSettleAmount;
+            /// <summary>
+            /// 
+            /// </summary>
+            protected float _FSettleExchangeRate;
             #endregion
+
             #region 属性
             /// <summary>
-            /// 产品代码
+            /// 
             /// </summary>
-            public string FItemID
-            {
-                get { return GetFItemId(); }
-                set { Fitemid = value; }
-            }
+            public int FBillID { get { return GetFBillID(); } set { _FBillID = value; } }
+            ///// <summary>
+            ///// 
+            ///// </summary>
+            //public int FEntryID { get { return GetFEntryID(); } set { _FEntryID = value; } }
             /// <summary>
-            /// 实发数量
+            /// 
             /// </summary>
-            public string Fauxqty { get; set; }
+            public int FReceiveCyID { get { return GetFReceiveCyID(); } set { _FReceiveCyID = value; } }
             /// <summary>
-            /// 单位
+            /// 
             /// </summary>
-            public string FUnitID { get { return Getfunitid(); } set { Funitid = value; } }
+            public decimal FReceiveAmount { get { return GetFReceiveAmount(); } set { _FReceiveAmount = value; } }
             /// <summary>
-            /// 发料仓库
+            /// 
             /// </summary>
-            public string FSCStockID { get { return GetFscstockid(); } set { FscStockId = value; } }
+            public decimal FReceiveAmountFor { get { return GetFReceiveAmountFor(); } set { _FReceiveAmountFor = value; } }
+            /// <summary>
+            /// 
+            /// </summary>
+            public float FReceiveExchangeRate { get { return GetFReceiveExchangeRate(); } set { _FReceiveExchangeRate = value; } }
+            /// <summary>
+            /// 
+            /// </summary>
+            public int FSettleCyID { get { return GetFSettleCyID(); } set { _FSettleCyID = value; } }
+            /// <summary>
+            /// 
+            /// </summary>
+            public decimal FSettleAmountFor { get { return GetFSettleAmountFor(); } set { _FSettleAmountFor = value; } }
+            /// <summary>
+            /// 
+            /// </summary>
+            public decimal FSettleAmount { get { return GetFSettleAmount(); } set { _FSettleAmount = value; } }
+            /// <summary>
+            /// 
+            /// </summary>
+            public float FSettleExchangeRate { get { return GetFSettleExchangeRate(); } set { _FSettleExchangeRate = value; } }
 
-            /// <summary>
-            /// 基本单位发数量
-            /// </summary>
-            public string FQty { get; set; }
             #endregion
+
             #region 虚方法
             /// <summary>
-            /// 获取产品代码
+            /// 
             /// </summary>
             /// <returns></returns>
-            protected virtual string GetFItemId()
+            protected virtual int GetFBillID()
             {
-                return Fitemid;
+                return _FBillID;
+            }
+            ///// <summary>
+            ///// 
+            ///// </summary>
+            ///// <returns></returns>
+            //protected virtual int GetFEntryID()
+            //{
+            //    return _FEntryID;
+            //}
+            /// <summary>
+            /// 
+            /// </summary>
+            /// <returns></returns>
+            protected virtual int GetFReceiveCyID()
+            {
+                return _FReceiveCyID;
             }
             /// <summary>
-            /// 获取单位
+            /// 
             /// </summary>
             /// <returns></returns>
-            protected virtual string Getfunitid()
+            protected virtual decimal GetFReceiveAmount()
             {
-                return Funitid;
+                return _FReceiveAmount;
             }
             /// <summary>
-            /// 获取发料仓库
+            /// 
             /// </summary>
             /// <returns></returns>
-            protected virtual string GetFscstockid()
+            protected virtual decimal GetFReceiveAmountFor()
             {
-                return FscStockId;
+                return _FReceiveAmountFor;
             }
-
+            /// <summary>
+            /// 
+            /// </summary>
+            /// <returns></returns>
+            protected virtual float GetFReceiveExchangeRate()
+            {
+                return _FReceiveExchangeRate;
+            }
+            /// <summary>
+            /// 
+            /// </summary>
+            /// <returns></returns>
+            protected virtual int GetFSettleCyID()
+            {
+                return _FSettleCyID;
+            }
+            /// <summary>
+            /// 
+            /// </summary>
+            /// <returns></returns>
+            protected virtual decimal GetFSettleAmountFor()
+            {
+                return _FSettleAmountFor;
+            }
+            /// <summary>
+            /// 
+            /// </summary>
+            /// <returns></returns>
+            protected virtual decimal GetFSettleAmount()
+            {
+                return _FSettleAmount;
+            }
+            /// <summary>
+            /// 
+            /// </summary>
+            /// <returns></returns>
+            protected virtual float GetFSettleExchangeRate()
+            {
+                return _FSettleExchangeRate;
+            }
             #endregion
         }
     }

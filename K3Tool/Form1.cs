@@ -48,7 +48,11 @@ namespace K3Tool
             var number = Dp.DpRequisitionSlip.Work();
             MessageBox.Show("成功新增" + number);
         }
+
+        private void button6_Click(object sender, EventArgs e)
+        {
+            var number = Dp.DpNewReceiveBill.Work();
+            MessageBox.Show("成功新增" + number);
+        }
     }
-
-
 }
