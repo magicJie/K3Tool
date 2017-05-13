@@ -51,7 +51,6 @@
     <Compile Include="K3\CommonFunction.cs" />
     <Compile Include="K3\ICStockBill.cs" />
     <Compile Include="K3\ICStockBillEntry.cs" />
-    <Compile Include="K3\NewReceiveBill.cs" />
     <Compile Include="K3\Picking.cs" />
     <Compile Include="K3\ProductInventory.cs" />
     <Compile Include="K3\PurchasedWarehouse.cs" />

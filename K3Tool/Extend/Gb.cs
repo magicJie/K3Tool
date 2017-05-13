@@ -28,37 +28,37 @@ namespace K3Tool.Extend
 
                 protected override string GetFfmanagerid()
                 {
-                    var filter = string.Format("FNumber='{0}'", Ffmanagerid);
+                    var filter = string.Format("FName='{0}'", Ffmanagerid);
                     return CommonFunction.Getfitemid(RelatedConn, Fitemclassid.职员, filter);
                 }
 
                 protected override string GetFsmanagerid()
                 {
-                    var filter = string.Format("FNumber='{0}'", Fsmanagerid);
+                    var filter = string.Format("FName='{0}'", Fsmanagerid);
                     return CommonFunction.Getfitemid(RelatedConn, Fitemclassid.职员, filter);
                 }
 
                 protected override string GetFempid()
                 {
-                    var filter = string.Format("FNumber='{0}'", Fempid);
+                    var filter = string.Format("FName='{0}'", Fempid);
                     return CommonFunction.Getfitemid(RelatedConn, Fitemclassid.职员, filter);
                 }
 
                 protected override string GetFbillerid()
                 {
-                    var filter = string.Format("FNumber='{0}'", Fbillerid);
+                    var filter = string.Format("FName='{0}'", Fbillerid);
                     return CommonFunction.Getfitemid(RelatedConn, Fitemclassid.职员, filter);
                 }
 
                 protected override string GetFdcstockid()
                 {
-                    var filter = string.Format("FNumber='{0}'", Fdcstockid);
+                    var filter = string.Format("FName='{0}'", Fdcstockid);
                     return CommonFunction.Getfitemid(RelatedConn, Fitemclassid.仓库, filter);
                 }
 
                 protected override string GetFsupplyid()
                 {
-                    var filter = string.Format("FNumber='{0}'", Fsupplyid);
+                    var filter = string.Format("FName='{0}'", Fsupplyid);
                     return CommonFunction.Getfitemid(RelatedConn, Fitemclassid.供应商, filter);
                 }
             }
@@ -67,7 +67,7 @@ namespace K3Tool.Extend
             {
                 protected override string GetFItemId()
                 {
-                    var filter = string.Format("FNumber='{0}'", Fitemid);
+                    var filter = string.Format("FName='{0}'", Fitemid);
                     return CommonFunction.Getfitemid(RelatedConn, Fitemclassid.物料, filter);
                 }
 
@@ -83,7 +83,7 @@ namespace K3Tool.Extend
                 var headliList = new List<ICStockBill>();
                 var bodyliList = new List<ICStockBillEntry>();
                 var recordlist = new List<string>();
-                var headsqlstring = "select * from 称重信息 where 过磅类型='PO' kindeestate is null";
+                var headsqlstring = "select 流水号,更新时间,发货单位,毛重司磅员 from 称重信息 where 过磅类型='PO' and kindeestate is null";
                 var bodysqlstring = "select * from 称重信息 where 过磅类型='PO'";
                 var headtable = SqlHelper.Query(SourceConn, headsqlstring, true);
                 var bodytable = SqlHelper.Query(SourceConn, bodysqlstring);
@@ -94,13 +94,13 @@ namespace K3Tool.Extend
                     Head head = new Head
                     {
                         FBillNo = itemRow["流水号"].ToString(),
-                        Fdate = DateTime.Parse(itemRow["毛重时间"].ToString()),
+                        Fdate = DateTime.Parse(itemRow["更新时间"].ToString()),
                         FSupplyID = itemRow["发货单位"].ToString(),
-                        FSManagerID = itemRow["毛中司磅员"].ToString(),
-                        FFManagerID = itemRow["毛中司磅员"].ToString(),
-                        FEmpID = itemRow["毛中司磅员"].ToString(),
-                        FBillerID = itemRow["毛中司磅员"].ToString(),
-                        FDCStockID = itemRow[""].ToString(),
+                        FSManagerID = itemRow["毛重司磅员"].ToString(),
+                        FFManagerID = itemRow["毛重司磅员"].ToString(),
+                        FEmpID = itemRow["毛重司磅员"].ToString(),
+                        FBillerID = itemRow["毛重司磅员"].ToString(),
+                        FDCStockID = "原料仓",                        
                         FInterID = number + i
                     };
                     headliList.Add(head);
@@ -117,7 +117,7 @@ namespace K3Tool.Extend
                             Famount = bodyitemRow["金额"].ToString(),
                             Fauxprice = bodyitemRow["单价"].ToString(),
                             FDCStockID = head.FDCStockID,
-                            FUnitID = bodyitemRow[""].ToString(),
+                            FUnitID = "kg",                            
                             FEntryID = j
                         };
                         bodyliList.Add(body);
@@ -148,31 +148,31 @@ namespace K3Tool.Extend
 
                 protected override string Getfdeptid()
                 {
-                    var filter = string.Format("FNumber='{0}'", Fdeptid);
+                    var filter = string.Format("FName='{0}'", Fdeptid);
                     return CommonFunction.Getfitemid(RelatedConn, Fitemclassid.部门, filter);
                 }
 
                 protected override string GetFsmanagerid()
                 {
-                    var filter = string.Format("FName='{0}'", "邹洪雪");
+                    var filter = string.Format("FName='{0}'", Fsmanagerid);
                     return CommonFunction.Getfitemid(RelatedConn, Fitemclassid.职员, filter);
                 }
 
                 protected override string GetFfmanagerid()
                 {
-                    var filter = string.Format("FName='{0}'", "邹洪雪");
+                    var filter = string.Format("FName='{0}'", Ffmanagerid);
                     return CommonFunction.Getfitemid(RelatedConn, Fitemclassid.职员, filter);
                 }
 
                 protected override string GetFbillerid()
                 {
-                    var filter = string.Format("FName='{0}'", "邹洪雪");
+                    var filter = string.Format("FName='{0}'", Fbillerid);
                     return CommonFunction.Getfitemid(RelatedConn, Fitemclassid.职员, filter);
                 }
 
                 protected override string GetFsupplyid()
                 {
-                    var filter = string.Format("FNumber='{0}'", Fsupplyid);
+                    var filter = string.Format("FName='{0}'", Fsupplyid);
                     return CommonFunction.Getfitemid(RelatedConn, Fitemclassid.客户, filter);
                 }
 
@@ -182,13 +182,13 @@ namespace K3Tool.Extend
             {
                 protected override string GetFItemId()
                 {
-                    var filter = string.Format("FNumber='{0}'", Fitemid);
+                    var filter = string.Format("FName='{0}'", Fitemid);
                     return CommonFunction.Getfitemid(RelatedConn, Fitemclassid.物料, filter);
                 }
 
                 protected override string GetFdcstockid()
                 {
-                    var filter = string.Format("FNumber='{0}'", Fdcstockid);
+                    var filter = string.Format("FName='{0}'", Fdcstockid);
                     return CommonFunction.Getfitemid(RelatedConn, Fitemclassid.仓库, filter);
                 }
 
@@ -204,7 +204,7 @@ namespace K3Tool.Extend
                 var headliList = new List<ICStockBill>();
                 var bodyliList = new List<ICStockBillEntry>();
                 var recordlist = new List<string>();
-                var headsqlstring = "select * from  称重信息 where 过磅类型='SO' kindeestate is null";
+                var headsqlstring = "select 流水号,更新时间,毛重司磅员,收货单位 from  称重信息 where 过磅类型='SO' and kindeestate is null";
                 var bodysqlstring = "select * from  称重信息";
                 var headtable = SqlHelper.Query(SourceConn, headsqlstring, true);
                 var bodytable = SqlHelper.Query(SourceConn, bodysqlstring);
@@ -215,9 +215,12 @@ namespace K3Tool.Extend
                     Head head = new Head
                     {
                         FBillNo = itemRow["流水号"].ToString(),
-                        Fdate = DateTime.Parse(itemRow["毛重时间"].ToString()),
-                        FDeptID = itemRow[""].ToString(),
+                        Fdate = DateTime.Parse(itemRow["更新时间"].ToString()),
+                        FDeptID = "销售部",
                         FBillerID = itemRow["毛重司磅员"].ToString(),
+                        FFManagerID = itemRow["毛重司磅员"].ToString(),
+                        FSManagerID = itemRow["毛重司磅员"].ToString(),
+                        FSupplyID = itemRow["收货单位"].ToString(),                        
                         FInterID = number + i
                     };
                     headliList.Add(head);
@@ -230,11 +233,11 @@ namespace K3Tool.Extend
                             FItemID = bodyitemRow["货名"].ToString(),
                             FQty = bodyitemRow["实重"].ToString() == "" ? "0" : bodyitemRow["实重"].ToString(),
                             Fauxqty = bodyitemRow["实重"].ToString() == "" ? "0" : bodyitemRow["实重"].ToString(),
-                            FUnitID = bodyitemRow[""].ToString(),
+                            FUnitID = "kg",
                             FConsignPrice = bodyitemRow["单价"].ToString() == "" ? "0" : bodyitemRow["单价"].ToString(),
                             FConsignAmount = bodyitemRow["金额"].ToString() == "" ? "0" : bodyitemRow["金额"].ToString(),
-                            FDCStockID = bodyitemRow[""].ToString(),
-                            FInterID = head.FInterID,
+                            FDCStockID ="成品库",
+                            FInterID = head.FInterID,                            
                             FEntryID = j
                         };
                         bodyliList.Add(body);
