@@ -51,6 +51,14 @@ namespace Tool.K3
             /// 内码
             /// </summary>
             protected int _FBillID;
+
+            protected string _FReceiveAmount;
+            protected string _FReceiveAmountFor;
+            protected string _FSettleAmount;
+            protected string _FSettleAmountFor;
+            protected int _FBillType;
+            protected string _FClassTypeID;
+            protected float _FAdjustExchangeRate;
             #endregion
             #region 属性
             /// <summary>
@@ -134,6 +142,42 @@ namespace Tool.K3
                 get { return GetFBillID(); }
                 set { _FBillID = value; }
             }
+
+            public string FReceiveAmount
+            {
+                get { return GetFReceiveAmount(); }
+                set { _FReceiveAmount = value; }
+            }
+            public string FReceiveAmountFor
+            {
+                get { return GetFReceiveAmountFor(); }
+                set { _FReceiveAmountFor = value; }
+            }
+            public string FSettleAmount
+            {
+                get { return GetFSettleAmount(); }
+                set { _FSettleAmount = value; }
+            }
+            public string FSettleAmountFor
+            {
+                get { return GetFSettleAmountFor(); }
+                set { _FSettleAmountFor = value; }
+            }
+            public int FBillType
+            {
+                get { return GetFBillType(); }
+                set { _FBillType = value; }
+            }
+            public string FClassTypeID
+            {
+                get { return GetFClassTypeID(); }
+                set { _FClassTypeID = value; }
+            }
+            public float FAdjustExchangeRate
+            {
+                get { return GetFAdjustExchangeRate(); }
+                set { _FAdjustExchangeRate = value; }
+            }
             #endregion
             #region 虚方法
             /// <summary>
@@ -207,6 +251,35 @@ namespace Tool.K3
             protected int GetFBillID()
             {
                 return _FBillID;
+            }
+
+            protected string GetFReceiveAmount()
+            {
+                return _FReceiveAmount;
+            }
+            protected string GetFReceiveAmountFor()
+            {
+                return _FReceiveAmountFor;
+            }
+            protected string GetFSettleAmount()
+            {
+                return _FSettleAmount;
+            }
+            protected string GetFSettleAmountFor()
+            {
+                return _FSettleAmountFor;
+            }
+            protected int GetFBillType()
+            {
+                return _FBillType;
+            }
+            protected string GetFClassTypeID()
+            {
+                return _FClassTypeID;
+            }
+            protected float GetFAdjustExchangeRate()
+            {
+                return _FAdjustExchangeRate;
             }
             #endregion
         }

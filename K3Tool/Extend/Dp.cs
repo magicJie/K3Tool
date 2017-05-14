@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Configuration;
 using System.Data;
+using System.Data.SqlClient;
+using System.Linq;
 using Tool.Common;
 using Tool.K3;
 using Tool.Sql;
@@ -217,8 +219,8 @@ namespace K3Tool.Extend
                     {
                         FBillNo = itemRow["处方号"].ToString(),
                         Fdate = DateTime.Parse(itemRow["录入时间"].ToString()),
-                        FDeptID=itemRow["科室id"].ToString(),
-                        FBillerID=itemRow["录入人"].ToString(),
+                        FDeptID = itemRow["科室id"].ToString(),
+                        FBillerID = itemRow["录入人"].ToString(),
                         FInterID = number + i
                     };
                     headliList.Add(head);
@@ -528,7 +530,7 @@ namespace K3Tool.Extend
                 var bodytable = SqlHelper.Query(SourceConn, bodysqlstring);
                 var i = 0;
                 var number = CommonFunction.GetMaxNum(RelatedConn, ICStockBill.TableName);
-                var logList=new List<Tuple<string,List<Tuple<string,string,string>>>>();
+                var logList = new List<Tuple<string, List<Tuple<string, string, string>>>>();
                 foreach (DataRow itemRow in headtable.Rows)
                 {
                     Head head = new Head
@@ -624,7 +626,8 @@ namespace K3Tool.Extend
                 /// <summary>
                 /// 制单人
                 /// </summary>
-                public string FPreparer {
+                public string FPreparer
+                {
                     set { _fPreparer = value; }
                     get
                     {
@@ -660,66 +663,101 @@ namespace K3Tool.Extend
 
             }
             public static int Work()
-            {             
+            {
                 CommonFunction.Initalize(SourceConn, "cmis_chufang_detail");
                 var headliList = new List<NewReceiveBill.Head>();
-                var bodyliList = new List<NewReceiveBill.Body>(); 
-                var recordlist = new List<string>();
-                var headsqlstring = "select id,处方号,科室id,医生id,处方类型,总价格,录入人,录入时间,'耿惠平' as 制单人,'客户' as 客户 from  cmis_chufang_detail where 处方类型 in (3,5,6,8,9,10,15) and kindeestate is null";
-                //var bodysqlstring = "select 单据号,药品ID,数量,进货单价,进货总价,药库单位 from cmis_code_guahao_fee_def"; 
-                var headtable = SqlHelper.Query(SourceConn, headsqlstring, true);
-                //var bodytable = SqlHelper.Query(SourceConn, bodysqlstring);
-                var i = 0;
-                var number = CommonFunction.GetMaxNum(RelatedConn, NewReceiveBill.Head.TableName);
-                var logList = new List<Tuple<string, List<Tuple<string, string, string>>>>();
-                foreach (DataRow itemRow in headtable.Rows)
+                var bodyliList = new List<NewReceiveBill.Body>();
+                var headsqlstring = @"select id,处方号,科室id,医生id,处方类型,总价格,录入人,录入时间,'耿惠平' as 制单人,'客户' as 客户 
+                                      from  cmis_chufang_detail where 处方类型 in (3,5,6,8,9,10,15) and kindeestate is null";
+                var conn = new SqlConnection(SourceConn);
+                var headReader = SqlHelper.GetDataReader(conn, headsqlstring);
+                try
                 {
-                    Head head = new Head
+                    var number = CommonFunction.GetMaxNum(RelatedConn, NewReceiveBill.Head.TableName);
+                    var i = 0;
+                    var batchNum = 0;
+                    var recordIds = new List<string>();
+                    //1000条数据提交一次，规避大事务
+                    while (headReader.Read())
                     {
-                        FDate = DateTime.Parse(itemRow["录入时间"].ToString()),
-                        FFincDate = DateTime.Parse(itemRow["录入时间"].ToString()),
-                        FExchangeRateType = 1,
-                        FCurrencyID = 1,
-                        FExchangeRate = 1,
-                        FCustomer = 21,
-                        FRP = 1,
-                        FBillID = number + i,
-                        FNumber = "XSKD" + number + i,
-                        FAmountFor = decimal.Parse(itemRow["总价格"].ToString()),
-                        FAmount= decimal.Parse(itemRow["总价格"].ToString()),
-                        FPreparer= itemRow["制单人"].ToString(),
-                        FEmployee= itemRow["录入人"].ToString(),
-                        FDepartment= int.Parse(itemRow["科室id"].ToString())
-                    };
-                    headliList.Add(head);
-                    recordlist.Add(string.Format("update cmis_chufang_detail set kindeestate='1' where id='{0}'", itemRow["id"].ToString()));
-                    //var j = 1;
-                    //foreach (DataRow bodyitemRow in bodytable.Select(string.Format("单据号='{0}'", head.FBillNo)))
-                    //{
+                        if (batchNum == 1000)
+                        {
+                            DoBatch(number + i, headliList, bodyliList, recordIds);
+                            headliList.Clear();
+                            bodyliList.Clear();
+                            recordIds.Clear();
+                            batchNum = 0;
+                            continue;
+                        }
+                        var totalAmount = decimal.Parse(headReader["总价格"].ToString());
+                        Head head = new Head
+                        {
+                            FDate = DateTime.Parse(headReader["录入时间"].ToString()),
+                            FFincDate = DateTime.Parse(headReader["录入时间"].ToString()),
+                            FExchangeRateType = 1,
+                            FCurrencyID = 1,
+                            FExchangeRate = 1,
+                            FCustomer = 21,
+                            FRP = 1,
+                            FBillID = number + i,
+                            FNumber = "XSKD" + number + i,
+                            FAmountFor = totalAmount,
+                            FAmount = totalAmount,
+                            FPreparer = headReader["制单人"].ToString(),
+                            FEmployee = headReader["录入人"].ToString(),
+                            FDepartment = int.Parse(headReader["科室id"].ToString()),
+                            FAdjustExchangeRate = 1,
+                            FBillType = 1000,
+                            FClassTypeID = "1000005",
+                            FReceiveAmount = totalAmount.ToString(),
+                            FReceiveAmountFor = totalAmount.ToString(),
+                            FSettleAmount = totalAmount.ToString(),
+                            FSettleAmountFor = totalAmount.ToString()
+                        };
+                        headliList.Add(head);
+                        recordIds.Add(headReader["id"].ToString());
                         Body body = new Body
                         {
                             FBillID = head.FBillID,
-                            FReceiveAmount=head.FAmount,
-                            FReceiveAmountFor=head.FAmount,
-                            FReceiveExchangeRate=1,
-                            FSettleAmount=head.FAmount,
-                            FSettleAmountFor=head.FAmount,
-                            FReceiveCyID=1,
-                            FSettleCyID=1,
-                            FSettleExchangeRate=1,
-                            //FEntryID = 1
+                            FReceiveAmount = head.FAmount,
+                            FReceiveAmountFor = head.FAmount,
+                            FReceiveExchangeRate = 1,
+                            FSettleAmount = head.FAmount,
+                            FSettleAmountFor = head.FAmount,
+                            FReceiveCyID = 1,
+                            FSettleCyID = 1,
+                            FSettleExchangeRate = 1,
                         };
                         bodyliList.Add(body);
-                        //j = j + 1;
-                    //}
-                    i = i + 1;
+                        i++;
+                        batchNum++;
+                    }
+                    DoBatch(number + i, headliList, bodyliList, recordIds);
+                    return i;
                 }
-                var headsqlstringlist = CommonFunction.GetSqlList(RelatedConn, headliList, NewReceiveBill.Head.TableName);
-                var bodysqlstringlist = CommonFunction.GetSqlList(RelatedConn, bodyliList, NewReceiveBill.Body.TableName);
+                catch (Exception ex)
+                {
+                    log4net.LogManager.GetLogger("logger").Error(ex.ToString());
+                    throw;
+                }
+                finally
+                {
+
+                    headReader.Close();
+                    conn.Close();
+                }
+            }
+
+            private static int DoBatch(int number, List<NewReceiveBill.Head> heads, List<NewReceiveBill.Body> bodys, List<string> recordIds)
+            {
+                var headsqlstringlist = CommonFunction.GetSqlList(RelatedConn, heads, NewReceiveBill.Head.TableName);
+                var bodysqlstringlist = CommonFunction.GetSqlList(RelatedConn, bodys, NewReceiveBill.Body.TableName);
                 headsqlstringlist.AddRange(bodysqlstringlist);
                 var resultnumber = SqlHelper.ExecuteSqlTran(RelatedConn, headsqlstringlist);
-                SqlHelper.ExecuteSqlTran(SourceConn, recordlist);
-                CommonFunction.UpdateMaxNum(RelatedConn, NewReceiveBill.Head.TableName, number + i);
+                SqlHelper.ExecuteSqlTran(SourceConn, new List<string>()
+                                    { string.Format("update cmis_chufang_detail set kindeestate='1' where id in ({0})",
+                                        string.Join(",",recordIds.Select(x=>"'"+x+"'"))) });
+                CommonFunction.UpdateMaxNum(RelatedConn, NewReceiveBill.Head.TableName, number);
                 return resultnumber;
             }
         }

@@ -21,6 +21,7 @@ namespace Tool.Sql
                 var cmd = new SqlCommand {Connection = conn};
                 var tx = conn.BeginTransaction();
                 cmd.Transaction = tx;
+                cmd.CommandTimeout = 0;
                 try
                 {
                     var count = 0;
@@ -53,7 +54,6 @@ namespace Tool.Sql
         /// <returns></returns>
         public static DataTable Query(string conn, string sqlString,bool distan=false)
         {
-
             using (var connection = new SqlConnection(conn))
             {
                 var ds = new DataSet();
@@ -73,7 +73,22 @@ namespace Tool.Sql
                 }
                 return ds.Tables[0];
             }
+        }
 
+        /// <summary>
+        /// 根据提供的数据库连接和查询返回一个dataReader对象以供读取数据。
+        /// <para>请一定要注意用完数据之后关闭连接和dataReader!!!</para>
+        /// </summary>
+        /// <param name="conn"></param>
+        /// <param name="sqlString"></param>
+        /// <param name="distan"></param>
+        /// <returns></returns>
+        public static SqlDataReader GetDataReader(SqlConnection conn, string sqlString)
+        {
+            var command = new SqlCommand(sqlString, conn);
+            command.CommandTimeout = 0;
+            conn.Open();
+            return command.ExecuteReader();
         }
 
         public static DataTable DistanTable(DataTable dataTable)

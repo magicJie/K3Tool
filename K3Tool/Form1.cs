@@ -52,7 +52,7 @@ namespace K3Tool
         private void button6_Click(object sender, EventArgs e)
         {
             var number = Dp.DpNewReceiveBill.Work();
-            MessageBox.Show("成功新增" + number);
+            MessageBox.Show("成功导入" + number+"条数据");
         }
     }
 }
