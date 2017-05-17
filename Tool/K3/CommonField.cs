@@ -35,7 +35,11 @@
         /// <summary>
         /// 供应商
         /// </summary>
-        供应商
+        供应商,
+        /// <summary>
+        /// 医师
+        /// </summary>
+        医师
         
        
 

@@ -40,6 +40,9 @@ namespace Tool.K3
                 case Fitemclassid.供应商:
                     type = 8;
                     break;
+                case Fitemclassid.医师:
+                    type = 3003;
+                    break;
             }
             var sqlstring = string.Format("select FItemID from t_item where FItemClassID='{0}' and {1}", type,where);
             var datatable = SqlHelper.Query(conn, sqlstring);

@@ -607,6 +607,7 @@ namespace K3Tool.Extend
                 private string _fPreparer;
                 private string _fEmployee;
                 private int _fDepartment;
+                private string _FBase;
                 /// <summary>
                 /// 单据金额
                 /// </summary>
@@ -655,14 +656,38 @@ namespace K3Tool.Extend
                 public int FDepartment
                 {
                     set { _fDepartment = value; }
-                    get { return _fDepartment; }
+                    get
+                    {
+                        var filter = string.Format("FNumber='{0}'", _fDepartment);
+                        return int.Parse(CommonFunction.Getfitemid(RelatedConn, Fitemclassid.部门, filter));
+                    }
+                }
+                /// <summary>
+                /// 医师
+                /// </summary>
+                public string FBase
+                {
+                    get
+                    {
+                        var filter = string.Format("FNumber='{0}'", _FBase);
+                        return CommonFunction.Getfitemid(RelatedConn, Fitemclassid.医师, filter);
+                    }
+                    set { _FBase = value; }
                 }
 
                 protected override int GetFBillType()
-                {
-                    var sqlstring = string.Format("select fitemid from t_rp_systemenum where FNumber='{0}'", _FBillType);
-                    var fitemid = SqlHelper.Query(RelatedConn, sqlstring);
-                    return int.Parse(fitemid.Rows[0]["fitemid"].ToString());
+                {                   
+                    try
+                    {
+                        var sqlstring = string.Format("select fitemid from t_rp_systemenum where FNumber='{0}'", _FBillType);
+                        var fitemid = SqlHelper.Query(RelatedConn, sqlstring);
+                        var a = fitemid.Rows[0]["fitemid"].ToString();
+                        return int.Parse(a);
+                    }
+                    catch (Exception ex)
+                    {
+                       throw new Exception("收款类型"+_FBillType+"找不到");
+                    }                    
                 }
             }
             public class Body : NewReceiveBill.Body
@@ -674,7 +699,7 @@ namespace K3Tool.Extend
                 CommonFunction.Initalize(SourceConn, "cmis_chufang_detail");
                 var headliList = new List<NewReceiveBill.Head>();
                 var bodyliList = new List<NewReceiveBill.Body>();
-                var headsqlstring = @"select id,处方号,科室id,医生id,处方类型,总价格,录入人,录入时间,'耿惠平' as 制单人,'客户' as 客户 
+                var headsqlstring = @"select id,处方号,科室id,医生id,处方类型,总价格,录入人,录入时间,'耿惠平' as 制单人,'客户' as 客户,处方类型 
                                       from  cmis_chufang_detail where 处方类型 in (3,5,6,8,9,10,15) and kindeestate is null";
                 var conn = new SqlConnection(SourceConn);
                 var headReader = SqlHelper.GetDataReader(conn, headsqlstring);
@@ -715,12 +740,13 @@ namespace K3Tool.Extend
                             FEmployee = headReader["录入人"].ToString(),
                             FDepartment = int.Parse(headReader["科室id"].ToString()),
                             FAdjustExchangeRate = 1,
-                            FBillType =int.Parse(headReader["科室id"].ToString()),
+                            FBillType =int.Parse(headReader["处方类型"].ToString()),
                             FClassTypeID = "1000005",
                             FReceiveAmount = totalAmount.ToString(),
                             FReceiveAmountFor = totalAmount.ToString(),
-                            FSettleAmount = totalAmount.ToString(),                            
-                            FSettleAmountFor = totalAmount.ToString()                            
+                            FSettleAmount = totalAmount.ToString(),
+                            FBase = headReader["医生id"].ToString(),
+                            FSettleAmountFor = totalAmount.ToString()
                         };
                         headliList.Add(head);
                         recordIds.Add(headReader["id"].ToString());
