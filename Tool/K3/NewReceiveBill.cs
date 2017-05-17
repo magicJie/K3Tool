@@ -40,6 +40,10 @@ namespace Tool.K3
             /// </summary>
             protected float _FExchangeRate;
             /// <summary>
+            /// 核算项目类别字段
+            /// </summary>
+            protected int _FItemClassID;
+            /// <summary>
             /// 核算项目
             /// </summary>
             protected int _FCustomer;
@@ -56,6 +60,9 @@ namespace Tool.K3
             protected string _FReceiveAmountFor;
             protected string _FSettleAmount;
             protected string _FSettleAmountFor;
+            /// <summary>
+            /// 收款类型
+            /// </summary>
             protected int _FBillType;
             protected string _FClassTypeID;
             protected float _FAdjustExchangeRate;
@@ -116,6 +123,9 @@ namespace Tool.K3
                 get { return GetFExchangeRate(); }
                 set { _FExchangeRate = value; }
             }
+            public int FItemClassID {
+                get { return _FItemClassID; }
+                set { _FItemClassID = value; } }
             /// <summary>
             /// 核算项目
             /// </summary>
@@ -163,6 +173,9 @@ namespace Tool.K3
                 get { return GetFSettleAmountFor(); }
                 set { _FSettleAmountFor = value; }
             }
+            /// <summary>
+            /// 收款类型
+            /// </summary>
             public int FBillType
             {
                 get { return GetFBillType(); }
@@ -269,7 +282,7 @@ namespace Tool.K3
             {
                 return _FSettleAmountFor;
             }
-            protected int GetFBillType()
+            protected virtual int GetFBillType()
             {
                 return _FBillType;
             }
