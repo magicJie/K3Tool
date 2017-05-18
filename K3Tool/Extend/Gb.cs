@@ -61,6 +61,10 @@ namespace K3Tool.Extend
                     var filter = string.Format("FName='{0}'", Fsupplyid);
                     return CommonFunction.Getfitemid(RelatedConn, Fitemclassid.供应商, filter);
                 }
+                /// <summary>
+                /// 司机车号
+                /// </summary>
+                public string FHeadSelfA0143 { get; set; }
             }
 
             public class Body : PurchasedWarehouse.Body
@@ -77,13 +81,13 @@ namespace K3Tool.Extend
                     return CommonFunction.Getfitemid(RelatedConn, Fitemclassid.单位, filter);
                 }
             }
-            public static int Work()
+            public static int Work(string time)
             {
                 CommonFunction.Initalize(SourceConn, "称重信息");
                 var headliList = new List<ICStockBill>();
                 var bodyliList = new List<ICStockBillEntry>();
                 var recordlist = new List<string>();
-                var headsqlstring = "select 流水号,更新时间,发货单位,毛重司磅员 from 称重信息 where 过磅类型='PO' and kindeestate is null";
+                var headsqlstring =string.Format("select 流水号,更新时间,发货单位,毛重司磅员,车号 from 称重信息 where 过磅类型='PO' and 更新时间>='{0}' and kindeestate is null",time);
                 var bodysqlstring = "select * from 称重信息 where 过磅类型='PO'";
                 var headtable = SqlHelper.Query(SourceConn, headsqlstring, true);
                 var bodytable = SqlHelper.Query(SourceConn, bodysqlstring);
@@ -100,11 +104,12 @@ namespace K3Tool.Extend
                         FFManagerID = itemRow["毛重司磅员"].ToString(),
                         FEmpID = itemRow["毛重司磅员"].ToString(),
                         FBillerID = itemRow["毛重司磅员"].ToString(),
-                        FDCStockID = "原料仓",                        
+                        FDCStockID = "原料仓",
+                        FHeadSelfA0143 = itemRow["车号"].ToString(),
                         FInterID = number + i
                     };
                     headliList.Add(head);
-                    recordlist.Add(string.Format("update 称重 set kindeestate='1' where 流水号='{0}'", itemRow["流水号"]));
+                    recordlist.Add(string.Format("update 称重信息 set kindeestate='1' where 流水号='{0}'", itemRow["流水号"]));
                     var j = 1;
                     foreach (DataRow bodyitemRow in bodytable.Select(string.Format("流水号='{0}'", head.FBillNo)))
                     {
@@ -176,6 +181,21 @@ namespace K3Tool.Extend
                     return CommonFunction.Getfitemid(RelatedConn, Fitemclassid.客户, filter);
                 }
 
+                protected override string GetFempid()
+                {
+                    var filter = string.Format("FName='{0}'", Fempid);
+                    return CommonFunction.Getfitemid(RelatedConn, Fitemclassid.职员, filter);
+                }
+
+                /// <summary>
+                /// 工程名称
+                /// </summary>
+                public string FHeadSelfB0155 { get; set; }
+                /// <summary>
+                /// 司机车号
+                /// </summary>
+                public string FHeadSelfB0156 { get; set; }
+
             }
 
             public class Body : SalesOutLet.Body
@@ -198,13 +218,13 @@ namespace K3Tool.Extend
                     return CommonFunction.Getfitemid(RelatedConn, Fitemclassid.单位, filter);
                 }
             }
-            public static int Work()
+            public static int Work(string time)
             {
                 CommonFunction.Initalize(SourceConn, "称重信息");
                 var headliList = new List<ICStockBill>();
                 var bodyliList = new List<ICStockBillEntry>();
                 var recordlist = new List<string>();
-                var headsqlstring = "select 流水号,更新时间,毛重司磅员,收货单位 from  称重信息 where 过磅类型='SO' and kindeestate is null";
+                var headsqlstring =string.Format("select 流水号,更新时间,毛重司磅员,收货单位,备用1,车号,备用3 from  称重信息 where 过磅类型='SO' and 更新时间>='{0}' and kindeestate is null",time);
                 var bodysqlstring = "select * from  称重信息";
                 var headtable = SqlHelper.Query(SourceConn, headsqlstring, true);
                 var bodytable = SqlHelper.Query(SourceConn, bodysqlstring);
@@ -220,7 +240,10 @@ namespace K3Tool.Extend
                         FBillerID = itemRow["毛重司磅员"].ToString(),
                         FFManagerID = itemRow["毛重司磅员"].ToString(),
                         FSManagerID = itemRow["毛重司磅员"].ToString(),
-                        FSupplyID = itemRow["收货单位"].ToString(),                        
+                        FSupplyID = itemRow["收货单位"].ToString(),
+                        FHeadSelfB0155 = itemRow["备用1"].ToString(),
+                        FHeadSelfB0156 = itemRow["车号"].ToString(),
+                        FEmpID = itemRow["备用3"].ToString(),
                         FInterID = number + i
                     };
                     headliList.Add(head);

@@ -31,11 +31,15 @@
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(gb));
             this.button1 = new System.Windows.Forms.Button();
             this.button2 = new System.Windows.Forms.Button();
+            this.dateTimePicker1 = new System.Windows.Forms.DateTimePicker();
+            this.dateTimePicker2 = new System.Windows.Forms.DateTimePicker();
+            this.label1 = new System.Windows.Forms.Label();
+            this.label2 = new System.Windows.Forms.Label();
             this.SuspendLayout();
             // 
             // button1
             // 
-            this.button1.Location = new System.Drawing.Point(29, 33);
+            this.button1.Location = new System.Drawing.Point(35, 80);
             this.button1.Name = "button1";
             this.button1.Size = new System.Drawing.Size(111, 35);
             this.button1.TabIndex = 0;
@@ -45,7 +49,7 @@
             // 
             // button2
             // 
-            this.button2.Location = new System.Drawing.Point(189, 33);
+            this.button2.Location = new System.Drawing.Point(208, 80);
             this.button2.Name = "button2";
             this.button2.Size = new System.Drawing.Size(111, 35);
             this.button2.TabIndex = 1;
@@ -53,19 +57,56 @@
             this.button2.UseVisualStyleBackColor = true;
             this.button2.Click += new System.EventHandler(this.button2_Click);
             // 
+            // dateTimePicker1
+            // 
+            this.dateTimePicker1.Location = new System.Drawing.Point(35, 53);
+            this.dateTimePicker1.Name = "dateTimePicker1";
+            this.dateTimePicker1.Size = new System.Drawing.Size(111, 21);
+            this.dateTimePicker1.TabIndex = 2;
+            // 
+            // dateTimePicker2
+            // 
+            this.dateTimePicker2.Location = new System.Drawing.Point(208, 53);
+            this.dateTimePicker2.Name = "dateTimePicker2";
+            this.dateTimePicker2.Size = new System.Drawing.Size(111, 21);
+            this.dateTimePicker2.TabIndex = 3;
+            // 
+            // label1
+            // 
+            this.label1.AutoSize = true;
+            this.label1.Location = new System.Drawing.Point(35, 28);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(101, 12);
+            this.label1.TabIndex = 4;
+            this.label1.Text = "入库单开始时间：";
+            // 
+            // label2
+            // 
+            this.label2.AutoSize = true;
+            this.label2.Location = new System.Drawing.Point(208, 28);
+            this.label2.Name = "label2";
+            this.label2.Size = new System.Drawing.Size(101, 12);
+            this.label2.TabIndex = 5;
+            this.label2.Text = "出库单开始时间：";
+            // 
             // gb
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(342, 108);
+            this.ClientSize = new System.Drawing.Size(354, 140);
+            this.Controls.Add(this.label2);
+            this.Controls.Add(this.label1);
+            this.Controls.Add(this.dateTimePicker2);
+            this.Controls.Add(this.dateTimePicker1);
             this.Controls.Add(this.button2);
             this.Controls.Add(this.button1);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MaximizeBox = false;
             this.MinimizeBox = false;
             this.Name = "gb";
-            this.Text = "金蝶快速导入工具";            
+            this.Text = "金蝶快速导入工具";
             this.ResumeLayout(false);
+            this.PerformLayout();
 
         }
 
@@ -73,6 +114,10 @@
 
         private System.Windows.Forms.Button button1;
         private System.Windows.Forms.Button button2;
+        private System.Windows.Forms.DateTimePicker dateTimePicker1;
+        private System.Windows.Forms.DateTimePicker dateTimePicker2;
+        private System.Windows.Forms.Label label1;
+        private System.Windows.Forms.Label label2;
     }
 }
 

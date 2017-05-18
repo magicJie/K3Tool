@@ -15,14 +15,16 @@ namespace K3Tool
 
         private void button1_Click(object sender, EventArgs e)
         {
-            var number =Gb.GbPurchasedWarehouse.Work();
+            var time = dateTimePicker1.Value.ToString("yyyy-MM-dd");
+            var number = Gb.GbPurchasedWarehouse.Work(time);            
             MessageBox.Show("成功新增" + number);
 
         }
 
         private void button2_Click(object sender, EventArgs e)
         {
-            var number =Gb.GbSalesOutLet.Work();
+            var time = dateTimePicker2.Value.ToString("yyyy-MM-dd");
+            var number =Gb.GbSalesOutLet.Work(time);            
             MessageBox.Show("成功新增" + number);
         }
        

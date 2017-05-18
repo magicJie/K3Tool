@@ -694,9 +694,9 @@ namespace K3Tool.Extend
             {
 
             }
-            public class RPContact : NewReceiveBill.RPContact
-            {
-            }
+            //public class RPContact : NewReceiveBill.RPContact
+            //{
+            //}
             public static int Work()
             {
                 CommonFunction.Initalize(SourceConn, "cmis_chufang_detail");
@@ -766,10 +766,10 @@ namespace K3Tool.Extend
                             FSettleExchangeRate = 1,
                         };
                         bodyliList.Add(body);
-                        var rpContact=new RPContact
-                        {
+                        //var rpContact=new RPContact
+                        //{
                             
-                        }
+                        //}
                         i++;
                         batchNum++;
                     }

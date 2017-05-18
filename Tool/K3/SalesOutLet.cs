@@ -35,6 +35,11 @@
             /// 销售方式字段
             /// </summary>
             protected int Fsalestyle;
+
+            /// <summary>
+            /// 业务员字段
+            /// </summary>
+            protected string Fempid;
             #endregion
             #region 属性                      
             /// <summary>
@@ -65,6 +70,11 @@
             /// 销售方式
             /// </summary>
             public int FSaleStyle { get { return GetFsalestyle(); } set { Fsalestyle = value; } }
+
+            /// <summary>
+            /// 业务员
+            /// </summary>
+            public string FEmpID { get { return GetFempid(); } set { Fempid = value; } }
             #endregion
             #region 虚方法
             /// <summary>
@@ -115,7 +125,15 @@
             protected virtual int GetFsalestyle()
             {
                 return Fsalestyle;
-            }      
+            }
+            /// <summary>
+            /// 获取业务员
+            /// </summary>
+            /// <returns></returns>
+            protected virtual string GetFempid()
+            {
+                return Fempid;
+            }
             #endregion
             #region 实现
 
