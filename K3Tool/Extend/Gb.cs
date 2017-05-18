@@ -65,6 +65,10 @@ namespace K3Tool.Extend
                 /// 司机车号
                 /// </summary>
                 public string FHeadSelfA0143 { get; set; }
+                /// <summary>
+                /// 检验是否是良品
+                /// </summary>
+                public string FChkPassItem { get; set; }
             }
 
             public class Body : PurchasedWarehouse.Body
@@ -106,6 +110,7 @@ namespace K3Tool.Extend
                         FBillerID = itemRow["毛重司磅员"].ToString(),
                         FDCStockID = "原料仓",
                         FHeadSelfA0143 = itemRow["车号"].ToString(),
+                        FChkPassItem="1058",
                         FInterID = number + i
                     };
                     headliList.Add(head);
