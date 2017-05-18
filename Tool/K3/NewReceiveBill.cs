@@ -473,5 +473,195 @@ namespace Tool.K3
             }
             #endregion
         }
+
+        /// <summary>
+        /// 往来表
+        /// </summary>
+        public class RPContact
+        {
+            public static string TableName = "t_RP_Contact";
+
+            #region 字段
+            /// <summary>
+            /// 年
+            /// </summary>
+            protected int _FYear;
+            /// <summary>
+            /// 月
+            /// </summary>
+            protected int _FPeriod;
+            protected int _FRP;
+            protected int _FType;
+            protected DateTime _FDate;
+            protected DateTime _FFincDate;
+            /// <summary>
+            /// 收款单号
+            /// </summary>
+            protected int _FNumber;
+            /// <summary>
+            /// 
+            /// </summary>
+            protected int _FCustomer;
+            /// <summary>
+            /// 
+            /// </summary>
+            protected int _FDepartment;
+            /// <summary>
+            /// 
+            /// </summary>
+            protected int _FEmployee;
+            /// <summary>
+            /// 币别
+            /// </summary>
+            protected int _FCurrencyID;
+            /// <summary>
+            /// 
+            /// </summary>
+            protected float _FExchangeRate;
+            /// <summary>
+            /// 
+            /// </summary>
+            protected decimal _FAmount;
+            protected decimal _FAmountFor;
+            protected decimal _FRemainAmount;
+            protected decimal _FRemainAmountFor;
+            /// <summary>
+            /// 收款单内码
+            /// </summary>
+            protected int _FBillID;
+            protected DateTime _FRPDate;
+
+            #endregion
+
+            #region 属性
+            public int FYear { get { return _FYear; } set { _FYear = value; } }
+            public int FPeriod { get { return _FPeriod; } set { _FYear = value; } }
+            public int FRP { get { return _FRP; } set { _FYear = value; } }
+            public DateTime FDate { get { return _FDate; } set { _FDate = value; } }
+            public DateTime FFincDate { get { return _FFincDate; } set { _FFincDate = value; } }
+            public int FNumber { get { return _FNumber; } set { _FNumber = value; } }
+
+            /// <summary>
+            /// 
+            /// </summary>
+            public int FBillID { get { return GetFBillID(); } set { _FBillID = value; } }
+            /// <summary>
+            /// 
+            /// </summary>
+            public int FReceiveCyID { get { return GetFReceiveCyID(); } set { _FReceiveCyID = value; } }
+            /// <summary>
+            /// 
+            /// </summary>
+            public decimal FReceiveAmount { get { return GetFReceiveAmount(); } set { _FReceiveAmount = value; } }
+            /// <summary>
+            /// 
+            /// </summary>
+            public decimal FReceiveAmountFor { get { return GetFReceiveAmountFor(); } set { _FReceiveAmountFor = value; } }
+            /// <summary>
+            /// 
+            /// </summary>
+            public float FReceiveExchangeRate { get { return GetFReceiveExchangeRate(); } set { _FReceiveExchangeRate = value; } }
+            /// <summary>
+            /// 
+            /// </summary>
+            public int FSettleCyID { get { return GetFSettleCyID(); } set { _FSettleCyID = value; } }
+            /// <summary>
+            /// 
+            /// </summary>
+            public decimal FSettleAmountFor { get { return GetFSettleAmountFor(); } set { _FSettleAmountFor = value; } }
+            /// <summary>
+            /// 
+            /// </summary>
+            public decimal FSettleAmount { get { return GetFSettleAmount(); } set { _FSettleAmount = value; } }
+            /// <summary>
+            /// 
+            /// </summary>
+            public float FSettleExchangeRate { get { return GetFSettleExchangeRate(); } set { _FSettleExchangeRate = value; } }
+
+            #endregion
+
+            #region 虚方法
+            /// <summary>
+            /// 
+            /// </summary>
+            /// <returns></returns>
+            protected virtual int GetFBillID()
+            {
+                return _FBillID;
+            }
+            ///// <summary>
+            ///// 
+            ///// </summary>
+            ///// <returns></returns>
+            //protected virtual int GetFEntryID()
+            //{
+            //    return _FEntryID;
+            //}
+            /// <summary>
+            /// 
+            /// </summary>
+            /// <returns></returns>
+            protected virtual int GetFReceiveCyID()
+            {
+                return _FReceiveCyID;
+            }
+            /// <summary>
+            /// 
+            /// </summary>
+            /// <returns></returns>
+            protected virtual decimal GetFReceiveAmount()
+            {
+                return _FReceiveAmount;
+            }
+            /// <summary>
+            /// 
+            /// </summary>
+            /// <returns></returns>
+            protected virtual decimal GetFReceiveAmountFor()
+            {
+                return _FReceiveAmountFor;
+            }
+            /// <summary>
+            /// 
+            /// </summary>
+            /// <returns></returns>
+            protected virtual float GetFReceiveExchangeRate()
+            {
+                return _FReceiveExchangeRate;
+            }
+            /// <summary>
+            /// 
+            /// </summary>
+            /// <returns></returns>
+            protected virtual int GetFSettleCyID()
+            {
+                return _FSettleCyID;
+            }
+            /// <summary>
+            /// 
+            /// </summary>
+            /// <returns></returns>
+            protected virtual decimal GetFSettleAmountFor()
+            {
+                return _FSettleAmountFor;
+            }
+            /// <summary>
+            /// 
+            /// </summary>
+            /// <returns></returns>
+            protected virtual decimal GetFSettleAmount()
+            {
+                return _FSettleAmount;
+            }
+            /// <summary>
+            /// 
+            /// </summary>
+            /// <returns></returns>
+            protected virtual float GetFSettleExchangeRate()
+            {
+                return _FSettleExchangeRate;
+            }
+            #endregion
+        }
     }
 }
