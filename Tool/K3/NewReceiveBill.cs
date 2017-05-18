@@ -55,7 +55,14 @@ namespace Tool.K3
             /// 内码
             /// </summary>
             protected int _FBillID;
-
+            /// <summary>
+            /// 年
+            /// </summary>
+            protected int _FYear;
+            /// <summary>
+            /// 月
+            /// </summary>
+            protected int _FPeriod;
             protected string _FReceiveAmount;
             protected string _FReceiveAmountFor;
             protected string _FSettleAmount;
@@ -142,7 +149,8 @@ namespace Tool.K3
                 get { return GetFRP(); }
                 set { _FRP = value; }
             }
-
+            public int FYear { get { return _FYear; } set { _FYear = value; } }
+            public int FPeriod { get { return _FPeriod; } set { _FYear = value; } }
             //下面属性非金蝶表结构要求必填但是业务上要求必填
             /// <summary>
             /// 内码

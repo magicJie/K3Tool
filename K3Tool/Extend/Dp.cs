@@ -751,7 +751,9 @@ namespace K3Tool.Extend
                             FReceiveAmountFor = totalAmount.ToString(),
                             FSettleAmount = totalAmount.ToString(),
                             FBase = headReader["医生id"].ToString(),
-                            FSettleAmountFor = totalAmount.ToString()
+                            FSettleAmountFor = totalAmount.ToString(),
+                            FYear = DateTime.Parse(headReader["录入时间"].ToString()).Year,
+                            FPeriod = DateTime.Parse(headReader["录入时间"].ToString()).Month
                         };
                         headliList.Add(head);
                         recordIds.Add(headReader["id"].ToString());
@@ -781,12 +783,12 @@ namespace K3Tool.Extend
                             FExchangeRate=head.FExchangeRate,
                             FFincDate=head.FFincDate,
                             FNumber=head.FNumber,
-                            FPeriod= head.FDate.Year,
+                            FPeriod= head.FDate.Month,
                             FRemainAmount=head.FAmount,
                             FRemainAmountFor=head.FAmount,
                             FRP=head.FRP,
                             FRPDate=head.FDate,
-                            FYear=head.FDate.Month
+                            FYear=head.FDate.Year
                         };
                         contactList.Add(rpContact);
                         i++;
