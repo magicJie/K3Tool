@@ -702,6 +702,7 @@ namespace K3Tool.Extend
                 CommonFunction.Initalize(SourceConn, "cmis_chufang_detail");
                 var headliList = new List<NewReceiveBill.Head>();
                 var bodyliList = new List<NewReceiveBill.Body>();
+                var contactList = new List<NewReceiveBill.RPContact>();
                 var headsqlstring = @"select id,处方号,科室id,医生id,处方类型,总价格,录入人,录入时间,'耿惠平' as 制单人,'客户' as 客户,处方类型 
                                       from  cmis_chufang_detail where 处方类型 in (3,5,6,8,9,10,15) and kindeestate is null";
                 var conn = new SqlConnection(SourceConn);
@@ -717,9 +718,10 @@ namespace K3Tool.Extend
                     {
                         if (batchNum == 1000)
                         {
-                            DoBatch(number + i, headliList, bodyliList, recordIds);
+                            DoBatch(number + i, headliList, bodyliList, contactList, recordIds);
                             headliList.Clear();
                             bodyliList.Clear();
+                            contactList.Clear();
                             recordIds.Clear();
                             batchNum = 0;
                             continue;
@@ -766,14 +768,31 @@ namespace K3Tool.Extend
                             FSettleExchangeRate = 1,
                         };
                         bodyliList.Add(body);
-                        //var rpContact=new RPContact
-                        //{
-                            
-                        //}
+                        var rpContact = new NewReceiveBill.RPContact
+                        {
+                            FAmount=head.FAmount,
+                            FAmountFor=head.FAmount,
+                            FBillID=head.FBillID,
+                            FCurrencyID=head.FCurrencyID,
+                            FCustomer=head.FCustomer,
+                            FDate=head.FDate,
+                            FDepartment=head.FDepartment,
+                            FEmployee=head.FEmployee,
+                            FExchangeRate=head.FExchangeRate,
+                            FFincDate=head.FFincDate,
+                            FNumber=head.FNumber,
+                            FPeriod= head.FDate.Year,
+                            FRemainAmount=head.FAmount,
+                            FRemainAmountFor=head.FAmount,
+                            FRP=head.FRP,
+                            FRPDate=head.FDate,
+                            FYear=head.FDate.Month
+                        };
+                        contactList.Add(rpContact);
                         i++;
                         batchNum++;
                     }
-                    DoBatch(number + i, headliList, bodyliList, recordIds);
+                    DoBatch(number + i, headliList, bodyliList, contactList, recordIds);
                     return i;
                 }
                 catch (Exception ex)
@@ -789,11 +808,13 @@ namespace K3Tool.Extend
                 }
             }
 
-            private static int DoBatch(int number, List<NewReceiveBill.Head> heads, List<NewReceiveBill.Body> bodys, List<string> recordIds)
+            private static int DoBatch(int number, List<NewReceiveBill.Head> heads, List<NewReceiveBill.Body> bodys,List<NewReceiveBill.RPContact> contracts, List<string> recordIds)
             {
                 var headsqlstringlist = CommonFunction.GetSqlList(RelatedConn, heads, NewReceiveBill.Head.TableName);
                 var bodysqlstringlist = CommonFunction.GetSqlList(RelatedConn, bodys, NewReceiveBill.Body.TableName);
+                var contractsqlstringlist = CommonFunction.GetSqlList(RelatedConn, contracts, NewReceiveBill.RPContact.TableName);
                 headsqlstringlist.AddRange(bodysqlstringlist);
+                headsqlstringlist.AddRange(contractsqlstringlist);
                 var resultnumber = SqlHelper.ExecuteSqlTran(RelatedConn, headsqlstringlist);
                 SqlHelper.ExecuteSqlTran(SourceConn, new List<string>()
                                     { string.Format("update cmis_chufang_detail set kindeestate='1' where id in ({0})",
