@@ -51,7 +51,8 @@ namespace K3Tool
 
         private void button6_Click(object sender, EventArgs e)
         {
-            var number = Dp.DpNewReceiveBill.Work();
+            var time = sktime.Value.ToString("yyyy-MM-dd");
+            var number = Dp.DpNewReceiveBill.Work(time);
             MessageBox.Show("成功导入" + number+"条数据");
         }
     }

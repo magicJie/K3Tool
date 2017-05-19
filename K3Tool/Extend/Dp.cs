@@ -697,14 +697,14 @@ namespace K3Tool.Extend
             //public class RPContact : NewReceiveBill.RPContact
             //{
             //}
-            public static int Work()
+            public static int Work(string time)
             {
                 CommonFunction.Initalize(SourceConn, "cmis_chufang_detail");
                 var headliList = new List<NewReceiveBill.Head>();
                 var bodyliList = new List<NewReceiveBill.Body>();
                 var contactList = new List<NewReceiveBill.RPContact>();
-                var headsqlstring = @"select id,处方号,科室id,医生id,处方类型,总价格,录入人,录入时间,'耿惠平' as 制单人,'客户' as 客户,处方类型 
-                                      from  cmis_chufang_detail where 处方类型 in (3,5,6,8,9,10,15) and kindeestate is null";
+                var headsqlstring =String.Format(@"select id,处方号,科室id,医生id,处方类型,总价格,录入人,录入时间,'耿惠平' as 制单人,'客户' as 客户,处方类型 
+                                      from  cmis_chufang_detail where 录入时间>='{0}' and kindeestate is null",time);
                 var conn = new SqlConnection(SourceConn);
                 var headReader = SqlHelper.GetDataReader(conn, headsqlstring);
                 try
