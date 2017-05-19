@@ -104,7 +104,7 @@
             this.MaximizeBox = false;
             this.MinimizeBox = false;
             this.Name = "gb";
-            this.Text = "金蝶快速导入工具";
+            this.Text = "金蝶快速导入工具-地磅";
             this.ResumeLayout(false);
             this.PerformLayout();
 

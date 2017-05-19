@@ -562,7 +562,7 @@ namespace Tool.K3
             /// 
             /// </summary>
             public int FBillID { get { return GetFBillID(); } set { _FBillID = value; } }
-
+            public int FType { get; set; }
             #endregion
 
             #region 虚方法

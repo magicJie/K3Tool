@@ -692,7 +692,10 @@ namespace K3Tool.Extend
             }
             public class Body : NewReceiveBill.Body
             {
-
+                /// <summary>
+                /// 结算折扣金额
+                /// </summary>
+                public string FDiscountFor { get; set; }
             }
             //public class RPContact : NewReceiveBill.RPContact
             //{
@@ -703,8 +706,8 @@ namespace K3Tool.Extend
                 var headliList = new List<NewReceiveBill.Head>();
                 var bodyliList = new List<NewReceiveBill.Body>();
                 var contactList = new List<NewReceiveBill.RPContact>();
-                var headsqlstring =String.Format(@"select id,处方号,科室id,医生id,处方类型,总价格,录入人,录入时间,'耿惠平' as 制单人,'客户' as 客户,处方类型 
-                                      from  cmis_chufang_detail where 录入时间>='{0}' and kindeestate is null",time);
+                var headsqlstring =String.Format(@"select id,处方号,科室id,医生id,处方类型,总价格,录入人,录入时间,'耿惠平' as 制单人,'客户' as 客户,处方类型,折扣金额 
+                                      from  cmis_chufang_detail where 录入时间>='{0}' and 处方类型 in (3,5,6,8,9,10,15) and kindeestate is null", time);
                 var conn = new SqlConnection(SourceConn);
                 var headReader = SqlHelper.GetDataReader(conn, headsqlstring);
                 try
@@ -768,6 +771,7 @@ namespace K3Tool.Extend
                             FReceiveCyID = 1,
                             FSettleCyID = 1,
                             FSettleExchangeRate = 1,
+                            FDiscountFor = headReader["折扣金额"].ToString()
                         };
                         bodyliList.Add(body);
                         var rpContact = new NewReceiveBill.RPContact
@@ -788,7 +792,8 @@ namespace K3Tool.Extend
                             FRemainAmountFor=head.FAmount,
                             FRP=head.FRP,
                             FRPDate=head.FDate,
-                            FYear=head.FDate.Year
+                            FYear=head.FDate.Year,
+                            FType=5
                         };
                         contactList.Add(rpContact);
                         i++;
