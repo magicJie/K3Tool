@@ -179,6 +179,15 @@ namespace K3Tool.Extend
                     return CommonFunction.Getfitemid(RelatedConn, Fitemclassid.客户, filter);
                 }
 
+                protected override string GetFempid()
+                {
+                    var filter = string.Format("FName='{0}'", Fempid);
+                    return CommonFunction.Getfitemid(RelatedConn, Fitemclassid.职员, filter);
+                }
+                /// <summary>
+                /// 医师
+                /// </summary>
+                public string FHeadSelfB0154 { get; set; }
             }
 
             public class Body : SalesOutLet.Body
@@ -208,7 +217,7 @@ namespace K3Tool.Extend
                 var bodyliList = new List<ICStockBillEntry>();
                 var recordlist = new List<string>();
                 var headsqlstring = "select 处方号,科室id,录入人,convert(nvarchar(10),录入时间,21) as 录入时间 from  cmis_chufang_detail where (处方类型=1 or 处方类型=2 or 处方类型=4) and kindeestate is null";
-                var bodysqlstring = "select 处方号,总数量,收费项目id,CASE WHEN 最小单位=\'g\' THEN 单价*1000 else 单价 END as 新单价,总价格*剂数 as 新总价格,最小单位,\'2.\' + CONVERT(varchar(20),处方类型) as 出库类型 from  cmis_chufang_detail where (处方类型=1 or 处方类型=2 or 处方类型=4)";
+                var bodysqlstring = "select 处方号,总数量,收费项目id,CASE WHEN 最小单位=\'g\' THEN 单价 else 单价 END as 新单价,总价格*剂数 as 新总价格,最小单位,\'2.\' + CONVERT(varchar(20),处方类型) as 出库类型 from  cmis_chufang_detail where (处方类型=1 or 处方类型=2 or 处方类型=4)";
                 var headtable = SqlHelper.Query(SourceConn, headsqlstring, true);
                 var bodytable = SqlHelper.Query(SourceConn, bodysqlstring);
                 var i = 0;
@@ -221,8 +230,11 @@ namespace K3Tool.Extend
                         Fdate = DateTime.Parse(itemRow["录入时间"].ToString()),
                         FDeptID = itemRow["科室id"].ToString(),
                         FBillerID = itemRow["录入人"].ToString(),
+                        FEmpID = itemRow["录入人"].ToString(),
+                        FSupplyID = itemRow["科室id"].ToString(),
                         FInterID = number + i
                     };
+                    head.FHeadSelfB0154 = head.FEmpID;
                     headliList.Add(head);
                     recordlist.Add(string.Format("update cmis_chufang_detail set kindeestate='1' where 处方号='{0}'", itemRow["处方号"]));
                     var j = 1;
