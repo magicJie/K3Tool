@@ -646,7 +646,7 @@ namespace K3Tool.Extend
                     {
                         //var filter = string.Format("FName='{0}'", _fPreparer);
                         //return CommonFunction.Getfitemid(RelatedConn, Fitemclassid.职员, filter);
-                        return "16394";
+                        return "28";
                     }
                 }
                 /// <summary>
@@ -659,7 +659,7 @@ namespace K3Tool.Extend
                     {
                         //var filter = string.Format("FName='{0}'", _fEmployee);
                         //return CommonFunction.Getfitemid(RelatedConn, Fitemclassid.职员, filter);
-                        return "16394";
+                        return "28";
                     }
                 }
                 /// <summary>
@@ -701,6 +701,18 @@ namespace K3Tool.Extend
                        throw new Exception("收款类型"+_FBillType+"找不到");
                     }                    
                 }
+
+                protected override int GetFAccountID()
+                {
+                    //现金收费科目暂时固定为0
+                    return 0;
+                }
+
+                protected override int GetFAccountID_CN()
+                {
+                    //现金收费科目暂时固定为0
+                    return 0;
+                }
             }
             public class Body : NewReceiveBill.Body
             {
@@ -708,6 +720,13 @@ namespace K3Tool.Extend
                 /// 结算折扣金额
                 /// </summary>
                 public string FDiscountFor { get; set; }
+
+
+                protected override int GetFAccountID()
+                {
+                    //暂时固定为1700
+                    return 1700;
+                }
             }
             //public class RPContact : NewReceiveBill.RPContact
             //{

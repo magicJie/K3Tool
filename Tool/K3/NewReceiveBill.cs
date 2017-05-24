@@ -73,6 +73,9 @@ namespace Tool.K3
             protected int _FBillType;
             protected string _FClassTypeID;
             protected float _FAdjustExchangeRate;
+
+            protected int _FAccountID;
+            protected int _FAccountID_CN;
             #endregion
             #region 属性
             /// <summary>
@@ -150,7 +153,7 @@ namespace Tool.K3
                 set { _FRP = value; }
             }
             public int FYear { get { return _FYear; } set { _FYear = value; } }
-            public int FPeriod { get { return _FPeriod; } set { _FYear = value; } }
+            public int FPeriod { get { return _FPeriod; } set { _FPeriod = value; } }
             //下面属性非金蝶表结构要求必填但是业务上要求必填
             /// <summary>
             /// 内码
@@ -198,6 +201,18 @@ namespace Tool.K3
             {
                 get { return GetFAdjustExchangeRate(); }
                 set { _FAdjustExchangeRate = value; }
+            }
+
+            public int FAccountID
+            {
+                get { return GetFAccountID(); }
+                set { _FAccountID = value; }
+            }
+
+            public int FAccountID_CN
+            {
+                get { return GetFAccountID_CN(); }
+                set { _FAccountID_CN = value; }
             }
             #endregion
             #region 虚方法
@@ -269,24 +284,24 @@ namespace Tool.K3
             /// 获取内码
             /// </summary>
             /// <returns></returns>
-            protected int GetFBillID()
+            protected virtual int GetFBillID()
             {
                 return _FBillID;
             }
 
-            protected string GetFReceiveAmount()
+            protected virtual string GetFReceiveAmount()
             {
                 return _FReceiveAmount;
             }
-            protected string GetFReceiveAmountFor()
+            protected virtual string GetFReceiveAmountFor()
             {
                 return _FReceiveAmountFor;
             }
-            protected string GetFSettleAmount()
+            protected virtual string GetFSettleAmount()
             {
                 return _FSettleAmount;
             }
-            protected string GetFSettleAmountFor()
+            protected virtual string GetFSettleAmountFor()
             {
                 return _FSettleAmountFor;
             }
@@ -294,13 +309,23 @@ namespace Tool.K3
             {
                 return _FBillType;
             }
-            protected string GetFClassTypeID()
+            protected virtual string GetFClassTypeID()
             {
                 return _FClassTypeID;
             }
-            protected float GetFAdjustExchangeRate()
+            protected virtual float GetFAdjustExchangeRate()
             {
                 return _FAdjustExchangeRate;
+            }
+
+            protected virtual int GetFAccountID()
+            {
+                return _FAccountID;
+            }
+
+            protected virtual int GetFAccountID_CN()
+            {
+                return _FAccountID_CN;
             }
             #endregion
         }
@@ -352,6 +377,7 @@ namespace Tool.K3
             /// 
             /// </summary>
             protected float _FSettleExchangeRate;
+            protected int _FAccountID;
             #endregion
 
             #region 属性
@@ -395,6 +421,12 @@ namespace Tool.K3
             /// 
             /// </summary>
             public float FSettleExchangeRate { get { return GetFSettleExchangeRate(); } set { _FSettleExchangeRate = value; } }
+
+            public int FAccountID
+            {
+                get { return GetFAccountID(); }
+                set { _FAccountID = value; }
+            }
 
             #endregion
 
@@ -479,6 +511,11 @@ namespace Tool.K3
             {
                 return _FSettleExchangeRate;
             }
+
+            protected virtual int GetFAccountID()
+            {
+                return _FAccountID;
+            }
             #endregion
         }
 
@@ -543,8 +580,8 @@ namespace Tool.K3
 
             #region 属性
             public int FYear { get { return _FYear; } set { _FYear = value; } }
-            public int FPeriod { get { return _FPeriod; } set { _FYear = value; } }
-            public int FRP { get { return _FRP; } set { _FYear = value; } }
+            public int FPeriod { get { return _FPeriod; } set { _FPeriod = value; } }
+            public int FRP { get { return _FRP; } set { _FRP = value; } }
             public DateTime FDate { get { return _FDate; } set { _FDate = value; } }
             public DateTime FFincDate { get { return _FFincDate; } set { _FFincDate = value; } }
             public string FNumber { get { return _FNumber; } set { _FNumber = value; } }
