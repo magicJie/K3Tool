@@ -22,7 +22,8 @@ namespace K3Tool
 
         private void button2_Click(object sender, EventArgs e)
         {
-            var number = Dp.DpSalesOutLet.Work();
+            var time = sktime.Value.ToString("yyyy-MM-dd");
+            var number = Dp.DpSalesOutLet.Work(time);
             MessageBox.Show("成功新增" + number);
         }
 

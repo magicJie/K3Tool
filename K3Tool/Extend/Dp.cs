@@ -144,6 +144,7 @@ namespace K3Tool.Extend
         {
             public class Head : SalesOutLet.Head
             {
+                private string _ys;
                 protected override int GetFsalestyle()
                 {
                     return 100;
@@ -175,7 +176,7 @@ namespace K3Tool.Extend
 
                 protected override string GetFsupplyid()
                 {
-                    var filter = string.Format("FNumber='{0}'", Fsupplyid);
+                    var filter = string.Format("FName='{0}'", "客户");
                     return CommonFunction.Getfitemid(RelatedConn, Fitemclassid.客户, filter);
                 }
 
@@ -187,7 +188,14 @@ namespace K3Tool.Extend
                 /// <summary>
                 /// 医师
                 /// </summary>
-                public string FHeadSelfB0154 { get; set; }
+                public string FHeadSelfB0154
+                {
+                    get
+                    {
+                        var filter = string.Format("FNumber='{0}'", _ys);
+                        return CommonFunction.Getfitemid(RelatedConn, Fitemclassid.医师, filter);
+                    }
+                    set { _ys = value; } }
             }
 
             public class Body : SalesOutLet.Body
@@ -210,13 +218,13 @@ namespace K3Tool.Extend
                     return CommonFunction.Getfitemid(RelatedConn, Fitemclassid.单位, filter);
                 }
             }
-            public static int Work()
+            public static int Work(string time)
             {
                 CommonFunction.Initalize(SourceConn, "cmis_chufang_detail");
                 var headliList = new List<ICStockBill>();
                 var bodyliList = new List<ICStockBillEntry>();
                 var recordlist = new List<string>();
-                var headsqlstring = "select 处方号,科室id,录入人,convert(nvarchar(10),录入时间,21) as 录入时间 from  cmis_chufang_detail where (处方类型=1 or 处方类型=2 or 处方类型=4) and kindeestate is null";
+                var headsqlstring = string.Format("select 处方号,科室id,医生id,录入人,convert(nvarchar(10),录入时间,21) as 录入时间 from  cmis_chufang_detail where 录入时间>='{0}' and (处方类型=1 or 处方类型=2 or 处方类型=4) and kindeestate is null",time);
                 var bodysqlstring = "select 处方号,总数量,收费项目id,CASE WHEN 最小单位=\'g\' THEN 单价 else 单价 END as 新单价,总价格*剂数 as 新总价格,最小单位,\'2.\' + CONVERT(varchar(20),处方类型) as 出库类型 from  cmis_chufang_detail where (处方类型=1 or 处方类型=2 or 处方类型=4)";
                 var headtable = SqlHelper.Query(SourceConn, headsqlstring, true);
                 var bodytable = SqlHelper.Query(SourceConn, bodysqlstring);
@@ -231,10 +239,10 @@ namespace K3Tool.Extend
                         FDeptID = itemRow["科室id"].ToString(),
                         FBillerID = itemRow["录入人"].ToString(),
                         FEmpID = itemRow["录入人"].ToString(),
-                        FSupplyID = itemRow["科室id"].ToString(),
+                        //FSupplyID = itemRow["科室id"].ToString(),
+                        FHeadSelfB0154=itemRow["医生id"].ToString(),
                         FInterID = number + i
-                    };
-                    head.FHeadSelfB0154 = head.FEmpID;
+                    };                    
                     headliList.Add(head);
                     recordlist.Add(string.Format("update cmis_chufang_detail set kindeestate='1' where 处方号='{0}'", itemRow["处方号"]));
                     var j = 1;
