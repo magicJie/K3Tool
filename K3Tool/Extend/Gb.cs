@@ -85,13 +85,13 @@ namespace K3Tool.Extend
                     return CommonFunction.Getfitemid(RelatedConn, Fitemclassid.单位, filter);
                 }
             }
-            public static int Work(string time)
+            public static int Work(string kstime, string jstime)
             {
                 CommonFunction.Initalize(SourceConn, "称重信息");
                 var headliList = new List<ICStockBill>();
                 var bodyliList = new List<ICStockBillEntry>();
                 var recordlist = new List<string>();
-                var headsqlstring =string.Format("select 流水号,更新时间,发货单位,毛重司磅员,车号 from 称重信息 where 过磅类型='PO' and 更新时间>='{0}' and kindeestate is null",time);
+                var headsqlstring =string.Format("select 流水号,更新时间,发货单位,毛重司磅员,车号 from 称重信息 where 过磅类型='PO' and 更新时间>='{0}' and 更新时间<='{1}' and kindeestate is null",kstime,jstime);
                 var bodysqlstring = "select * from 称重信息 where 过磅类型='PO'";
                 var headtable = SqlHelper.Query(SourceConn, headsqlstring, true);
                 var bodytable = SqlHelper.Query(SourceConn, bodysqlstring);
@@ -223,13 +223,13 @@ namespace K3Tool.Extend
                     return CommonFunction.Getfitemid(RelatedConn, Fitemclassid.单位, filter);
                 }
             }
-            public static int Work(string time)
+            public static int Work(string kstime, string jstime)
             {
                 CommonFunction.Initalize(SourceConn, "称重信息");
                 var headliList = new List<ICStockBill>();
                 var bodyliList = new List<ICStockBillEntry>();
                 var recordlist = new List<string>();
-                var headsqlstring =string.Format("select 流水号,更新时间,毛重司磅员,收货单位,备用1,车号,备用3 from  称重信息 where 过磅类型='SO' and 更新时间>='{0}' and kindeestate is null",time);
+                var headsqlstring =string.Format("select 流水号,更新时间,毛重司磅员,收货单位,备用1,车号,备用3 from  称重信息 where 过磅类型='SO' and 更新时间>='{0}' and 更新时间<='{1}' and kindeestate is null",kstime,jstime);
                 var bodysqlstring = "select * from  称重信息";
                 var headtable = SqlHelper.Query(SourceConn, headsqlstring, true);
                 var bodytable = SqlHelper.Query(SourceConn, bodysqlstring);

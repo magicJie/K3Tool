@@ -15,15 +15,14 @@ namespace K3Tool
 
         private void button1_Click(object sender, EventArgs e)
         {
-            var number = Dp.DpPurchasedWarehouse.Work();
+            var number = Dp.DpPurchasedWarehouse.Work(kstime.Value.ToString("yyyy-MM-dd"), jstime.Value.ToString("yyyy-MM-dd"));
             MessageBox.Show("成功新增" + number);
 
         }
 
         private void button2_Click(object sender, EventArgs e)
         {
-            var time = sktime.Value.ToString("yyyy-MM-dd");
-            var number = Dp.DpSalesOutLet.Work(time);
+            var number = Dp.DpSalesOutLet.Work(kstime.Value.ToString("yyyy-MM-dd"), jstime.Value.ToString("yyyy-MM-dd"));
             MessageBox.Show("成功新增" + number);
         }
 
@@ -34,26 +33,25 @@ namespace K3Tool
 
         private void button3_Click(object sender, EventArgs e)
         {
-            var number = Dp.DpPicking.Work();
+            var number = Dp.DpPicking.Work(kstime.Value.ToString("yyyy-MM-dd"), jstime.Value.ToString("yyyy-MM-dd"));
             MessageBox.Show("成功新增" + number);
         }
 
         private void button4_Click(object sender, EventArgs e)
         {
-            var number = Dp.DpProductInventory.Work();
+            var number = Dp.DpProductInventory.Work(kstime.Value.ToString("yyyy-MM-dd"), jstime.Value.ToString("yyyy-MM-dd"));
             MessageBox.Show("成功新增" + number);
         }
 
         private void button5_Click(object sender, EventArgs e)
         {
-            var number = Dp.DpRequisitionSlip.Work();
+            var number = Dp.DpRequisitionSlip.Work(kstime.Value.ToString("yyyy-MM-dd"), jstime.Value.ToString("yyyy-MM-dd"));
             MessageBox.Show("成功新增" + number);
         }
 
         private void button6_Click(object sender, EventArgs e)
         {
-            var time = sktime.Value.ToString("yyyy-MM-dd");
-            var number = Dp.DpNewReceiveBill.Work(time);
+            var number = Dp.DpNewReceiveBill.Work(kstime.Value.ToString("yyyy-MM-dd"), jstime.Value.ToString("yyyy-MM-dd"));
             MessageBox.Show("成功导入" + number+"条数据");
         }
     }

@@ -80,13 +80,13 @@ namespace K3Tool.Extend
                     return CommonFunction.Getfitemid(RelatedConn, Fitemclassid.单位, filter);
                 }
             }
-            public static int Work()
+            public static int Work(string kstime, string jstime)
             {
                 CommonFunction.Initalize(SourceConn, "cmis_mk_voucher_main2");
                 var headliList = new List<ICStockBill>();
                 var bodyliList = new List<ICStockBillEntry>();
                 var recordlist = new List<string>();
-                var headsqlstring = "select 单据号,操作时间,供应商,操作人,'1.'+CONVERT(char(5),子库房) as 仓库 from cmis_mk_voucher_main2 where 业务类型='1' and kindeestate is null";
+                var headsqlstring =string.Format("select 单据号,操作时间,供应商,操作人,'1.'+CONVERT(char(5),子库房) as 仓库 from cmis_mk_voucher_main2 where 业务类型='1' and kindeestate is null and 操作时间>='{0}' and 操作时间<='{1}'",kstime,jstime);
                 var bodysqlstring = "select 单据号,药品ID,数量,进货总价,进货单价,药库单位 from cmis_mk_voucher_detail";
                 var headtable = SqlHelper.Query(SourceConn, headsqlstring, true);
                 var bodytable = SqlHelper.Query(SourceConn, bodysqlstring);
@@ -218,13 +218,13 @@ namespace K3Tool.Extend
                     return CommonFunction.Getfitemid(RelatedConn, Fitemclassid.单位, filter);
                 }
             }
-            public static int Work(string time)
+            public static int Work(string kstime,string jstime)
             {
                 CommonFunction.Initalize(SourceConn, "cmis_chufang_detail");
                 var headliList = new List<ICStockBill>();
                 var bodyliList = new List<ICStockBillEntry>();
                 var recordlist = new List<string>();
-                var headsqlstring = string.Format("select 处方号,科室id,医生id,录入人,convert(nvarchar(10),录入时间,21) as 录入时间 from  cmis_chufang_detail where 录入时间>='{0}' and (处方类型=1 or 处方类型=2 or 处方类型=4) and kindeestate is null",time);
+                var headsqlstring = string.Format("select 处方号,科室id,医生id,录入人,convert(nvarchar(10),录入时间,21) as 录入时间 from  cmis_chufang_detail where 录入时间>='{0}' and 录入时间<='{1}' and (处方类型=1 or 处方类型=2 or 处方类型=4) and kindeestate is null",kstime,jstime);
                 var bodysqlstring = "select 处方号,总数量,收费项目id,CASE WHEN 最小单位=\'g\' THEN 单价 else 单价 END as 新单价,总价格*剂数 as 新总价格,最小单位,\'2.\' + CONVERT(varchar(20),处方类型) as 出库类型 from  cmis_chufang_detail where (处方类型=1 or 处方类型=2 or 处方类型=4)";
                 var headtable = SqlHelper.Query(SourceConn, headsqlstring, true);
                 var bodytable = SqlHelper.Query(SourceConn, bodysqlstring);
@@ -330,13 +330,13 @@ namespace K3Tool.Extend
                     return CommonFunction.Getfitemid(RelatedConn, Fitemclassid.仓库, filter);
                 }
             }
-            public static int Work()
+            public static int Work(string kstime, string jstime)
             {
                 CommonFunction.Initalize(SourceConn, "cmis_mk_voucher_main2");
                 var headliList = new List<ICStockBill>();
                 var bodyliList = new List<ICStockBillEntry>();
                 var recordlist = new List<string>();
-                var headsqlstring = "select 单据号,接收科室,操作时间,操作人,'1.'+CONVERT(char(5),子库房) as 仓库 from cmis_mk_voucher_main2 where 业务类型=14 and kindeestate is null";
+                var headsqlstring =string.Format("select 单据号,接收科室,操作时间,操作人,'1.'+CONVERT(char(5),子库房) as 仓库 from cmis_mk_voucher_main2 where 业务类型=14 and kindeestate is null and 操作时间>='{0}' and 操作时间<='{1}'",kstime,jstime);
                 var bodysqlstring = "select 单据号,药品ID,数量,药库单位 from cmis_mk_voucher_detail";
                 var headtable = SqlHelper.Query(SourceConn, headsqlstring, true);
                 var bodytable = SqlHelper.Query(SourceConn, bodysqlstring);
@@ -432,13 +432,13 @@ namespace K3Tool.Extend
                     return CommonFunction.Getfitemid(RelatedConn, Fitemclassid.仓库, filter);
                 }
             }
-            public static int Work()
+            public static int Work(string kstime, string jstime)
             {
                 CommonFunction.Initalize(SourceConn, "cmis_mk_voucher_main2");
                 var headliList = new List<ICStockBill>();
                 var bodyliList = new List<ICStockBillEntry>();
                 var recordlist = new List<string>();
-                var headsqlstring = "select 单据号,'1.'+CONVERT(char(5),子库房) as 仓库,20 as 交货单位,操作时间,操作人 from cmis_mk_voucher_main2 where 业务类型='2' and kindeestate is null";
+                var headsqlstring = string.Format("select 单据号,'1.'+CONVERT(char(5),子库房) as 仓库,20 as 交货单位,操作时间,操作人 from cmis_mk_voucher_main2 where 业务类型='2' and kindeestate is null and 操作时间>='{0}' and 操作时间<='{1}'",kstime,jstime);
                 var bodysqlstring = "select 单据号,药品ID,药库单位,数量,进货单价,进货总价 from cmis_mk_voucher_detail";
                 var headtable = SqlHelper.Query(SourceConn, headsqlstring, true);
                 var bodytable = SqlHelper.Query(SourceConn, bodysqlstring);
@@ -538,13 +538,13 @@ namespace K3Tool.Extend
                     return CommonFunction.Getfitemid(RelatedConn, Fitemclassid.仓库, filter);
                 }
             }
-            public static int Work()
+            public static int Work(string kstime, string jstime)
             {
                 CommonFunction.Initalize(SourceConn, "cmis_mk_voucher_main2");
                 var headliList = new List<ICStockBill>();
                 var bodyliList = new List<ICStockBillEntry>();
                 var recordlist = new List<string>();
-                var headsqlstring = "select 单据号,操作人,操作时间,'1.' + CONVERT(varchar(20),子库房) as 调出仓库,'2.' + CONVERT(varchar(20),子库房) as 调入仓库 from cmis_mk_voucher_main2 where 业务类型=11 and kindeestate is null";
+                var headsqlstring = string.Format("select 单据号,操作人,操作时间,'1.' + CONVERT(varchar(20),子库房) as 调出仓库,'2.' + CONVERT(varchar(20),子库房) as 调入仓库 from cmis_mk_voucher_main2 where 业务类型=11 and kindeestate is null and 操作时间>='{0}' and 操作时间<='{1}'",kstime,jstime);
                 var bodysqlstring = "select 单据号,药品ID,数量,进货单价,进货总价,药库单位 from cmis_mk_voucher_detail";
                 var headtable = SqlHelper.Query(SourceConn, headsqlstring, true);
                 var bodytable = SqlHelper.Query(SourceConn, bodysqlstring);
@@ -739,14 +739,14 @@ namespace K3Tool.Extend
             //public class RPContact : NewReceiveBill.RPContact
             //{
             //}
-            public static int Work(string time)
+            public static int Work(string kstime,string jstime)
             {
                 CommonFunction.Initalize(SourceConn, "cmis_chufang_detail");
                 var headliList = new List<NewReceiveBill.Head>();
                 var bodyliList = new List<NewReceiveBill.Body>();
                 var contactList = new List<NewReceiveBill.RPContact>();
                 var headsqlstring =String.Format(@"select id,处方号,科室id,医生id,处方类型,总价格,录入人,录入时间,'耿惠平' as 制单人,'客户' as 客户,处方类型,折扣金额 
-                                      from  cmis_chufang_detail where 录入时间>='{0}' and 处方类型 in (3,5,6,8,9,10,15) and kindeestate is null", time);
+                                      from  cmis_chufang_detail where 录入时间>='{0}' and 录入时间<='{1}' and 处方类型 in (3,5,6,8,9,10,15) and kindeestate is null", kstime,jstime);
                 var conn = new SqlConnection(SourceConn);
                 var headReader = SqlHelper.GetDataReader(conn, headsqlstring);
                 try
