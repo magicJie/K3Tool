@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Configuration;
 using System.Data;
 using System.Data.SqlClient;
+using System.Globalization;
 using System.Linq;
 using Tool.Common;
 using Tool.K3;
@@ -218,6 +219,7 @@ namespace K3Tool.Extend
                     return CommonFunction.Getfitemid(RelatedConn, Fitemclassid.单位, filter);
                 }
             }
+
             public static int Work(string kstime,string jstime)
             {
                 CommonFunction.Initalize(SourceConn, "cmis_chufang_detail");
@@ -225,7 +227,7 @@ namespace K3Tool.Extend
                 var bodyliList = new List<ICStockBillEntry>();
                 var recordlist = new List<string>();
                 var headsqlstring = string.Format("select 处方号,科室id,医生id,录入人,convert(nvarchar(10),录入时间,21) as 录入时间 from  cmis_chufang_detail where 录入时间>='{0}' and 录入时间<='{1}' and (处方类型=1 or 处方类型=2 or 处方类型=4) and kindeestate is null",kstime,jstime);
-                var bodysqlstring = "select 处方号,总数量,收费项目id,CASE WHEN 最小单位=\'g\' THEN 单价 else 单价 END as 新单价,总价格*剂数 as 新总价格,最小单位,\'2.\' + CONVERT(varchar(20),处方类型) as 出库类型 from  cmis_chufang_detail where (处方类型=1 or 处方类型=2 or 处方类型=4)";
+                var bodysqlstring = "select 处方号,总数量*剂数 as 实发数量,收费项目id,CASE WHEN 最小单位=\'g\' THEN 单价 else 单价 END as 新单价,总价格*剂数 as 新总价格,最小单位,单位,剂数,\'2.\' + CONVERT(varchar(20),处方类型) as 出库类型 from  cmis_chufang_detail where (处方类型=1 or 处方类型=2 or 处方类型=4)";
                 var headtable = SqlHelper.Query(SourceConn, headsqlstring, true);
                 var bodytable = SqlHelper.Query(SourceConn, bodysqlstring);
                 var i = 0;
@@ -251,8 +253,8 @@ namespace K3Tool.Extend
                         Body body = new Body
                         {
                             FItemID = bodyitemRow["收费项目id"].ToString(),
-                            FQty = bodyitemRow["总数量"].ToString() == "" ? "0" : bodyitemRow["总数量"].ToString(),
-                            Fauxqty = bodyitemRow["总数量"].ToString() == "" ? "0" : bodyitemRow["总数量"].ToString(),
+                            FQty = bodyitemRow["实发数量"].ToString() == "" ? "0" : bodyitemRow["实发数量"].ToString(),
+                            Fauxqty = bodyitemRow["实发数量"].ToString() == "" ? "0" : bodyitemRow["实发数量"].ToString(),
                             FUnitID = bodyitemRow["最小单位"].ToString(),
                             FConsignPrice = bodyitemRow["新单价"].ToString() == "" ? "0" : bodyitemRow["新单价"].ToString(),
                             FConsignAmount = bodyitemRow["新总价格"].ToString() == "" ? "0" : bodyitemRow["新总价格"].ToString(),
@@ -260,6 +262,10 @@ namespace K3Tool.Extend
                             FInterID = head.FInterID,
                             FEntryID = j
                         };
+                        if (bodyitemRow["最小单位"].ToString() == "g" && bodyitemRow["单位"].ToString() == "kg")
+                        {
+                            body.FQty = (Convert.ToDouble(body.FQty)/1000).ToString(CultureInfo.InvariantCulture);
+                        }
                         bodyliList.Add(body);
                         j = j + 1;
                     }
