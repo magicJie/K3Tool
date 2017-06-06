@@ -65,10 +65,7 @@ namespace K3Tool.Extend
                 /// 司机车号
                 /// </summary>
                 public string FHeadSelfA0143 { get; set; }
-                /// <summary>
-                /// 检验是否是良品
-                /// </summary>
-                public string FChkPassItem { get; set; }
+                
             }
 
             public class Body : PurchasedWarehouse.Body
@@ -84,6 +81,14 @@ namespace K3Tool.Extend
                     var filter = string.Format("FName='{0}'", Funitid);
                     return CommonFunction.Getfitemid(RelatedConn, Fitemclassid.单位, filter);
                 }
+                /// <summary>
+                /// 检验是否是良品
+                /// </summary>
+                public string FChkPassItem { get; set; }
+                /// <summary>
+                /// 应收数量
+                /// </summary>
+                public string FAuxQtyMust { get; set; }
             }
             public static int Work(string kstime, string jstime)
             {
@@ -109,8 +114,7 @@ namespace K3Tool.Extend
                         FEmpID = itemRow["毛重司磅员"].ToString(),
                         FBillerID = itemRow["毛重司磅员"].ToString(),
                         FDCStockID = "原料仓",
-                        FHeadSelfA0143 = itemRow["车号"].ToString(),
-                        FChkPassItem="1058",
+                        FHeadSelfA0143 = itemRow["车号"].ToString(),                        
                         FInterID = number + i
                     };
                     headliList.Add(head);
@@ -122,12 +126,14 @@ namespace K3Tool.Extend
                         {
                             FItemID = bodyitemRow["货名"].ToString(),
                             FInterID = head.FInterID,
-                            FQty = bodyitemRow["实重"].ToString(),
-                            Fauxqty = bodyitemRow["实重"].ToString(),
+                            FQty =(float.Parse(bodyitemRow["实重"].ToString())/1000).ToString(),
+                            Fauxqty = (float.Parse(bodyitemRow["实重"].ToString()) / 1000).ToString(),
                             Famount = bodyitemRow["金额"].ToString(),
-                            Fauxprice = bodyitemRow["单价"].ToString(),
+                            Fauxprice =(float.Parse(bodyitemRow["单价"].ToString())*1000).ToString(),
                             FDCStockID = head.FDCStockID,
-                            FUnitID = "kg",                            
+                            FUnitID = "吨",
+                            FAuxQtyMust = (float.Parse(bodyitemRow["实重"].ToString()) / 1000).ToString(),
+                            FChkPassItem = "1058",
                             FEntryID = j
                         };
                         bodyliList.Add(body);
@@ -191,7 +197,7 @@ namespace K3Tool.Extend
                     var filter = string.Format("FName='{0}'", Fempid);
                     return CommonFunction.Getfitemid(RelatedConn, Fitemclassid.职员, filter);
                 }
-
+               
                 /// <summary>
                 /// 工程名称
                 /// </summary>
@@ -221,7 +227,15 @@ namespace K3Tool.Extend
                 {
                     var filter = string.Format("FName='{0}'", Funitid);
                     return CommonFunction.Getfitemid(RelatedConn, Fitemclassid.单位, filter);
-                }
+                } 
+                /// <summary>
+                /// 检验是否是良品
+                /// </summary>
+                public string FChkPassItem { get; set; }
+                /// <summary>
+                /// 应发数量
+                /// </summary>
+                public string FAuxQtyMust { get; set; }
             }
             public static int Work(string kstime, string jstime)
             {
@@ -248,7 +262,7 @@ namespace K3Tool.Extend
                         FSupplyID = itemRow["收货单位"].ToString(),
                         FHeadSelfB0155 = itemRow["备用1"].ToString(),
                         FHeadSelfB0156 = itemRow["车号"].ToString(),
-                        FEmpID = itemRow["备用3"].ToString(),
+                        FEmpID = itemRow["备用3"].ToString(),                        
                         FInterID = number + i
                     };
                     headliList.Add(head);
@@ -259,13 +273,15 @@ namespace K3Tool.Extend
                         Body body = new Body
                         {
                             FItemID = bodyitemRow["货名"].ToString(),
-                            FQty = bodyitemRow["实重"].ToString() == "" ? "0" : bodyitemRow["实重"].ToString(),
-                            Fauxqty = bodyitemRow["实重"].ToString() == "" ? "0" : bodyitemRow["实重"].ToString(),
-                            FUnitID = "kg",
-                            FConsignPrice = bodyitemRow["单价"].ToString() == "" ? "0" : bodyitemRow["单价"].ToString(),
+                            FQty = (float.Parse(bodyitemRow["实重"].ToString()) / 1000).ToString() == "" ? "0" : (float.Parse(bodyitemRow["实重"].ToString()) / 1000).ToString(),
+                            Fauxqty = (float.Parse(bodyitemRow["实重"].ToString()) / 1000).ToString() == "" ? "0" : (float.Parse(bodyitemRow["实重"].ToString()) / 1000).ToString(),
+                            FUnitID = "吨",
+                            FConsignPrice = (float.Parse(bodyitemRow["单价"].ToString()) * 1000).ToString() == "" ? "0" : (float.Parse(bodyitemRow["单价"].ToString()) * 1000).ToString(),
                             FConsignAmount = bodyitemRow["金额"].ToString() == "" ? "0" : bodyitemRow["金额"].ToString(),
                             FDCStockID ="成品库",
-                            FInterID = head.FInterID,                            
+                            FInterID = head.FInterID,
+                            FChkPassItem = "1058",
+                            FAuxQtyMust = (float.Parse(bodyitemRow["实重"].ToString()) / 1000).ToString() == "" ? "0" : (float.Parse(bodyitemRow["实重"].ToString()) / 1000).ToString(),
                             FEntryID = j
                         };
                         bodyliList.Add(body);
