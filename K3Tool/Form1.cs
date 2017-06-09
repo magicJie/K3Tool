@@ -54,5 +54,11 @@ namespace K3Tool
             var number = Dp.DpNewReceiveBill.Work(kstime.Value.ToString("yyyy-MM-dd"), jstime.Value.ToString("yyyy-MM-dd"));
             MessageBox.Show("成功导入" + number+"条数据");
         }
+
+        private void button7_Click(object sender, EventArgs e)
+        {
+            var number = Dp.OtherOutboundBill.Work(kstime.Value.ToString("yyyy-MM-dd"), jstime.Value.ToString("yyyy-MM-dd"));
+            MessageBox.Show("成功导入" + number + "条数据");
+        }
     }
 }

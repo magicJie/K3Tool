@@ -37,8 +37,9 @@
             this.button6 = new System.Windows.Forms.Button();
             this.kstime = new System.Windows.Forms.DateTimePicker();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
-            this.label1 = new System.Windows.Forms.Label();
             this.jstime = new System.Windows.Forms.DateTimePicker();
+            this.label1 = new System.Windows.Forms.Label();
+            this.button7 = new System.Windows.Forms.Button();
             this.groupBox1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -121,6 +122,13 @@
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "日期";
             // 
+            // jstime
+            // 
+            this.jstime.Location = new System.Drawing.Point(196, 20);
+            this.jstime.Name = "jstime";
+            this.jstime.Size = new System.Drawing.Size(150, 21);
+            this.jstime.TabIndex = 8;
+            // 
             // label1
             // 
             this.label1.AutoSize = true;
@@ -130,18 +138,22 @@
             this.label1.TabIndex = 7;
             this.label1.Text = "至";
             // 
-            // jstime
+            // button7
             // 
-            this.jstime.Location = new System.Drawing.Point(196, 20);
-            this.jstime.Name = "jstime";
-            this.jstime.Size = new System.Drawing.Size(150, 21);
-            this.jstime.TabIndex = 8;
+            this.button7.Location = new System.Drawing.Point(54, 192);
+            this.button7.Name = "button7";
+            this.button7.Size = new System.Drawing.Size(125, 35);
+            this.button7.TabIndex = 8;
+            this.button7.Text = "一键导入其他出库单";
+            this.button7.UseVisualStyleBackColor = true;
+            this.button7.Click += new System.EventHandler(this.button7_Click);
             // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(552, 179);
+            this.ClientSize = new System.Drawing.Size(551, 235);
+            this.Controls.Add(this.button7);
             this.Controls.Add(this.groupBox1);
             this.Controls.Add(this.button6);
             this.Controls.Add(this.button5);
@@ -173,6 +185,7 @@
         private System.Windows.Forms.GroupBox groupBox1;
         private System.Windows.Forms.DateTimePicker jstime;
         private System.Windows.Forms.Label label1;
+        private System.Windows.Forms.Button button7;
     }
 }
 
