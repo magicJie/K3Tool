@@ -22,7 +22,7 @@
     <UpdatePeriodically>false</UpdatePeriodically>
     <UpdateRequired>false</UpdateRequired>
     <MapFileExtensions>false</MapFileExtensions>
-    <ApplicationRevision>75</ApplicationRevision>
+    <ApplicationRevision>76</ApplicationRevision>
     <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <PublishWizardCompleted>true</PublishWizardCompleted>
@@ -77,8 +77,15 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Extend\Dl.cs" />
     <Compile Include="Extend\Dp.cs" />
     <Compile Include="Extend\Gb.cs" />
+    <Compile Include="DlForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="DlForm.Designer.cs">
+      <DependentUpon>DlForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="gb.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -93,6 +100,9 @@
     </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <EmbeddedResource Include="DlForm.resx">
+      <DependentUpon>DlForm.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="gb.resx">
       <DependentUpon>gb.cs</DependentUpon>
     </EmbeddedResource>
