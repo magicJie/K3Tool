@@ -974,13 +974,14 @@ namespace K3Tool.Extend
                     {
                         Body body = new Body
                         {
-                            FItemID = bodyitemRow["药品ID"].ToString(),                            
+                            FItemID = bodyitemRow["药品ID"].ToString(),
+                            FQty = bodyitemRow["数量"].ToString() == "" ? "0" : bodyitemRow["数量"].ToString(),
                             Fauxqty = bodyitemRow["数量"].ToString() == "" ? "0" : bodyitemRow["数量"].ToString(),
                             FUnitID = bodyitemRow["药库单位"].ToString(),
                             FDCStockID = itemRow["仓库"].ToString(),
                             FInterID = head.FInterID,
                             FEntryID = j
-                        };                       
+                        };
                         bodyliList.Add(body);
                         j = j + 1;
                     }

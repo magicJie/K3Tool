@@ -140,6 +140,11 @@
             {
                 return Fdcstockid;
             }
+
+            /// <summary>
+            /// 基本单位发数量
+            /// </summary>
+            public string FQty { get; set; }
         }        
     }
 }
