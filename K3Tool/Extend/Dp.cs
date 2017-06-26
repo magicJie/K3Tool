@@ -18,6 +18,7 @@ namespace K3Tool.Extend
     {
         public static string RelatedConn = ConfigurationManager.ConnectionStrings["dprelated"].ToString();
         public static string SourceConn = ConfigurationManager.ConnectionStrings["dpsource"].ToString();
+
         /// <summary>
         /// 外购入库单
         /// </summary>

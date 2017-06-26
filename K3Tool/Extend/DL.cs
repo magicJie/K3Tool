@@ -21,7 +21,7 @@ namespace K3Tool.Extend
         /// <summary>
         /// 外购入库单
         /// </summary>
-        public class DpPurchasedWarehouse
+        public class DlPurchasedWarehouse
         {
             public class Head : PurchasedWarehouse.Head
             {
@@ -83,15 +83,21 @@ namespace K3Tool.Extend
             }
             public static int Work(string kstime, string jstime)
             {
-                CommonFunction.Initalize(SourceConn, "cmis_mk_voucher_main2");
+                CommonFunction.Initalize(SourceConn, "T_Mat_KFPurchase");
                 var headliList = new List<ICStockBill>();
                 var bodyliList = new List<ICStockBillEntry>();
                 var recordlist = new List<string>();
-                var headsqlstring = string.Format("select 单据号,操作时间,供应商,操作人,'1.'+CONVERT(char(5),子库房) as 仓库 from cmis_mk_voucher_main2 where 业务类型='1' and kindeestate is null and 操作时间>='{0}' and 操作时间<='{1}'", kstime, jstime);
-                var bodysqlstring = "select 单据号,药品ID,数量,进货总价,进货单价,药库单位 from cmis_mk_voucher_detail";
+                var headsqlstring = 
+                    string.Format(@"select a.FBillNo 单据号,a.FBillDate 操作时间,a.FSupplierID 供应商,b.FNumber 操作人,c.FNumber 仓库 from T_Mat_KFPurchase a
+                                    left join T_Sys_User b on b.FUserID = a.FBillUserID
+                                    left join T_Sys_Group c on c.FGroupID = a.FKFGroupID where kindeestate is null and ,a.FBillDate>='{0}' and ,a.FBillDate<='{1}'",
+                                    kstime, jstime);
+                //TODO 药品ID和仓库ID需要确认基础表是哪个
+                var bodysqlstring = @"select a.FFeeItemID 药品ID,a.FQuantity 数量,a.FPurchaseAmt 进货总价,a.FPurchasePrice 进货单价,a.FKFUnit 药库单位
+                                      from T_Mat_KFPurchaseDetail a";
                 var headtable = SqlHelper.Query(SourceConn, headsqlstring, true);
                 var bodytable = SqlHelper.Query(SourceConn, bodysqlstring);
-                var i = 0;
+                var i = 0; 
                 var number = CommonFunction.GetMaxNum(RelatedConn, ICStockBill.TableName);
                 foreach (DataRow itemRow in headtable.Rows)
                 {
@@ -108,7 +114,7 @@ namespace K3Tool.Extend
                         FInterID = number + i
                     };
                     headliList.Add(head);
-                    recordlist.Add(string.Format("update cmis_mk_voucher_main2 set kindeestate='1' where 单据号='{0}'", itemRow["单据号"]));
+                    recordlist.Add(string.Format("update T_Mat_KFPurchase set kindeestate='1' where FBillNo='{0}'", itemRow["单据号"]));
                     var j = 1;
                     foreach (DataRow bodyitemRow in bodytable.Select(string.Format("单据号='{0}'", head.FBillNo)))
                     {
@@ -138,10 +144,256 @@ namespace K3Tool.Extend
                 return resultnumber;
             }
         }
+
+        /// <summary>
+        /// 退货单
+        /// </summary>
+        public class DlRefund
+        {
+            public class Head : PurchasedWarehouse.Head
+            {
+                protected override string GetFpostyle()
+                {
+                    return "251";
+                }
+
+                protected override string GetFfmanagerid()
+                {
+                    var filter = string.Format("FNumber='{0}'", Ffmanagerid);
+                    return CommonFunction.Getfitemid(RelatedConn, Fitemclassid.职员, filter);
+                }
+
+                protected override string GetFsmanagerid()
+                {
+                    var filter = string.Format("FNumber='{0}'", Fsmanagerid);
+                    return CommonFunction.Getfitemid(RelatedConn, Fitemclassid.职员, filter);
+                }
+
+                protected override string GetFempid()
+                {
+                    var filter = string.Format("FNumber='{0}'", Fempid);
+                    return CommonFunction.Getfitemid(RelatedConn, Fitemclassid.职员, filter);
+                }
+
+                protected override string GetFbillerid()
+                {
+                    var filter = string.Format("FNumber='{0}'", Fbillerid);
+                    return CommonFunction.Getfitemid(RelatedConn, Fitemclassid.职员, filter);
+                }
+
+                protected override string GetFdcstockid()
+                {
+                    var filter = string.Format("FNumber='{0}'", Fdcstockid);
+                    return CommonFunction.Getfitemid(RelatedConn, Fitemclassid.仓库, filter);
+                }
+
+                protected override string GetFsupplyid()
+                {
+                    var filter = string.Format("FNumber='{0}'", Fsupplyid);
+                    return CommonFunction.Getfitemid(RelatedConn, Fitemclassid.供应商, filter);
+                }
+            }
+
+            public class Body : PurchasedWarehouse.Body
+            {
+                protected override string GetFItemId()
+                {
+                    var filter = string.Format("FNumber='{0}'", Fitemid);
+                    return CommonFunction.Getfitemid(RelatedConn, Fitemclassid.物料, filter);
+                }
+
+                protected override string GetFunitid()
+                {
+                    var filter = string.Format("FName='{0}'", Funitid);
+                    return CommonFunction.Getfitemid(RelatedConn, Fitemclassid.单位, filter);
+                }
+            }
+
+            public static int Work(string kstime, string jstime)
+            {
+                CommonFunction.Initalize(SourceConn, "T_Mat_KFPurchase");
+                var headliList = new List<ICStockBill>();
+                var bodyliList = new List<ICStockBillEntry>();
+                var recordlist = new List<string>();
+                var headsqlstring =
+                    string.Format(@"select a.FKFRefundID 单据号,a.FBillDate 操作时间,a.FSupplierID 供应商,b.FNumber 操作人,c.FNumber 仓库 from T_Mat_KFRefund a
+                                    left join T_Sys_User b on b.FUserID = a.FBillUserID
+                                    left join T_Sys_Group c on c.FGroupID = a.FKFGroupID where kindeestate is null and ,a.FBillDate>='{0}' and ,a.FBillDate<='{1}'",
+                                    kstime, jstime);
+                //TODO 药品ID和仓库ID需要确认基础表是哪个
+                var bodysqlstring = @"select a.FKFRefundID 单据号, a.FFeeItemID 药品ID,a.FQuantity 数量,a.FPurchaseAmt 进货总价,a.FPurchasePrice 进货单价,a.FKFUnit 药库单位
+                                      from T_Mat_KFRefundDetail a";
+                var headtable = SqlHelper.Query(SourceConn, headsqlstring, true);
+                var bodytable = SqlHelper.Query(SourceConn, bodysqlstring);
+                var i = 0;
+                var number = CommonFunction.GetMaxNum(RelatedConn, ICStockBill.TableName);
+                foreach (DataRow itemRow in headtable.Rows)
+                {
+                    Head head = new Head
+                    {
+                        FBillNo = itemRow["单据号"].ToString(),
+                        Fdate = DateTime.Parse(itemRow["操作时间"].ToString()),
+                        FSupplyID = itemRow["供应商"].ToString(),
+                        FSManagerID = itemRow["操作人"].ToString(),
+                        FFManagerID = itemRow["操作人"].ToString(),
+                        FEmpID = itemRow["操作人"].ToString(),
+                        FBillerID = itemRow["操作人"].ToString(),
+                        FDCStockID = itemRow["仓库"].ToString(),
+                        FInterID = number + i
+                    };
+                    headliList.Add(head);
+                    recordlist.Add(string.Format("update T_Mat_KFPurchase set kindeestate='1' where FBillNo='{0}'", itemRow["单据号"]));
+                    var j = 1;
+                    foreach (DataRow bodyitemRow in bodytable.Select(string.Format("单据号='{0}'", head.FBillNo)))
+                    {
+                        Body body = new Body
+                        {
+                            FItemID = bodyitemRow["药品ID"].ToString(),
+                            FInterID = head.FInterID,
+                            FQty = bodyitemRow["数量"].ToString(),
+                            Fauxqty = bodyitemRow["数量"].ToString(),
+                            Famount = bodyitemRow["进货总价"].ToString(),
+                            Fauxprice = bodyitemRow["进货单价"].ToString(),
+                            FDCStockID = head.FDCStockID,
+                            FUnitID = bodyitemRow["药库单位"].ToString(),
+                            FEntryID = j
+                        };
+                        bodyliList.Add(body);
+                        j = j + 1;
+                    }
+                    i = i + 1;
+                }
+                var headsqlstringlist = CommonFunction.GetSqlList(RelatedConn, headliList, ICStockBill.TableName);
+                var bodysqlstringlist = CommonFunction.GetSqlList(RelatedConn, bodyliList, ICStockBillEntry.TableName);
+                headsqlstringlist.AddRange(bodysqlstringlist);
+                var resultnumber = SqlHelper.ExecuteSqlTran(RelatedConn, headsqlstringlist);
+                SqlHelper.ExecuteSqlTran(SourceConn, recordlist);
+                CommonFunction.UpdateMaxNum(RelatedConn, ICStockBill.TableName, number + i);
+                return resultnumber;
+            }
+        }
+
+        /// <summary>
+        /// 生产领料单
+        /// </summary>
+        public class DlPicking
+        {
+            public class Head : Picking.Head
+            {
+                protected override string GetFPurposeId()
+                {
+                    return "12000";
+                }
+
+                protected override string GetFfmanagerId()
+                {
+                    var filter = string.Format("FNumber='{0}'", FfmanagerId);
+                    return CommonFunction.Getfitemid(RelatedConn, Fitemclassid.职员, filter);
+                }
+
+                protected override string GetFsManagerId()
+                {
+                    var filter = string.Format("FNumber='{0}'", FsmanagerId);
+                    return CommonFunction.Getfitemid(RelatedConn, Fitemclassid.职员, filter);
+                }
+
+                protected override string Getfdeptid()
+                {
+                    var filter = string.Format("FNumber='{0}'", Fdeptid);
+                    return CommonFunction.Getfitemid(RelatedConn, Fitemclassid.部门, filter);
+                }
+
+                protected override string GetFbillerid()
+                {
+                    var filter = string.Format("FNumber='{0}'", Fbillerid);
+                    return CommonFunction.Getfitemid(RelatedConn, Fitemclassid.职员, filter);
+                }
+            }
+            public class Body : Picking.Body
+            {
+                protected override string GetFItemId()
+                {
+                    var filter = string.Format("FNumber='{0}'", Fitemid);
+                    return CommonFunction.Getfitemid(RelatedConn, Fitemclassid.物料, filter);
+                }
+
+                protected override string Getfunitid()
+                {
+                    var filter = string.Format("FName='{0}'", Funitid);
+                    return CommonFunction.Getfitemid(RelatedConn, Fitemclassid.单位, filter);
+                }
+
+                protected override string GetFscstockid()
+                {
+                    var filter = string.Format("FNumber='{0}'", FscStockId);
+                    return CommonFunction.Getfitemid(RelatedConn, Fitemclassid.仓库, filter);
+                }
+            }
+            public static int Work(string kstime, string jstime)
+            {
+                CommonFunction.Initalize(SourceConn, "T_Biz_Pharmaceutical");
+                var headliList = new List<ICStockBill>();
+                var bodyliList = new List<ICStockBillEntry>();
+                var recordlist = new List<string>();
+                var headsqlstring = string.Format(
+                    @"select a.FPharmaceuticalID 单据号,a.FCreateDate 操作时间,b.FNumber 操作人
+                    from T_Biz_Pharmaceutical a
+                    left
+                    join T_Sys_User b on b.FUserID = a.FCreateUserID where  kindeestate is null and a.FCreateDate>='{0}' and a.FCreateDate<='{1}'",
+                    kstime, jstime);
+                var bodysqlstring = @"select a.FPharmaceuticalID 单据号,b.FNumber 药品ID,a.FQuantity 数量,a.FKFUnit 药库单位
+                                    from T_Biz_PharmaceuticalDetail a
+                                    inner join T_Biz_Item b on b.FItemID=a.FFeeItemID";
+                var headtable = SqlHelper.Query(SourceConn, headsqlstring, true);
+                var bodytable = SqlHelper.Query(SourceConn, bodysqlstring);
+                var i = 0;
+                var number = CommonFunction.GetMaxNum(RelatedConn, ICStockBill.TableName);
+                foreach (DataRow itemRow in headtable.Rows)
+                {
+                    Head head = new Head
+                    {
+                        FBillNo = itemRow["单据号"].ToString(),
+                        Fdate = DateTime.Parse(itemRow["操作时间"].ToString()),
+                        FDeptID = itemRow["接收科室"].ToString(),
+                        FSManagerID = itemRow["操作人"].ToString(),
+                        FFManagerID = itemRow["操作人"].ToString(),
+                        FBillerID = itemRow["操作人"].ToString(),
+                        FInterID = number + i
+                    };
+                    headliList.Add(head);
+                    recordlist.Add(string.Format("update T_Biz_Pharmaceutical set kindeestate='1' where 单据号='{0}'", head.FBillNo));
+                    var j = 1;
+                    foreach (DataRow bodyitemRow in bodytable.Select(string.Format("单据号='{0}'", head.FBillNo)))
+                    {
+                        Body body = new Body
+                        {
+                            FItemID = bodyitemRow["药品ID"].ToString(),
+                            FQty = bodyitemRow["数量"].ToString(),
+                            Fauxqty = bodyitemRow["数量"].ToString(),
+                            FUnitID = bodyitemRow["药库单位"].ToString(),
+                            FSCStockID = itemRow["仓库"].ToString(),
+                            FInterID = head.FInterID,
+                            FEntryID = j
+                        };
+                        bodyliList.Add(body);
+                        j = j + 1;
+                    }
+                    i = i + 1;
+                }
+                var headsqlstringlist = CommonFunction.GetSqlList(RelatedConn, headliList, ICStockBill.TableName);
+                var bodysqlstringlist = CommonFunction.GetSqlList(RelatedConn, bodyliList, ICStockBillEntry.TableName);
+                headsqlstringlist.AddRange(bodysqlstringlist);
+                var resultnumber = SqlHelper.ExecuteSqlTran(RelatedConn, headsqlstringlist);
+                SqlHelper.ExecuteSqlTran(SourceConn, recordlist);
+                CommonFunction.UpdateMaxNum(RelatedConn, ICStockBill.TableName, number + i);
+                return resultnumber;
+            }
+        }
+
         /// <summary>
         /// 销售出库单
         /// </summary>
-        public class DpSalesOutLet
+        public class DlSalesOutLet
         {
             public class Head : SalesOutLet.Head
             {
@@ -281,119 +533,11 @@ namespace K3Tool.Extend
                 return resultnumber;
             }
         }
-        /// <summary>
-        /// 生产领料单
-        /// </summary>
-        public class DpPicking
-        {
-            public class Head : Picking.Head
-            {
-                protected override string GetFPurposeId()
-                {
-                    return "12000";
-                }
 
-                protected override string GetFfmanagerId()
-                {
-                    var filter = string.Format("FNumber='{0}'", FfmanagerId);
-                    return CommonFunction.Getfitemid(RelatedConn, Fitemclassid.职员, filter);
-                }
-
-                protected override string GetFsManagerId()
-                {
-                    var filter = string.Format("FNumber='{0}'", FsmanagerId);
-                    return CommonFunction.Getfitemid(RelatedConn, Fitemclassid.职员, filter);
-                }
-
-                protected override string Getfdeptid()
-                {
-                    var filter = string.Format("FNumber='{0}'", Fdeptid);
-                    return CommonFunction.Getfitemid(RelatedConn, Fitemclassid.部门, filter);
-                }
-
-                protected override string GetFbillerid()
-                {
-                    var filter = string.Format("FNumber='{0}'", Fbillerid);
-                    return CommonFunction.Getfitemid(RelatedConn, Fitemclassid.职员, filter);
-                }
-            }
-            public class Body : Picking.Body
-            {
-                protected override string GetFItemId()
-                {
-                    var filter = string.Format("FNumber='{0}'", Fitemid);
-                    return CommonFunction.Getfitemid(RelatedConn, Fitemclassid.物料, filter);
-                }
-
-                protected override string Getfunitid()
-                {
-                    var filter = string.Format("FName='{0}'", Funitid);
-                    return CommonFunction.Getfitemid(RelatedConn, Fitemclassid.单位, filter);
-                }
-
-                protected override string GetFscstockid()
-                {
-                    var filter = string.Format("FNumber='{0}'", FscStockId);
-                    return CommonFunction.Getfitemid(RelatedConn, Fitemclassid.仓库, filter);
-                }
-            }
-            public static int Work(string kstime, string jstime)
-            {
-                CommonFunction.Initalize(SourceConn, "cmis_mk_voucher_main2");
-                var headliList = new List<ICStockBill>();
-                var bodyliList = new List<ICStockBillEntry>();
-                var recordlist = new List<string>();
-                var headsqlstring = string.Format("select 单据号,接收科室,操作时间,操作人,'1.'+CONVERT(char(5),子库房) as 仓库 from cmis_mk_voucher_main2 where 业务类型=14 and kindeestate is null and 操作时间>='{0}' and 操作时间<='{1}'", kstime, jstime);
-                var bodysqlstring = "select 单据号,药品ID,数量,药库单位 from cmis_mk_voucher_detail";
-                var headtable = SqlHelper.Query(SourceConn, headsqlstring, true);
-                var bodytable = SqlHelper.Query(SourceConn, bodysqlstring);
-                var i = 0;
-                var number = CommonFunction.GetMaxNum(RelatedConn, ICStockBill.TableName);
-                foreach (DataRow itemRow in headtable.Rows)
-                {
-                    Head head = new Head
-                    {
-                        FBillNo = itemRow["单据号"].ToString(),
-                        Fdate = DateTime.Parse(itemRow["操作时间"].ToString()),
-                        FDeptID = itemRow["接收科室"].ToString(),
-                        FSManagerID = itemRow["操作人"].ToString(),
-                        FFManagerID = itemRow["操作人"].ToString(),
-                        FBillerID = itemRow["操作人"].ToString(),
-                        FInterID = number + i
-                    };
-                    headliList.Add(head);
-                    recordlist.Add(string.Format("update cmis_mk_voucher_main2 set kindeestate='1' where 单据号='{0}'", head.FBillNo));
-                    var j = 1;
-                    foreach (DataRow bodyitemRow in bodytable.Select(string.Format("单据号='{0}'", head.FBillNo)))
-                    {
-                        Body body = new Body
-                        {
-                            FItemID = bodyitemRow["药品ID"].ToString(),
-                            FQty = bodyitemRow["数量"].ToString(),
-                            Fauxqty = bodyitemRow["数量"].ToString(),
-                            FUnitID = bodyitemRow["药库单位"].ToString(),
-                            FSCStockID = itemRow["仓库"].ToString(),
-                            FInterID = head.FInterID,
-                            FEntryID = j
-                        };
-                        bodyliList.Add(body);
-                        j = j + 1;
-                    }
-                    i = i + 1;
-                }
-                var headsqlstringlist = CommonFunction.GetSqlList(RelatedConn, headliList, ICStockBill.TableName);
-                var bodysqlstringlist = CommonFunction.GetSqlList(RelatedConn, bodyliList, ICStockBillEntry.TableName);
-                headsqlstringlist.AddRange(bodysqlstringlist);
-                var resultnumber = SqlHelper.ExecuteSqlTran(RelatedConn, headsqlstringlist);
-                SqlHelper.ExecuteSqlTran(SourceConn, recordlist);
-                CommonFunction.UpdateMaxNum(RelatedConn, ICStockBill.TableName, number + i);
-                return resultnumber;
-            }
-        }
         /// <summary>
         /// 产品入库单
         /// </summary>
-        public class DpProductInventory
+        public class DlProductInventory
         {
             public class Head : ProductInventory.Head
             {
@@ -494,140 +638,9 @@ namespace K3Tool.Extend
             }
         }
         /// <summary>
-        /// 调拨单
-        /// </summary>
-        public class DpRequisitionSlip
-        {
-            public class Head : RequisitionSlip.Head
-            {
-
-                protected override string GetFsmanagerid()
-                {
-                    var filter = string.Format("FNumber='{0}'", Fsmanagerid);
-                    return CommonFunction.Getfitemid(RelatedConn, Fitemclassid.职员, filter);
-                }
-
-                protected override string GetFfmanagerid()
-                {
-                    var filter = string.Format("FNumber='{0}'", Ffmanagerid);
-                    return CommonFunction.Getfitemid(RelatedConn, Fitemclassid.职员, filter);
-                }
-
-                protected override string GetFbillerid()
-                {
-                    var filter = string.Format("FName='{0}'", "邹洪雪");
-                    return CommonFunction.Getfitemid(RelatedConn, Fitemclassid.职员, filter);
-                }
-            }
-            public class Body : RequisitionSlip.Body
-            {
-                protected override string GetFItemId()
-                {
-                    var filter = string.Format("FNumber='{0}'", Fitemid);
-                    return CommonFunction.Getfitemid(RelatedConn, Fitemclassid.物料, filter);
-                }
-
-                protected override string GetFunitid()
-                {
-                    var filter = string.Format("FName='{0}'", Funitid);
-                    return CommonFunction.Getfitemid(RelatedConn, Fitemclassid.单位, filter);
-                }
-
-                protected override string GetFscstockid()
-                {
-                    var filter = string.Format("FNumber='{0}'", Fscstockid);
-                    return CommonFunction.Getfitemid(RelatedConn, Fitemclassid.仓库, filter);
-                }
-
-                protected override string GetFdcstockid()
-                {
-                    var filter = string.Format("FNumber='{0}'", Fdcstockid);
-                    return CommonFunction.Getfitemid(RelatedConn, Fitemclassid.仓库, filter);
-                }
-            }
-            public static int Work(string kstime, string jstime)
-            {
-                CommonFunction.Initalize(SourceConn, "cmis_mk_voucher_main2");
-                var headliList = new List<ICStockBill>();
-                var bodyliList = new List<ICStockBillEntry>();
-                var recordlist = new List<string>();
-                var headsqlstring = string.Format("select 单据号,操作人,操作时间,'1.' + CONVERT(varchar(20),子库房) as 调出仓库,'2.' + CONVERT(varchar(20),子库房) as 调入仓库 from cmis_mk_voucher_main2 where 业务类型=11 and kindeestate is null and 操作时间>='{0}' and 操作时间<='{1}'", kstime, jstime);
-                var bodysqlstring = "select 单据号,药品ID,数量,进货单价,进货总价,药库单位 from cmis_mk_voucher_detail";
-                var headtable = SqlHelper.Query(SourceConn, headsqlstring, true);
-                var bodytable = SqlHelper.Query(SourceConn, bodysqlstring);
-                var i = 0;
-                var number = CommonFunction.GetMaxNum(RelatedConn, ICStockBill.TableName);
-                var logList = new List<Tuple<string, List<Tuple<string, string, string>>>>();
-                foreach (DataRow itemRow in headtable.Rows)
-                {
-                    Head head = new Head
-                    {
-                        FBillNo = itemRow["单据号"].ToString(),
-                        Fdate = DateTime.Parse(itemRow["操作时间"].ToString()),
-                        FSManagerID = itemRow["操作人"].ToString(),
-                        FFManagerID = itemRow["操作人"].ToString(),
-                        FInterID = number + i
-                    };
-                    headliList.Add(head);
-                    recordlist.Add(string.Format("update cmis_mk_voucher_main2 set kindeestate='1' where 单据号='{0}'", head.FBillNo));
-                    var j = 1;
-                    foreach (DataRow bodyitemRow in bodytable.Select(string.Format("单据号='{0}'", head.FBillNo)))
-                    {
-                        var fqty = bodyitemRow["数量"].ToString() == "" ? "0" : bodyitemRow["数量"].ToString();
-                        var fAmtRef = bodyitemRow["进货总价"].ToString() == "" ? "0" : bodyitemRow["进货总价"].ToString();
-                        var fAuxPriceRef = bodyitemRow["进货单价"].ToString() == "" ? "0" : bodyitemRow["进货单价"].ToString();
-                        Body body = new Body
-                        {
-                            FItemID = bodyitemRow["药品ID"].ToString(),
-                            FQty = fqty,
-                            Fauxqty = fqty,
-                            FUnitID = bodyitemRow["药库单位"].ToString(),
-                            FDCStockID = itemRow["调入仓库"].ToString(),
-                            FSCStockID = itemRow["调出仓库"].ToString(),
-                            FInterID = head.FInterID,
-                            FAmtRef = fAmtRef,
-                            FAuxPriceRef = fAuxPriceRef,
-                            Fauxprice = fAuxPriceRef,
-                            Famount = fAmtRef,
-                            FEntryID = j
-                        };
-                        var list = new List<Tuple<string, string, string>>();
-                        if (bodyitemRow["数量"].ToString() == "")
-                        {
-                            list.Add(new Tuple<string, string, string>("FQty", "", "0"));
-                            list.Add(new Tuple<string, string, string>("Fauxqty", "", "0"));
-                        }
-                        if (bodyitemRow["进货总价"].ToString() == "")
-                        {
-                            list.Add(new Tuple<string, string, string>("FAmtRef", "", "0"));
-                            list.Add(new Tuple<string, string, string>("Famount", "", "0"));
-                        }
-                        if (bodyitemRow["进货单价"].ToString() == "")
-                        {
-                            list.Add(new Tuple<string, string, string>("FAuxPriceRef", "", "0"));
-                            list.Add(new Tuple<string, string, string>("Fauxprice", "", "0"));
-                        }
-                        logList.Add(new Tuple<string, List<Tuple<string, string, string>>>(head.FBillNo, list));
-                        bodyliList.Add(body);
-                        j = j + 1;
-                    }
-                    i = i + 1;
-                }
-                var headsqlstringlist = CommonFunction.GetSqlList(RelatedConn, headliList, ICStockBill.TableName);
-                var bodysqlstringlist = CommonFunction.GetSqlList(RelatedConn, bodyliList, ICStockBillEntry.TableName);
-                headsqlstringlist.AddRange(bodysqlstringlist);
-                var resultnumber = SqlHelper.ExecuteSqlTran(RelatedConn, headsqlstringlist);
-                SqlHelper.ExecuteSqlTran(SourceConn, recordlist);
-                CommonFunction.UpdateMaxNum(RelatedConn, ICStockBill.TableName, number + i);
-                //事务提交了才写日志
-                logList.ForEach(x => LoggerHelper.WriteWarnInfo(ICStockBillEntry.TableName, "单据号", x.Item1, x.Item2));
-                return resultnumber;
-            }
-        }
-        /// <summary>
         /// 收款单
         /// </summary>
-        public class DpNewReceiveBill
+        public class DlNewReceiveBill
         {
             public class Head : NewReceiveBill.Head
             {
@@ -884,7 +897,7 @@ namespace K3Tool.Extend
         /// <summary>
         /// 其他出库单
         /// </summary>
-        public class OtherOutboundBill
+        public class DlOtherOutboundBill
         {
             public class Head : OtherOutboundBills.Head
             {
