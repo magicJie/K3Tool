@@ -6,9 +6,9 @@ using Tool.K3;
 
 namespace K3Tool
 {
-    public partial class gb : Form
+    public partial class GbForm : Form
     {
-        public gb()
+        public GbForm()
         {
             InitializeComponent();
         }

@@ -18,7 +18,7 @@ namespace K3Tool
             log4net.Config.XmlConfigurator.Configure();
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new Form1());
+            Application.Run(new DpForm());
         }
     }
 }

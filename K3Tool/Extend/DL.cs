@@ -5,7 +5,6 @@ using System.Data;
 using System.Data.SqlClient;
 using System.Globalization;
 using System.Linq;
-using Tool.Common;
 using Tool.K3;
 using Tool.Sql;
 
@@ -14,7 +13,7 @@ namespace K3Tool.Extend
     /// <summary>
     /// 大连医药--大鹏
     /// </summary>
-    class Dl
+    public class Dl
     {
         public static string RelatedConn = ConfigurationManager.ConnectionStrings["dlrelated"].ToString();
         public static string SourceConn = ConfigurationManager.ConnectionStrings["dlsource"].ToString();
@@ -81,6 +80,7 @@ namespace K3Tool.Extend
                     return CommonFunction.Getfitemid(RelatedConn, Fitemclassid.单位, filter);
                 }
             }
+
             public static int Work(string kstime, string jstime)
             {
                 CommonFunction.Initalize(SourceConn, "T_Mat_KFPurchase");
@@ -88,13 +88,16 @@ namespace K3Tool.Extend
                 var bodyliList = new List<ICStockBillEntry>();
                 var recordlist = new List<string>();
                 var headsqlstring = 
-                    string.Format(@"select a.FBillNo 单据号,a.FBillDate 操作时间,a.FSupplierID 供应商,b.FNumber 操作人,c.FNumber 仓库 from T_Mat_KFPurchase a
+                    string.Format(@"select a.FBillNo 单据号,a.FBillDate 操作时间,a.FSupplierID 供应商,b.FNumber 操作人,c.FNumber 仓库,a.FKFPurchaseID 表头ID
+                                    from T_Mat_KFPurchase a
                                     left join T_Sys_User b on b.FUserID = a.FBillUserID
-                                    left join T_Sys_Group c on c.FGroupID = a.FKFGroupID where kindeestate is null and ,a.FBillDate>='{0}' and ,a.FBillDate<='{1}'",
+                                    left join T_Sys_Group c on c.FGroupID = a.FKFGroupID
+                                    where kindeestate is null and ,a.FBillDate>='{0}' and ,a.FBillDate<='{1}'",
                                     kstime, jstime);
                 //TODO 药品ID和仓库ID需要确认基础表是哪个
-                var bodysqlstring = @"select a.FFeeItemID 药品ID,a.FQuantity 数量,a.FPurchaseAmt 进货总价,a.FPurchasePrice 进货单价,a.FKFUnit 药库单位
-                                      from T_Mat_KFPurchaseDetail a";
+                var bodysqlstring = @"select b.FNumber 药品ID,a.FQuantity 数量,a.FPurchaseAmt 进货总价,a.FPurchasePrice 进货单价,a.FKFUnit 药库单位,a.FKFPurchaseID 表头ID
+                                      from T_Mat_KFPurchaseDetail a
+                                      left join T_Biz_Item b on b.FItemID=a.FFeeItemID";
                 var headtable = SqlHelper.Query(SourceConn, headsqlstring, true);
                 var bodytable = SqlHelper.Query(SourceConn, bodysqlstring);
                 var i = 0; 
@@ -218,11 +221,12 @@ namespace K3Tool.Extend
                 var headsqlstring =
                     string.Format(@"select a.FKFRefundID 单据号,a.FBillDate 操作时间,a.FSupplierID 供应商,b.FNumber 操作人,c.FNumber 仓库 from T_Mat_KFRefund a
                                     left join T_Sys_User b on b.FUserID = a.FBillUserID
-                                    left join T_Sys_Group c on c.FGroupID = a.FKFGroupID where kindeestate is null and ,a.FBillDate>='{0}' and ,a.FBillDate<='{1}'",
-                                    kstime, jstime);
+                                    left join T_Sys_Group c on c.FGroupID = a.FKFGroupID 
+                                    where kindeestate is null and ,a.FBillDate>='{0}' and ,a.FBillDate<='{1}'",kstime, jstime);
                 //TODO 药品ID和仓库ID需要确认基础表是哪个
-                var bodysqlstring = @"select a.FKFRefundID 单据号, a.FFeeItemID 药品ID,a.FQuantity 数量,a.FPurchaseAmt 进货总价,a.FPurchasePrice 进货单价,a.FKFUnit 药库单位
-                                      from T_Mat_KFRefundDetail a";
+                var bodysqlstring = @"select a.FKFRefundID 单据号, b.FNumber 药品ID,a.FQuantity 数量,a.FPurchaseAmt 进货总价,a.FPurchasePrice 进货单价,a.FKFUnit 药库单位
+                                      from T_Mat_KFRefundDetail a 
+                                      left join T_Biz_Item b on b.FItemID=a.FFeeItemID";
                 var headtable = SqlHelper.Query(SourceConn, headsqlstring, true);
                 var bodytable = SqlHelper.Query(SourceConn, bodysqlstring);
                 var i = 0;
@@ -338,12 +342,11 @@ namespace K3Tool.Extend
                 var headsqlstring = string.Format(
                     @"select a.FPharmaceuticalID 单据号,a.FCreateDate 操作时间,b.FNumber 操作人
                     from T_Biz_Pharmaceutical a
-                    left
-                    join T_Sys_User b on b.FUserID = a.FCreateUserID where  kindeestate is null and a.FCreateDate>='{0}' and a.FCreateDate<='{1}'",
-                    kstime, jstime);
-                var bodysqlstring = @"select a.FPharmaceuticalID 单据号,b.FNumber 药品ID,a.FQuantity 数量,a.FKFUnit 药库单位
-                                    from T_Biz_PharmaceuticalDetail a
-                                    inner join T_Biz_Item b on b.FItemID=a.FFeeItemID";
+                    left join T_Sys_User b on b.FUserID = a.FCreateUserID
+                    where  kindeestate is null and a.FCreateDate>='{0}' and a.FCreateDate<='{1}'",kstime, jstime);
+                var bodysqlstring = @"select b.FNumber 药品ID,a.FQuantity 数量,a.FPurchaseAmt 进货总价,a.FPurchasePrice 进货单价,a.FKFUnit 药库单位
+                                      from T_Mat_KFPurchaseDetail a
+                                      left join T_Biz_Item b on b.FItemID=a.FFeeItemID";
                 var headtable = SqlHelper.Query(SourceConn, headsqlstring, true);
                 var bodytable = SqlHelper.Query(SourceConn, bodysqlstring);
                 var i = 0;
