@@ -10,14 +10,14 @@ namespace K3Tool.Extend
     /// <summary>
     /// 过磅
     /// </summary>   
-    public class Gb
+    public class Db
     {
-        public static string RelatedConn = ConfigurationManager.ConnectionStrings["gbrelated"].ToString();
-        public static string SourceConn = ConfigurationManager.ConnectionStrings["gbsource"].ToString();
+        public static string RelatedConn = ConfigurationManager.ConnectionStrings["dbrelated"].ToString();
+        public static string SourceConn = ConfigurationManager.ConnectionStrings["dbsource"].ToString();
         /// <summary>
         /// 入库单
         /// </summary>
-        public class GbPurchasedWarehouse
+        public class DbPurchasedWarehouse
         {
             public class Head : PurchasedWarehouse.Head
             {
@@ -104,6 +104,7 @@ namespace K3Tool.Extend
                 var number = CommonFunction.GetMaxNum(RelatedConn, ICStockBill.TableName);
                 foreach (DataRow itemRow in headtable.Rows)
                 {
+                    i = i + 1;
                     Head head = new Head
                     {
                         FBillNo = itemRow["流水号"].ToString(),
@@ -114,7 +115,7 @@ namespace K3Tool.Extend
                         FEmpID = itemRow["毛重司磅员"].ToString(),
                         FBillerID = itemRow["毛重司磅员"].ToString(),
                         FDCStockID = "原料仓",
-                        FHeadSelfA0143 = itemRow["车号"].ToString(),                        
+                        FHeadSelfA0143 = itemRow["车号"].ToString(),
                         FInterID = number + i
                     };
                     headliList.Add(head);
@@ -139,7 +140,6 @@ namespace K3Tool.Extend
                         bodyliList.Add(body);
                         j = j + 1;
                     }
-                    i = i + 1;
                 }
                 var headsqlstringlist = CommonFunction.GetSqlList(RelatedConn, headliList, ICStockBill.TableName);
                 var bodysqlstringlist = CommonFunction.GetSqlList(RelatedConn, bodyliList, ICStockBillEntry.TableName);
@@ -153,7 +153,7 @@ namespace K3Tool.Extend
         /// <summary>
         /// 出库单
         /// </summary>
-        public class GbSalesOutLet
+        public class DbSalesOutLet
         {
             public class Head : SalesOutLet.Head
             {
@@ -194,6 +194,10 @@ namespace K3Tool.Extend
 
                 protected override string GetFempid()
                 {
+                    if (Fempid == "")
+                    {
+                        return "";
+                    }
                     var filter = string.Format("FName='{0}'", Fempid);
                     return CommonFunction.Getfitemid(RelatedConn, Fitemclassid.职员, filter);
                 }
@@ -243,7 +247,7 @@ namespace K3Tool.Extend
                 var headliList = new List<ICStockBill>();
                 var bodyliList = new List<ICStockBillEntry>();
                 var recordlist = new List<string>();
-                var headsqlstring =string.Format("select 流水号,更新时间,毛重司磅员,收货单位,备用1,车号,备用3 from  称重信息 where 过磅类型='SO' and 更新时间>='{0}' and 更新时间<='{1}' and kindeestate is null",kstime,jstime);
+                var headsqlstring =string.Format("select 流水号,更新时间,更新人,收货单位,备用1,车号,备用3 from  称重信息 where 过磅类型='SO' and 更新时间>='{0}' and 更新时间<='{1}' and kindeestate is null",kstime,jstime);
                 var bodysqlstring = "select * from  称重信息";
                 var headtable = SqlHelper.Query(SourceConn, headsqlstring, true);
                 var bodytable = SqlHelper.Query(SourceConn, bodysqlstring);
@@ -251,18 +255,19 @@ namespace K3Tool.Extend
                 var number = CommonFunction.GetMaxNum(RelatedConn, ICStockBill.TableName);
                 foreach (DataRow itemRow in headtable.Rows)
                 {
+                    i = i + 1;
                     Head head = new Head
                     {
                         FBillNo = itemRow["流水号"].ToString(),
                         Fdate = DateTime.Parse(itemRow["更新时间"].ToString()),
                         FDeptID = "销售部",
-                        FBillerID = itemRow["毛重司磅员"].ToString(),
-                        FFManagerID = itemRow["毛重司磅员"].ToString(),
-                        FSManagerID = itemRow["毛重司磅员"].ToString(),
+                        FBillerID = itemRow["更新人"].ToString(),
+                        FFManagerID = itemRow["更新人"].ToString(),
+                        FSManagerID = itemRow["更新人"].ToString(),
                         FSupplyID = itemRow["收货单位"].ToString(),
                         FHeadSelfB0155 = itemRow["备用1"].ToString(),
                         FHeadSelfB0156 = itemRow["车号"].ToString(),
-                        FEmpID = itemRow["备用3"].ToString(),                        
+                        FEmpID = itemRow["备用3"].ToString(),
                         FInterID = number + i
                     };
                     headliList.Add(head);
@@ -287,7 +292,6 @@ namespace K3Tool.Extend
                         bodyliList.Add(body);
                         j = j + 1;
                     }
-                    i = i + 1;
                 }
                 var headsqlstringlist = CommonFunction.GetSqlList(RelatedConn, headliList, ICStockBill.TableName);
                 var bodysqlstringlist = CommonFunction.GetSqlList(RelatedConn, bodyliList, ICStockBillEntry.TableName);
@@ -298,6 +302,5 @@ namespace K3Tool.Extend
                 return resultnumber;
             }
         }
-       
     }
 }

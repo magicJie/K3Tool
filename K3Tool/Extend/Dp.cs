@@ -96,6 +96,7 @@ namespace K3Tool.Extend
                 var number = CommonFunction.GetMaxNum(RelatedConn, ICStockBill.TableName);
                 foreach (DataRow itemRow in headtable.Rows)
                 {
+                    i = i + 1;
                     Head head = new Head
                     {
                         FBillNo = itemRow["单据号"].ToString(),
@@ -128,7 +129,6 @@ namespace K3Tool.Extend
                         bodyliList.Add(body);
                         j = j + 1;
                     }
-                    i = i + 1;
                 }
                 var headsqlstringlist = CommonFunction.GetSqlList(RelatedConn, headliList, ICStockBill.TableName);
                 var bodysqlstringlist = CommonFunction.GetSqlList(RelatedConn, bodyliList, ICStockBillEntry.TableName);
@@ -235,6 +235,7 @@ namespace K3Tool.Extend
                 var number = CommonFunction.GetMaxNum(RelatedConn, ICStockBill.TableName);
                 foreach (DataRow itemRow in headtable.Rows)
                 {
+                    i = i + 1;
                     Head head = new Head
                     {
                         FBillNo = itemRow["处方号"].ToString(),
@@ -270,7 +271,6 @@ namespace K3Tool.Extend
                         bodyliList.Add(body);
                         j = j + 1;
                     }
-                    i = i + 1;
                 }
                 var headsqlstringlist = CommonFunction.GetSqlList(RelatedConn, headliList, ICStockBill.TableName);
                 var bodysqlstringlist = CommonFunction.GetSqlList(RelatedConn, bodyliList, ICStockBillEntry.TableName);
@@ -351,6 +351,7 @@ namespace K3Tool.Extend
                 var number = CommonFunction.GetMaxNum(RelatedConn, ICStockBill.TableName);
                 foreach (DataRow itemRow in headtable.Rows)
                 {
+                    i = i + 1;
                     Head head = new Head
                     {
                         FBillNo = itemRow["单据号"].ToString(),
@@ -379,7 +380,6 @@ namespace K3Tool.Extend
                         bodyliList.Add(body);
                         j = j + 1;
                     }
-                    i = i + 1;
                 }
                 var headsqlstringlist = CommonFunction.GetSqlList(RelatedConn, headliList, ICStockBill.TableName);
                 var bodysqlstringlist = CommonFunction.GetSqlList(RelatedConn, bodyliList, ICStockBillEntry.TableName);
@@ -453,6 +453,7 @@ namespace K3Tool.Extend
                 var number = CommonFunction.GetMaxNum(RelatedConn, ICStockBill.TableName);
                 foreach (DataRow itemRow in headtable.Rows)
                 {
+                    i = i + 1;
                     Head head = new Head
                     {
                         FBillNo = itemRow["单据号"].ToString(),
@@ -482,7 +483,6 @@ namespace K3Tool.Extend
                         bodyliList.Add(body);
                         j = j + 1;
                     }
-                    i = i + 1;
                 }
                 var headsqlstringlist = CommonFunction.GetSqlList(RelatedConn, headliList, ICStockBill.TableName);
                 var bodysqlstringlist = CommonFunction.GetSqlList(RelatedConn, bodyliList, ICStockBillEntry.TableName);
@@ -560,6 +560,7 @@ namespace K3Tool.Extend
                 var logList = new List<Tuple<string, List<Tuple<string, string, string>>>>();
                 foreach (DataRow itemRow in headtable.Rows)
                 {
+                    i = i + 1;
                     Head head = new Head
                     {
                         FBillNo = itemRow["单据号"].ToString(),
@@ -611,7 +612,6 @@ namespace K3Tool.Extend
                         bodyliList.Add(body);
                         j = j + 1;
                     }
-                    i = i + 1;
                 }
                 var headsqlstringlist = CommonFunction.GetSqlList(RelatedConn, headliList, ICStockBill.TableName);
                 var bodysqlstringlist = CommonFunction.GetSqlList(RelatedConn, bodyliList, ICStockBillEntry.TableName);
@@ -956,6 +956,7 @@ namespace K3Tool.Extend
                 var number = CommonFunction.GetMaxNum(RelatedConn, ICStockBill.TableName);
                 foreach (DataRow itemRow in headtable.Rows)
                 {
+                    i = i + 1;
                     Head head = new Head
                     {
                         FBillNo = itemRow["单据号"].ToString(),
@@ -986,7 +987,6 @@ namespace K3Tool.Extend
                         bodyliList.Add(body);
                         j = j + 1;
                     }
-                    i = i + 1;
                 }
                 var headsqlstringlist = CommonFunction.GetSqlList(RelatedConn, headliList, ICStockBill.TableName);
                 var bodysqlstringlist = CommonFunction.GetSqlList(RelatedConn, bodyliList, ICStockBillEntry.TableName);
