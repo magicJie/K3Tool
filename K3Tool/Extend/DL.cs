@@ -481,8 +481,8 @@ namespace K3Tool.Extend
                 var headliList = new List<ICStockBill>();
                 var bodyliList = new List<ICStockBillEntry>();
                 var recordlist = new List<string>();
-                var headsqlstring = string.Format("select 处方号,科室id,医生id,录入人,convert(nvarchar(10),录入时间,21) as 录入时间 from  cmis_chufang_detail where 录入时间>='{0}' and 录入时间<='{1}' and (处方类型=1 or 处方类型=2 or 处方类型=4) and kindeestate is null", kstime, jstime);
-                var bodysqlstring = "select 处方号,总数量*剂数 as 实发数量,收费项目id,CASE WHEN 最小单位=\'g\' THEN 单价 else 单价 END as 新单价,总价格*剂数 as 新总价格,最小单位,单位,剂数,\'2.\' + CONVERT(varchar(20),处方类型) as 出库类型 from  cmis_chufang_detail where (处方类型=1 or 处方类型=2 or 处方类型=4)";
+                var headsqlstring = string.Format("select *,(select FNumber from [T_Sys_User] where FUserID=a.FCreateUserID) as 操作人,FCreateDate as 操作时间,(select Fnumber from T_Bd_Manufacturer where FManufacturerID=a.FManufacturerID) as 交货单位 from T_Biz_Pharmaceutical a where a.kindeestate is null and a.操作时间>='{0}' and a.操作时间<='{1}'", kstime, jstime);
+                var bodysqlstring = "select *,FFeeItemID as 药品id from T_Biz_PharmaceuticalDetail";
                 var headtable = SqlHelper.Query(SourceConn, headsqlstring, true);
                 var bodytable = SqlHelper.Query(SourceConn, bodysqlstring);
                 var i = 0;
@@ -502,7 +502,7 @@ namespace K3Tool.Extend
                         FInterID = number + i
                     };
                     headliList.Add(head);
-                    recordlist.Add(string.Format("update cmis_chufang_detail set kindeestate='1' where 处方号='{0}'", itemRow["处方号"]));
+                    recordlist.Add(string.Format("update T_Biz_Pharmaceutical set kindeestate='1' where 单据号='{0}'", itemRow["单据号"]));
                     var j = 1;
                     foreach (DataRow bodyitemRow in bodytable.Select(string.Format("处方号='{0}'", head.FBillNo)))
                     {
@@ -963,8 +963,8 @@ namespace K3Tool.Extend
                 var headliList = new List<ICStockBill>();
                 var bodyliList = new List<ICStockBillEntry>();
                 var recordlist = new List<string>();
-                var headsqlstring = string.Format("select *,'1.'+CONVERT(char(5),子库房) as 仓库,21 as 领用部门,16398 as zhidanren,0 as chukuleixing from  cmis_mk_voucher_main2 where 操作时间>='{0}' and 操作时间<='{1}' and 业务类型=10 and kindeestate is null", kstime, jstime);
-                var bodysqlstring = "select * from  cmis_mk_voucher_detail";
+                var headsqlstring = string.Format("select * from  T_Mat_KFExport where 操作时间>='{0}' and 操作时间<='{1}' and kindeestate is null", kstime, jstime);
+                var bodysqlstring = "select * from  T_Mat_KFExport";
                 var headtable = SqlHelper.Query(SourceConn, headsqlstring, true);
                 var bodytable = SqlHelper.Query(SourceConn, bodysqlstring);
                 var i = 0;
@@ -985,7 +985,7 @@ namespace K3Tool.Extend
                         FInterID = number + i
                     };
                     headliList.Add(head);
-                    recordlist.Add(string.Format("update cmis_mk_voucher_main2 set kindeestate='1' where 单据号='{0}'", itemRow["单据号"]));
+                    recordlist.Add(string.Format("update T_Mat_KFExport set kindeestate='1' where 单据号='{0}'", itemRow["单据号"]));
                     var j = 1;
                     foreach (DataRow bodyitemRow in bodytable.Select(string.Format("单据号='{0}'", head.FBillNo)))
                     {
