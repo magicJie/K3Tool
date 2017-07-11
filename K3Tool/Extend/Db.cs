@@ -8,7 +8,7 @@ using Tool.Sql;
 namespace K3Tool.Extend
 {
     /// <summary>
-    /// 过磅
+    /// 地磅
     /// </summary>   
     public class Db
     {

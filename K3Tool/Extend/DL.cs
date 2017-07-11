@@ -11,7 +11,7 @@ using Tool.Sql;
 namespace K3Tool.Extend
 {
     /// <summary>
-    /// 大连医药--大鹏
+    /// 大连医卫
     /// </summary>
     public class Dl
     {
@@ -55,8 +55,9 @@ namespace K3Tool.Extend
 
                 protected override string GetFdcstockid()
                 {
-                    var filter = string.Format("FNumber='{0}'", Fdcstockid);
-                    return CommonFunction.Getfitemid(RelatedConn, Fitemclassid.仓库, filter);
+                    return "";
+                    //var filter = string.Format("FNumber='{0}'", Fdcstockid);
+                    //return CommonFunction.Getfitemid(RelatedConn, Fitemclassid.仓库, filter);
                 }
 
                 protected override string GetFsupplyid()
@@ -88,26 +89,26 @@ namespace K3Tool.Extend
                 var bodyliList = new List<ICStockBillEntry>();
                 var recordlist = new List<string>();
                 var headsqlstring = 
-                    string.Format(@"select a.FBillNo 单据号,a.FBillDate 操作时间,a.FSupplierID 供应商,b.FNumber 操作人,c.FNumber 仓库,a.FKFPurchaseID 表头ID
+                    string.Format(@"select a.FBillNo 单据号,a.FBillDate 操作时间,a.FSupplierID 供应商,c.FNumber 仓库,b.FNumber 操作人,a.FKFPurchaseID 表头ID
                                     from T_Mat_KFPurchase a
                                     left join T_Sys_User b on b.FUserID = a.FBillUserID
                                     left join T_Sys_Group c on c.FGroupID = a.FKFGroupID
                                     where kindeestate is null and ,a.FBillDate>='{0}' and ,a.FBillDate<='{1}'",
                                     kstime, jstime);
-                //TODO 药品ID和仓库ID需要确认基础表是哪个
-                var bodysqlstring = @"select b.FNumber 药品ID,a.FQuantity 数量,a.FPurchaseAmt 进货总价,a.FPurchasePrice 进货单价,a.FKFUnit 药库单位,a.FKFPurchaseID 表头ID
-                                      from T_Mat_KFPurchaseDetail a
-                                      left join T_Biz_Item b on b.FItemID=a.FFeeItemID";
+                var bodysqlstring = @"select b.FNumber 药品ID,c.FNumber 仓库,a.FQuantity 数量,a.FPurchaseAmt 进货总价,a.FPurchasePrice 进货单价,a.FKFUnit 药库单位,a.FKFPurchaseID 表头ID
+                                      from T_Mat_KFPurchaseDetail a 
+                                      left join T_Biz_MedSpec b on b.FFeeItemID=a.FFeeItemID 
+                                      left join T_Sys_Group c on c.FGroupID = a.FKFGroupID";
                 var headtable = SqlHelper.Query(SourceConn, headsqlstring, true);
                 var bodytable = SqlHelper.Query(SourceConn, bodysqlstring);
-                var i = 1; 
+                var i = 1;
                 var number = CommonFunction.GetMaxNum(RelatedConn, ICStockBill.TableName);
                 foreach (DataRow itemRow in headtable.Rows)
                 {
                     i = i + 1;
                     Head head = new Head
                     {
-                        FBillNo = itemRow["单据号"].ToString(),
+                        FBillNo = itemRow["仓库"].ToString().Substring(5,3)+itemRow["单据号"],//大连医卫设计是同一个药库的BillNo不重复
                         Fdate = DateTime.Parse(itemRow["操作时间"].ToString()),
                         FSupplyID = itemRow["供应商"].ToString(),
                         FSManagerID = itemRow["操作人"].ToString(),
@@ -130,7 +131,7 @@ namespace K3Tool.Extend
                             Fauxqty = bodyitemRow["数量"].ToString(),
                             Famount = bodyitemRow["进货总价"].ToString(),
                             Fauxprice = bodyitemRow["进货单价"].ToString(),
-                            FDCStockID = head.FDCStockID,
+                            FDCStockID = bodyitemRow["仓库"].ToString(),
                             FUnitID = bodyitemRow["药库单位"].ToString(),
                             FEntryID = j
                         };
@@ -224,10 +225,10 @@ namespace K3Tool.Extend
                                     left join T_Sys_User b on b.FUserID = a.FBillUserID
                                     left join T_Sys_Group c on c.FGroupID = a.FKFGroupID 
                                     where kindeestate is null and ,a.FBillDate>='{0}' and ,a.FBillDate<='{1}'", kstime, jstime);
-                //TODO 药品ID和仓库ID需要确认基础表是哪个
-                var bodysqlstring = @"select b.FNumber 药品ID,a.FQuantity 数量,a.FPurchaseAmt 进货总价,a.FPurchasePrice 进货单价,a.FKFUnit 药库单位,a.FKFRefundID 表头ID
+                var bodysqlstring = @"select b.FNumber 药品ID,c.FNumber 仓库,a.FQuantity 数量,a.FPurchaseAmt 进货总价,a.FPurchasePrice 进货单价,a.FKFUnit 药库单位,a.FKFRefundID 表头ID
                                       from T_Mat_KFRefundDetail a 
-                                      left join T_Biz_Item b on b.FItemID=a.FFeeItemID";
+                                      left join T_Biz_MedSpec b on b.FItemID=a.FFeeItemID 
+                                      left join T_Sys_Group c on c.FGroupID = a.FKFGroupID";
                 var headtable = SqlHelper.Query(SourceConn, headsqlstring, true);
                 var bodytable = SqlHelper.Query(SourceConn, bodysqlstring);
                 var i = 0;
@@ -237,7 +238,7 @@ namespace K3Tool.Extend
                     i = i + 1;
                     Head head = new Head
                     {
-                        FBillNo = itemRow["单据号"].ToString(),
+                        FBillNo = itemRow["仓库"].ToString().Substring(5, 3) + itemRow["单据号"],
                         Fdate = DateTime.Parse(itemRow["操作时间"].ToString()),
                         FSupplyID = itemRow["供应商"].ToString(),
                         FSManagerID = itemRow["操作人"].ToString(),
@@ -260,7 +261,7 @@ namespace K3Tool.Extend
                             Fauxqty = bodyitemRow["数量"].ToString(),
                             Famount = bodyitemRow["进货总价"].ToString(),
                             Fauxprice = bodyitemRow["进货单价"].ToString(),
-                            FDCStockID = head.FDCStockID,
+                            FDCStockID = bodyitemRow["仓库"].ToString(),
                             FUnitID = bodyitemRow["药库单位"].ToString(),
                             FEntryID = j
                         };
