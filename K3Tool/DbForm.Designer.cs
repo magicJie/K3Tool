@@ -35,6 +35,7 @@
             this.jstime = new System.Windows.Forms.DateTimePicker();
             this.label3 = new System.Windows.Forms.Label();
             this.kstime = new System.Windows.Forms.DateTimePicker();
+            this.button3 = new System.Windows.Forms.Button();
             this.groupBox1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -93,18 +94,29 @@
             this.kstime.Size = new System.Drawing.Size(150, 21);
             this.kstime.TabIndex = 6;
             // 
-            // gb
+            // button3
+            // 
+            this.button3.Location = new System.Drawing.Point(369, 97);
+            this.button3.Name = "button3";
+            this.button3.Size = new System.Drawing.Size(84, 35);
+            this.button3.TabIndex = 9;
+            this.button3.Text = "更新净重";
+            this.button3.UseVisualStyleBackColor = true;
+            this.button3.Click += new System.EventHandler(this.button3_Click);
+            // 
+            // DbForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(500, 155);
+            this.Controls.Add(this.button3);
             this.Controls.Add(this.groupBox1);
             this.Controls.Add(this.button2);
             this.Controls.Add(this.button1);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MaximizeBox = false;
             this.MinimizeBox = false;
-            this.Name = "gb";
+            this.Name = "DbForm";
             this.Text = "金蝶快速导入工具-地磅";
             this.groupBox1.ResumeLayout(false);
             this.groupBox1.PerformLayout();
@@ -120,6 +132,7 @@
         private System.Windows.Forms.DateTimePicker jstime;
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.DateTimePicker kstime;
+        private System.Windows.Forms.Button button3;
     }
 }
 

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Configuration;
 using System.Data;
+using System.Data.SqlClient;
 using Tool.K3;
 using Tool.Sql;
 
@@ -240,6 +241,10 @@ namespace K3Tool.Extend
                 /// 应发数量
                 /// </summary>
                 public string FAuxQtyMust { get; set; }
+                /// <summary>
+                /// 净重
+                /// </summary>
+                public string FEntrySelfB0174 { get; set; }
             }
             public static int Work(string kstime, string jstime)
             {
@@ -273,6 +278,7 @@ namespace K3Tool.Extend
                     headliList.Add(head);
                     recordlist.Add(string.Format("update 称重信息 set kindeestate='1' where 流水号='{0}'", itemRow["流水号"]));
                     var j = 1;
+                    //FEntrySelfB0174 自定义字段 净重
                     foreach (DataRow bodyitemRow in bodytable.Select(string.Format("流水号='{0}'", head.FBillNo)))
                     {
                         Body body = new Body
@@ -286,6 +292,7 @@ namespace K3Tool.Extend
                             FDCStockID ="成品库",
                             FInterID = head.FInterID,
                             FChkPassItem = "1058",
+                            FEntrySelfB0174= (float.Parse(bodyitemRow["净重"].ToString()) / 1000).ToString() == "" ? "0" : (float.Parse(bodyitemRow["净重"].ToString()) / 1000).ToString(),
                             FAuxQtyMust = (float.Parse(bodyitemRow["实重"].ToString()) / 1000).ToString() == "" ? "0" : (float.Parse(bodyitemRow["实重"].ToString()) / 1000).ToString(),
                             FEntryID = j
                         };
@@ -300,6 +307,33 @@ namespace K3Tool.Extend
                 SqlHelper.ExecuteSqlTran(SourceConn, recordlist);
                 CommonFunction.UpdateMaxNum(RelatedConn, ICStockBill.TableName, number + i);
                 return resultnumber;
+            }
+
+            /// <summary>
+            /// 更新之前未导入的净重
+            /// </summary>
+            /// <param name="kstime"></param>
+            /// <param name="jstime"></param>
+            /// <returns></returns>
+            internal static int Update(string kstime, string jstime)
+            {
+                var sqllist=new List<string>();
+                var table = SqlHelper.Query(RelatedConn, "select FBillNo from ICStockBill", true);
+                using (var connection = new SqlConnection(SourceConn))
+                {
+                    connection.Open();
+                    foreach (DataRow row in table.Rows)
+                    {
+                        var cmd=new SqlCommand($"select 净重 from 称重信息 where 流水号='{row[0]}'",connection);
+                        var jz = cmd.ExecuteScalar();
+                        if (jz==null)
+                        {
+                            continue;
+                        }
+                        sqllist.Add($"update ICStockBillEntry set FEntrySelfB0174={(decimal)jz / 1000} where FInterID=(select FInterID from ICStockBill where FBillNo='{row[0]}')");
+                    }
+                }
+                return SqlHelper.ExecuteSqlTran(RelatedConn, sqllist);
             }
         }
     }

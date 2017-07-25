@@ -81,7 +81,6 @@ namespace Tool.Sql
         /// </summary>
         /// <param name="conn"></param>
         /// <param name="sqlString"></param>
-        /// <param name="distan"></param>
         /// <returns></returns>
         public static SqlDataReader GetDataReader(SqlConnection conn, string sqlString)
         {

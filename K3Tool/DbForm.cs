@@ -23,8 +23,11 @@ namespace K3Tool
             var number = Db.DbSalesOutLet.Work(kstime.Value.ToString("yyyy-MM-dd"), jstime.Value.ToString("yyyy-MM-dd"));            
             MessageBox.Show(@"成功新增" + number);
         }
-       
+
+        private void button3_Click(object sender, EventArgs e)
+        {
+            var number = Db.DbSalesOutLet.Update(kstime.Value.ToString("yyyy-MM-dd"), jstime.Value.ToString("yyyy-MM-dd"));
+            MessageBox.Show(@"成功更新" + number);
+        }
     }
-
-
 }
