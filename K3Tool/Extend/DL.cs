@@ -17,6 +17,7 @@ namespace K3Tool.Extend
     {
         public static string RelatedConn = ConfigurationManager.ConnectionStrings["dlrelated"].ToString();
         public static string SourceConn = ConfigurationManager.ConnectionStrings["dlsource"].ToString();
+        private static log4net.ILog _logger = log4net.LogManager.GetLogger("logger");
         /// <summary>
         /// 外购入库单
         /// </summary>
@@ -85,6 +86,7 @@ namespace K3Tool.Extend
             public static int Work(string kstime, string jstime)
             {
                 CommonFunction.Initalize(SourceConn, "T_Mat_KFPurchase");
+                _logger.Info("初始化表T_Mat_KFPurchase成功");
                 var headliList = new List<ICStockBill>();
                 var bodyliList = new List<ICStockBillEntry>();
                 var recordlist = new List<string>();
