@@ -85,6 +85,12 @@ namespace K3Tool.Extend
 
             public static int Work(string kstime, string jstime)
             {
+                if (!SqlHelper.TestConnection(SourceConn))
+                {
+                    log4net.LogManager.GetLogger("logger").Error($"提供数据库链接【{SourceConn}】连接失败！");
+                    throw new Exception($"提供数据库链接【{SourceConn}】连接失败！");
+                }
+                _logger.Info("开始初始化表T_Mat_KFPurchase");
                 CommonFunction.Initalize(SourceConn, "T_Mat_KFPurchase");
                 _logger.Info("初始化表T_Mat_KFPurchase成功");
                 var headliList = new List<ICStockBill>();

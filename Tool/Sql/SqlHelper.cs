@@ -2,12 +2,13 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
+using MagicBox.Common;
 using System.Reflection;
 
 namespace Tool.Sql
 {
     public static class SqlHelper
-    {       
+    {
         /// <summary>
         /// 执行多条SQL语句，实现数据库事务。
         /// </summary>
@@ -99,6 +100,15 @@ namespace Tool.Sql
             }
             DataView dataView=new DataView(dataTable);
             return dataView.ToTable(true, columns.ToArray());
+        }
+
+        public static bool TestConnection(string connStr)
+        {
+            var timeout = new Timeout();
+            using (var conn = new SqlConnection(connStr))
+            {
+                return timeout.DoWithTimeout(new TimeSpan(0, 0, 5), () => conn.Open());
+            }
         }
     }
 }
