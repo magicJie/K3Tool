@@ -66,6 +66,7 @@ namespace Tool.Sql
                 }
                 catch (SqlException ex)
                 {
+                    log4net.LogManager.GetLogger("logger").Error($"执行Query时出错，执行sql为：\r\n{sqlString}");
                     throw new Exception(ex.Message);
                 }
                 if (distan)

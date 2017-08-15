@@ -90,9 +90,7 @@ namespace K3Tool.Extend
                     log4net.LogManager.GetLogger("logger").Error($"提供数据库链接【{SourceConn}】连接失败！");
                     throw new Exception($"提供数据库链接【{SourceConn}】连接失败！");
                 }
-                _logger.Info("开始初始化表T_Mat_KFPurchase");
                 CommonFunction.Initalize(SourceConn, "T_Mat_KFPurchase");
-                _logger.Info("初始化表T_Mat_KFPurchase成功");
                 var headliList = new List<ICStockBill>();
                 var bodyliList = new List<ICStockBillEntry>();
                 var recordlist = new List<string>();
@@ -101,7 +99,7 @@ namespace K3Tool.Extend
                                     from T_Mat_KFPurchase a
                                     left join T_Sys_User b on b.FUserID = a.FBillUserID
                                     left join T_Sys_Group c on c.FGroupID = a.FKFGroupID
-                                    where kindeestate is null and ,a.FBillDate>='{0}' and ,a.FBillDate<='{1}'",
+                                    where kindeestate is null and a.FBillDate>='{0}' and a.FBillDate<='{1}'",
                                     kstime, jstime);
                 var bodysqlstring = @"select b.FNumber 药品ID,c.FNumber 仓库,a.FQuantity 数量,a.FPurchaseAmt 进货总价,a.FPurchasePrice 进货单价,a.FKFUnit 药库单位,a.FKFPurchaseID 表头ID
                                       from T_Mat_KFPurchaseDetail a 
@@ -116,7 +114,7 @@ namespace K3Tool.Extend
                     i = i + 1;
                     Head head = new Head
                     {
-                        FBillNo = itemRow["仓库"].ToString().Substring(5,3)+itemRow["单据号"],//大连医卫设计是同一个药库的BillNo不重复
+                        FBillNo = itemRow["仓库"].ToString().Substring(4,3)+itemRow["单据号"],//大连医卫设计是同一个药库的BillNo不重复
                         Fdate = DateTime.Parse(itemRow["操作时间"].ToString()),
                         FSupplyID = itemRow["供应商"].ToString(),
                         FSManagerID = itemRow["操作人"].ToString(),
@@ -131,6 +129,10 @@ namespace K3Tool.Extend
                     var j = 1;
                     foreach (DataRow bodyitemRow in bodytable.Select(string.Format("表头ID='{0}'", itemRow["表头ID"])))
                     {
+                        if (bodyitemRow["药品ID"].ToString() == "")
+                        {
+                            continue;
+                        }
                         Body body = new Body
                         {
                             FItemID = bodyitemRow["药品ID"].ToString(),
@@ -246,7 +248,7 @@ namespace K3Tool.Extend
                     i = i + 1;
                     Head head = new Head
                     {
-                        FBillNo = itemRow["仓库"].ToString().Substring(5, 3) + itemRow["单据号"],
+                        FBillNo = itemRow["仓库"].ToString().Substring(4, 3) + itemRow["单据号"],
                         Fdate = DateTime.Parse(itemRow["操作时间"].ToString()),
                         FSupplyID = itemRow["供应商"].ToString(),
                         FSManagerID = itemRow["操作人"].ToString(),
@@ -261,6 +263,10 @@ namespace K3Tool.Extend
                     var j = 1;
                     foreach (DataRow bodyitemRow in bodytable.Select(string.Format("表头ID='{0}'", itemRow["表头ID"])))
                     {
+                        if (bodyitemRow["药品ID"].ToString() == "")
+                        {
+                            continue;
+                        }
                         Body body = new Body
                         {
                             FItemID = bodyitemRow["药品ID"].ToString(),
@@ -379,6 +385,10 @@ namespace K3Tool.Extend
                     var j = 1;
                     foreach (DataRow bodyitemRow in bodytable.Select(string.Format("单据号='{0}'", head.FBillNo)))
                     {
+                        if (bodyitemRow["药品ID"].ToString() == "")
+                        {
+                            continue;
+                        }
                         Body body = new Body
                         {
                             FItemID = bodyitemRow["药品ID"].ToString(),
