@@ -66,7 +66,7 @@ namespace Tool.Sql
                 }
                 catch (SqlException ex)
                 {
-                    log4net.LogManager.GetLogger("logger").Error(string.Format("执行Query时出错，执行sql为：\r\n{sqlString}"));
+                    log4net.LogManager.GetLogger("logger").Error(string.Format("执行Query时出错，执行sql为：\r\n{0}", sqlString));
                     throw new Exception(ex.Message);
                 }
                 if (distan)
