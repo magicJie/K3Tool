@@ -85,8 +85,8 @@ namespace K3Tool.Extend
             {
                 if (!SqlHelper.TestConnection(SourceConn))
                 {
-                    log4net.LogManager.GetLogger("logger").Error($"提供数据库链接【{SourceConn}】连接失败！");
-                    throw new Exception($"提供数据库链接【{SourceConn}】连接失败！");
+                    log4net.LogManager.GetLogger("logger").Error(string.Format("提供数据库链接【{SourceConn}】连接失败！"));
+                    throw new Exception(string.Format("提供数据库链接【{SourceConn}】连接失败！"));
                 }
                 CommonFunction.Initalize(SourceConn, "T_Mat_KFPurchase");
                 var headliList = new List<ICStockBill>();

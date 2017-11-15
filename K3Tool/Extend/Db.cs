@@ -324,13 +324,13 @@ namespace K3Tool.Extend
                     connection.Open();
                     foreach (DataRow row in table.Rows)
                     {
-                        var cmd=new SqlCommand($"select 净重 from 称重信息 where 流水号='{row[0]}'",connection);
+                        var cmd=new SqlCommand(string.Format("select 净重 from 称重信息 where 流水号='{row[0]}'",connection));
                         var jz = cmd.ExecuteScalar();
                         if (jz==null)
                         {
                             continue;
                         }
-                        sqllist.Add($"update ICStockBillEntry set FEntrySelfB0174={(decimal)jz / 1000} where FInterID=(select FInterID from ICStockBill where FBillNo='{row[0]}')");
+                        sqllist.Add(string.Format("update ICStockBillEntry set FEntrySelfB0174={(decimal)jz / 1000} where FInterID=(select FInterID from ICStockBill where FBillNo='{row[0]}')"));
                     }
                 }
                 return SqlHelper.ExecuteSqlTran(RelatedConn, sqllist);
