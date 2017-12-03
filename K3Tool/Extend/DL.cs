@@ -85,21 +85,21 @@ namespace K3Tool.Extend
             {
                 if (!SqlHelper.TestConnection(SourceConn))
                 {
-                    log4net.LogManager.GetLogger("logger").Error(string.Format("提供数据库链接【{SourceConn}】连接失败！"));
-                    throw new Exception(string.Format("提供数据库链接【{SourceConn}】连接失败！"));
+                    log4net.LogManager.GetLogger("logger").Error(string.Format("提供数据库链接【{0}】连接失败！", SourceConn));
+                    throw new Exception(string.Format("提供数据库链接【{0}】连接失败！", SourceConn));
                 }
                 CommonFunction.Initalize(SourceConn, "T_Mat_KFPurchase");
                 var headliList = new List<ICStockBill>();
                 var bodyliList = new List<ICStockBillEntry>();
                 var recordlist = new List<string>();
-                var headsqlstring = 
+                var headsqlstring =
                     string.Format(@"select a.FBillNo 单据号,a.FBillDate 操作时间,a.FSupplierID 供应商,c.FNumber 仓库,b.FNumber 操作人,a.FKFPurchaseID 表头ID
                                     from T_Mat_KFPurchase a
                                     left join T_Sys_User b on b.FUserID = a.FBillUserID
                                     left join T_Sys_Group c on c.FGroupID = a.FKFGroupID
                                     where kindeestate is null and a.FBillDate>='{0}' and a.FBillDate<='{1}'",
                                     kstime, jstime);
-                var bodysqlstring = @"select b.FNumber 药品ID,c.FNumber 仓库,a.FQuantity 数量,a.FPurchaseAmt 进货总价,a.FPurchasePrice 进货单价,a.FKFUnit 药库单位,a.FKFPurchaseID 表头ID
+                var bodysqlstring = @"select b.FNumber 药品ID,c.FNumber 仓库,a.FQuantity 数量,a.FPurchaseAmt 进货总价,a.FPurchasePrice 进货单价,a.FKFUnit 药库单位,a.FKFPurchaseID 表头ID,a.FKFPurchaseDetailID 表明细ID
                                       from T_Mat_KFPurchaseDetail a 
                                       left join T_Biz_MedSpec b on b.FFeeItemID=a.FFeeItemID 
                                       left join T_Sys_Group c on c.FGroupID = a.FKFGroupID";
@@ -109,10 +109,15 @@ namespace K3Tool.Extend
                 var number = CommonFunction.GetMaxNum(RelatedConn, ICStockBill.TableName);
                 foreach (DataRow itemRow in headtable.Rows)
                 {
+                    if (itemRow["操作人"] == null || string.IsNullOrWhiteSpace(itemRow["操作人"].ToString()))
+                    {
+                        log4net.LogManager.GetLogger("logger").Error(string.Format("外购入库单【{0}】/入库单明细【{1}】的操作人为空,已跳过导入", itemRow["表头ID"], itemRow["操作人"]));
+                        continue;
+                    }
                     i = i + 1;
                     Head head = new Head
                     {
-                        FBillNo = itemRow["仓库"].ToString().Substring(4,3)+itemRow["单据号"],//大连医卫设计是同一个药库的BillNo不重复
+                        FBillNo = itemRow["仓库"].ToString().Substring(4, 3) + itemRow["单据号"],//大连医卫设计是同一个药库的BillNo不重复
                         Fdate = DateTime.Parse(itemRow["操作时间"].ToString()),
                         FSupplyID = itemRow["供应商"].ToString(),
                         FSManagerID = itemRow["操作人"].ToString(),
@@ -126,8 +131,9 @@ namespace K3Tool.Extend
                     var j = 1;
                     foreach (DataRow bodyitemRow in bodytable.Select(string.Format("表头ID='{0}'", itemRow["表头ID"])))
                     {
-                        if (bodyitemRow["药品ID"].ToString() == "")
+                        if (bodyitemRow["药品ID"] == null || string.IsNullOrWhiteSpace(bodyitemRow["药品ID"].ToString()))
                         {
+                            log4net.LogManager.GetLogger("logger").Error(string.Format("外购入库单【{0}】/入库单明细【{1}】的物料为空,已跳过导入", itemRow["表头ID"], bodyitemRow["表明细ID"]));
                             continue;
                         }
                         Body body = new Body
@@ -138,7 +144,7 @@ namespace K3Tool.Extend
                             Fauxqty = bodyitemRow["数量"].ToString(),
                             Famount = bodyitemRow["进货总价"].ToString(),
                             Fauxprice = bodyitemRow["进货单价"].ToString(),
-                            FDCStockID = bodyitemRow["仓库"].ToString(),
+                            FDCStockID = itemRow["仓库"].ToString(),
                             FUnitID = bodyitemRow["药库单位"].ToString(),
                             FEntryID = j
                         };
@@ -355,7 +361,7 @@ namespace K3Tool.Extend
                                     @"select a.FPharmaceuticalID 单据号,a.FCreateDate 操作时间,b.FNumber 操作人
                                     from T_Biz_Pharmaceutical a
                                     left join T_Sys_User b on b.FUserID = a.FCreateUserID
-                                    where  kindeestate is null and a.FCreateDate>='{0}' and a.FCreateDate<='{1}'",kstime, jstime);
+                                    where  kindeestate is null and a.FCreateDate>='{0}' and a.FCreateDate<='{1}'", kstime, jstime);
                 var bodysqlstring = @"select b.FNumber 药品ID,a.FQuantity 数量,a.FKFUnit 药库单位,a.FPharmaceuticalID 单据号
                                     from T_Biz_PharmaceuticalDetail a
                                     left join T_Biz_MedSpec b on b.FFeeItemID=a.FFeeItemID ";
@@ -464,8 +470,18 @@ namespace K3Tool.Extend
                 var headliList = new List<ICStockBill>();
                 var bodyliList = new List<ICStockBillEntry>();
                 var recordlist = new List<string>();
-                var headsqlstring = string.Format("select FDepImportID,FBillNo as 单据号,FCreateDate as 操作时间,FBillUserID as 操作人,20 as 交货单位 from T_Mat_DepImport where 业务类型='2' and kindeestate is null and 操作时间>='{0}' and 操作时间<='{1}'", kstime, jstime);
-                var bodysqlstring = "select FDepImportID,FFeeItemID as 药品ID,FKFUnit as 药库单位,FQuantity as 数量,FPurchasePrice as 进货单价,FPurchaseAmt as 进货总价 from T_Mat_DepImportDetail";
+                var headsqlstring =
+                    string.Format(@"select a.FBillNo 单据号,a.FBillDate 操作时间,b.FNumber 操作人,d.FNumber 交货单位,c.FNumber 仓库,a.FDepImportID 表头ID
+                                    from T_Mat_DepImport a 
+                                    left join T_Sys_User b on b.FUserID = a.FBillUserID 
+                                    left join T_Sys_Group c on c.FGroupID = a.FKFGroupID 
+                                    left join T_Sys_Group d on d.FGroupID=a.FGroupID
+                                    where a.FBillType='113' and kindeestate is null and a.FBillDate>='{0}' and a.FBillDate<='{1}'",
+                                 kstime, jstime);
+                var bodysqlstring = @"select b.FNumber 药品ID,a.FQuantity 数量,a.FPurchaseAmt 进货总价,a.FPurchasePrice 进货单价,a.FKFUnit 药库单位,a.FDepImportID 表头ID,a.FDepImportDetailID 表明细ID
+                                      from T_Mat_DepImportDetail a 
+                                      left join T_Biz_MedSpec b on b.FFeeItemID=a.FFeeItemID";
+
                 var headtable = SqlHelper.Query(SourceConn, headsqlstring, true);
                 var bodytable = SqlHelper.Query(SourceConn, bodysqlstring);
                 var i = 0;
@@ -483,10 +499,15 @@ namespace K3Tool.Extend
                         FInterID = number + i
                     };
                     headliList.Add(head);
-                    recordlist.Add(string.Format("update T_Mat_DepImport set kindeestate='1' where FDepImportID='{0}'", itemRow["FDepImportID"]));
+                    recordlist.Add(string.Format("update T_Mat_DepImport set kindeestate='1' where FDepImportID='{0}'", itemRow["表头ID"]));
                     var j = 1;
-                    foreach (DataRow bodyitemRow in bodytable.Select(string.Format("FDepImportID='{0}'", itemRow["FDepImportID"])))
+                    foreach (DataRow bodyitemRow in bodytable.Select(string.Format("表头ID='{0}'", itemRow["表头ID"])))
                     {
+                        if (bodyitemRow["药品ID"] == null||string.IsNullOrWhiteSpace(bodyitemRow["药品ID"].ToString()))
+                        {
+                            log4net.LogManager.GetLogger("logger").Error(string.Format("产品入库单【{0}】/入库单明细【{1}】的物料为空,已跳过导入", itemRow["表头ID"], bodyitemRow["表明细ID"]));
+                            continue;
+                        }
                         Body body = new Body
                         {
                             FItemID = bodyitemRow["药品ID"].ToString(),
