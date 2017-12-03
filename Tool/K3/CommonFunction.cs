@@ -48,8 +48,7 @@ namespace Tool.K3
                     break;
 
             }
-            string sqlstring = "";
-            sqlstring = string.Format("select FItemID from t_item where FItemClassID='{0}' and {1}", type,where);
+            string sqlstring = string.Format("select FItemID from t_item where FItemClassID='{0}' and {1}", type,where);
             if (type == 9999)
             {
                 sqlstring = string.Format("select FUserID from t_user where {0}", where);

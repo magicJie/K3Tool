@@ -762,6 +762,7 @@ namespace K3Tool.Extend
                         {
                             FItemID = bodyitemRow["药品ID"].ToString(),
                             Fauxqty = bodyitemRow["数量"].ToString() == "" ? "0" : bodyitemRow["数量"].ToString(),
+                            FQty = bodyitemRow["数量"].ToString() == "" ? "0" : bodyitemRow["数量"].ToString(),
                             FUnitID = bodyitemRow["药库单位"].ToString(),
                             FDCStockID = bodyitemRow["仓库"].ToString(),
                             FInterID = head.FInterID,
@@ -780,9 +781,5 @@ namespace K3Tool.Extend
                 return resultnumber;
             }
         }
-
-        //盘盈单
-
-        //盘亏单
     }
 }
