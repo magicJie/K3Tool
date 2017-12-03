@@ -462,12 +462,12 @@ namespace K3Tool.Extend
             }
             public static int Work(string kstime, string jstime)
             {
-                CommonFunction.Initalize(SourceConn, "T_Biz_Pharmaceutical");
+                CommonFunction.Initalize(SourceConn, "T_Mat_DepImport");
                 var headliList = new List<ICStockBill>();
                 var bodyliList = new List<ICStockBillEntry>();
                 var recordlist = new List<string>();
-                var headsqlstring = string.Format("select 单据号,'1.'+CONVERT(char(5),子库房) as 仓库,20 as 交货单位,操作时间,操作人 from cmis_mk_voucher_main2 where 业务类型='2' and kindeestate is null and 操作时间>='{0}' and 操作时间<='{1}'", kstime, jstime);
-                var bodysqlstring = "select 单据号,药品ID,药库单位,数量,进货单价,进货总价 from cmis_mk_voucher_detail";
+                var headsqlstring = string.Format("select FDepImportID,FBillNo as 单据号,FCreateDate as 操作时间,FBillUserID as 操作人,20 as 交货单位 from T_Mat_DepImport where 业务类型='2' and kindeestate is null and 操作时间>='{0}' and 操作时间<='{1}'", kstime, jstime);
+                var bodysqlstring = "select FDepImportID,FFeeItemID as 药品ID,FKFUnit as 药库单位,FQuantity as 数量,FPurchasePrice as 进货单价,FPurchaseAmt as 进货总价 from T_Mat_DepImportDetail";
                 var headtable = SqlHelper.Query(SourceConn, headsqlstring, true);
                 var bodytable = SqlHelper.Query(SourceConn, bodysqlstring);
                 var i = 0;
@@ -485,9 +485,9 @@ namespace K3Tool.Extend
                         FInterID = number + i
                     };
                     headliList.Add(head);
-                    recordlist.Add(string.Format("update cmis_mk_voucher_main2 set kindeestate='1' where 单据号='{0}'", itemRow["单据号"]));
+                    recordlist.Add(string.Format("update T_Mat_DepImport set kindeestate='1' where FDepImportID='{0}'", itemRow["FDepImportID"]));
                     var j = 1;
-                    foreach (DataRow bodyitemRow in bodytable.Select(string.Format("单据号='{0}'", head.FBillNo)))
+                    foreach (DataRow bodyitemRow in bodytable.Select(string.Format("FDepImportID='{0}'", itemRow["FDepImportID"])))
                     {
                         Body body = new Body
                         {
