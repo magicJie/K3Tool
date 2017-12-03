@@ -43,8 +43,17 @@ namespace Tool.K3
                 case Fitemclassid.医师:
                     type = 3003;
                     break;
+                case Fitemclassid.登录用户:
+                    type = 9999;
+                    break;
+
             }
-            var sqlstring = string.Format("select FItemID from t_item where FItemClassID='{0}' and {1}", type,where);
+            string sqlstring = "";
+            sqlstring = string.Format("select FItemID from t_item where FItemClassID='{0}' and {1}", type,where);
+            if (type == 9999)
+            {
+                sqlstring = string.Format("select FUserID from t_user where {0}", where);
+            } 
             var datatable = SqlHelper.Query(conn, sqlstring);
             if (datatable.Rows.Count > 0)
             {

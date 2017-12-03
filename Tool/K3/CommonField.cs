@@ -39,7 +39,11 @@
         /// <summary>
         /// 医师
         /// </summary>
-        医师
+        医师,
+        /// <summary>
+        /// 登录用户
+        /// </summary>
+        登录用户
         
        
 

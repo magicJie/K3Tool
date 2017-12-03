@@ -51,8 +51,8 @@ namespace K3Tool.Extend
 
                 protected override string GetFbillerid()
                 {
-                    var filter = string.Format("FNumber='{0}'", Fbillerid);
-                    return CommonFunction.Getfitemid(RelatedConn, Fitemclassid.职员, filter);
+                    var filter = string.Format("FName='余信强'");
+                    return CommonFunction.Getfitemid(RelatedConn, Fitemclassid.登录用户, filter);
                 }
 
                 protected override string GetFdcstockid()
@@ -105,7 +105,6 @@ namespace K3Tool.Extend
                         FSManagerID = itemRow["操作人"].ToString(),
                         FFManagerID = itemRow["操作人"].ToString(),
                         FEmpID = itemRow["操作人"].ToString(),
-                        FBillerID = itemRow["操作人"].ToString(),
                         FDCStockID = itemRow["仓库"].ToString(),
                         FInterID = number + i
                     };
@@ -172,8 +171,8 @@ namespace K3Tool.Extend
 
                 protected override string GetFbillerid()
                 {
-                    var filter = string.Format("FName='{0}'", "邹洪雪");
-                    return CommonFunction.Getfitemid(RelatedConn, Fitemclassid.职员, filter);
+                    var filter = string.Format("FName='余信强'");
+                    return CommonFunction.Getfitemid(RelatedConn, Fitemclassid.登录用户, filter);
                 }
 
                 protected override string GetFsupplyid()
@@ -241,7 +240,6 @@ namespace K3Tool.Extend
                         FBillNo = itemRow["处方号"].ToString(),
                         Fdate = DateTime.Parse(itemRow["录入时间"].ToString()),
                         FDeptID = itemRow["科室id"].ToString(),
-                        FBillerID = itemRow["录入人"].ToString(),
                         FEmpID = itemRow["录入人"].ToString(),
                         //FSupplyID = itemRow["科室id"].ToString(),
                         FHeadSelfB0154=itemRow["医生id"].ToString(),
@@ -313,8 +311,8 @@ namespace K3Tool.Extend
 
                 protected override string GetFbillerid()
                 {
-                    var filter = string.Format("FNumber='{0}'", Fbillerid);
-                    return CommonFunction.Getfitemid(RelatedConn, Fitemclassid.职员, filter);
+                    var filter = string.Format("FName='余信强'");
+                    return CommonFunction.Getfitemid(RelatedConn, Fitemclassid.登录用户, filter);
                 }
             }
             public class Body : Picking.Body
@@ -359,7 +357,6 @@ namespace K3Tool.Extend
                         FDeptID = itemRow["接收科室"].ToString(),
                         FSManagerID = itemRow["操作人"].ToString(),
                         FFManagerID = itemRow["操作人"].ToString(),
-                        FBillerID = itemRow["操作人"].ToString(),
                         FInterID = number + i
                     };
                     headliList.Add(head);
@@ -409,8 +406,8 @@ namespace K3Tool.Extend
                 }
                 protected override string GetFbillerid()
                 {
-                    var filter = string.Format("FName='{0}'", "邹洪雪");
-                    return CommonFunction.Getfitemid(RelatedConn, Fitemclassid.职员, filter);
+                    var filter = string.Format("FName='余信强'");
+                    return CommonFunction.Getfitemid(RelatedConn, Fitemclassid.登录用户, filter);
                 }
                 protected override string Getfdeptid()
                 {
@@ -515,8 +512,8 @@ namespace K3Tool.Extend
 
                 protected override string GetFbillerid()
                 {
-                    var filter = string.Format("FName='{0}'", "邹洪雪");
-                    return CommonFunction.Getfitemid(RelatedConn, Fitemclassid.职员, filter);
+                    var filter = string.Format("FName='余信强'");
+                    return CommonFunction.Getfitemid(RelatedConn, Fitemclassid.登录用户, filter);
                 }
             }
             public class Body : RequisitionSlip.Body
@@ -910,8 +907,8 @@ namespace K3Tool.Extend
 
                 protected override string GetFbillerid()
                 {
-                    var filter = string.Format("FName='{0}'", "邹洪雪");
-                    return CommonFunction.Getfitemid(RelatedConn, Fitemclassid.职员, filter);
+                    var filter = string.Format("FName='余信强'");
+                    return CommonFunction.Getfitemid(RelatedConn, Fitemclassid.登录用户, filter);
                 }
 
                 protected override string GetFsupplyid()
@@ -962,7 +959,6 @@ namespace K3Tool.Extend
                         FBillNo = itemRow["单据号"].ToString(),
                         Fdate = DateTime.Parse(itemRow["操作时间"].ToString()),
                         FDeptID = itemRow["领用部门"].ToString(),
-                        FBillerID = itemRow["zhidanren"].ToString(),
                         FSupplyID = itemRow["接收科室"].ToString(),
                         FFManagerID = itemRow["操作人"].ToString(),
                         FSManagerID = itemRow["操作人"].ToString(),
