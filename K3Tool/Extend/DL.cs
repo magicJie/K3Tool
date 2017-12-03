@@ -602,8 +602,11 @@ namespace K3Tool.Extend
                 var headliList = new List<ICStockBill>();
                 var bodyliList = new List<ICStockBillEntry>();
                 var recordlist = new List<string>();
-                var headsqlstring = string.Format("select *,(select FNumber from [T_Sys_User] where FUserID=a.FCreateUserID) as 操作人,FCreateDate as 操作时间,(select Fnumber from T_Bd_Manufacturer where FManufacturerID=a.FManufacturerID) as 交货单位 from T_Biz_Pharmaceutical a where a.kindeestate is null and a.操作时间>='{0}' and a.操作时间<='{1}'", kstime, jstime);
-                var bodysqlstring = "select *,FFeeItemID as 药品id from T_Biz_PharmaceuticalDetail";
+                var headsqlstring = string.Format(@"select a.FBillNo as 处方号,a.FBillDate as 录入时间,b.FNumber 录入人 from T_Med_MZSale a
+                                         left join T_Sys_User b on b.FUserID = a.FBillUserID 
+                                         where a.kindeestate is null and a.操作时间>='{0}' and a.操作时间<='{1}'", kstime, jstime);
+                var bodysqlstring = @"select b.FNumber as 收费项目id，FQuantity as 实发数量,FUnit as 最小单位,FCheckPrice as 新单价,FCheckAmt as 新总价格,100 as 出库类型 from T_Med_MZSaleDetail 
+                                     left join T_Biz_MedSpec b on b.FFeeItemID=a.FFeeItemID	";
                 var headtable = SqlHelper.Query(SourceConn, headsqlstring, true);
                 var bodytable = SqlHelper.Query(SourceConn, bodysqlstring);
                 var i = 0;
@@ -615,15 +618,15 @@ namespace K3Tool.Extend
                     {
                         FBillNo = itemRow["处方号"].ToString(),
                         Fdate = DateTime.Parse(itemRow["录入时间"].ToString()),
-                        FDeptID = itemRow["科室id"].ToString(),
+                        //FDeptID = itemRow["科室id"].ToString(),
                         FBillerID = itemRow["录入人"].ToString(),
                         FEmpID = itemRow["录入人"].ToString(),
                         //FSupplyID = itemRow["科室id"].ToString(),
-                        FHeadSelfB0154 = itemRow["医生id"].ToString(),
+                        //FHeadSelfB0154 = itemRow["医生id"].ToString(),
                         FInterID = number + i
                     };
                     headliList.Add(head);
-                    recordlist.Add(string.Format("update T_Biz_Pharmaceutical set kindeestate='1' where 单据号='{0}'", itemRow["单据号"]));
+                    recordlist.Add(string.Format("update T_Mat_MZSale set kindeestate='1' where FBillNo='{0}'", itemRow["单据号"]));
                     var j = 1;
                     foreach (DataRow bodyitemRow in bodytable.Select(string.Format("处方号='{0}'", head.FBillNo)))
                     {
@@ -724,8 +727,12 @@ namespace K3Tool.Extend
                 var headliList = new List<ICStockBill>();
                 var bodyliList = new List<ICStockBillEntry>();
                 var recordlist = new List<string>();
-                var headsqlstring = string.Format("select * from  T_Mat_KFExport where 操作时间>='{0}' and 操作时间<='{1}' and kindeestate is null", kstime, jstime);
-                var bodysqlstring = "select * from  T_Mat_KFExport";
+                var headsqlstring = string.Format(@"select FBillNo as 单据号,FBillDate as 操作时间,FAppGroupID as 领用部门,c.FGroupID as 接收科室,b.FUserID as zhidanren,100 as chukuleixing from T_Mat_KFExport
+                                                    left join T_Sys_User b on b.FUserID = a.FBillUserID
+                                                    left join T_Sys_Group c on c.FGroupID = a.FKFGroupID 操作时间>='{0}' and 操作时间<='{1}' and kindeestate is null", kstime, jstime);
+                var bodysqlstring = @"select b.FNumber as 药品ID,FExpQuanlity as 数量,FUnit as 药库单位,c.FGroupID as 仓库 from T_Mat_KFExportDetail as a
+                                   left join T_Biz_MedSpec b on b.FFeeItemID=a.FFeeItemID 
+                                   left join T_Sys_Group c on c.FGroupID = a.FKFGroupID";
                 var headtable = SqlHelper.Query(SourceConn, headsqlstring, true);
                 var bodytable = SqlHelper.Query(SourceConn, bodysqlstring);
                 var i = 0;
@@ -740,8 +747,8 @@ namespace K3Tool.Extend
                         FDeptID = itemRow["领用部门"].ToString(),
                         FBillerID = itemRow["zhidanren"].ToString(),
                         FSupplyID = itemRow["接收科室"].ToString(),
-                        FFManagerID = itemRow["操作人"].ToString(),
-                        FSManagerID = itemRow["操作人"].ToString(),
+                        FFManagerID = itemRow["zhidanren"].ToString(),
+                        FSManagerID = itemRow["zhidanren"].ToString(),
                         FBillTypeID = itemRow["chukuleixing"].ToString(),
                         FInterID = number + i
                     };
