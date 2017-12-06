@@ -114,6 +114,11 @@ namespace K3Tool.Extend
                         log4net.LogManager.GetLogger("logger").Error(string.Format("外购入库单【{0}】/入库单明细【{1}】的操作人为空,已跳过导入", itemRow["表头ID"], itemRow["操作人"]));
                         continue;
                     }
+                    if (itemRow["供应商"] == null || string.IsNullOrWhiteSpace(itemRow["供应商"].ToString()))
+                    {
+                        log4net.LogManager.GetLogger("logger").Error(string.Format("外购入库单【{0}】/入库单明细【{1}】的操作人为空,已跳过导入", itemRow["表头ID"], itemRow["供应商"]));
+                        continue;
+                    }
                     i = i + 1;
                     Head head = new Head
                     {
