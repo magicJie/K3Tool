@@ -5,6 +5,7 @@ using System.Data;
 using System.Data.SqlClient;
 using System.Globalization;
 using System.Linq;
+using Tool.Common;
 using Tool.K3;
 using Tool.Sql;
 
@@ -109,9 +110,8 @@ namespace K3Tool.Extend
                 var number = CommonFunction.GetMaxNum(RelatedConn, ICStockBill.TableName);
                 foreach (DataRow itemRow in headtable.Rows)
                 {
-                    if (itemRow["操作人"] == null || string.IsNullOrWhiteSpace(itemRow["操作人"].ToString()))
+                    if (LoggerHelper.CheckValue(itemRow, "表头ID", "供应商", "操作人","仓库" ))
                     {
-                        log4net.LogManager.GetLogger("logger").Error(string.Format("外购入库单【{0}】/入库单明细【{1}】的操作人为空,已跳过导入", itemRow["表头ID"], itemRow["操作人"]));
                         continue;
                     }
                     if (itemRow["供应商"] == null || string.IsNullOrWhiteSpace(itemRow["供应商"].ToString()))
@@ -136,9 +136,8 @@ namespace K3Tool.Extend
                     var j = 1;
                     foreach (DataRow bodyitemRow in bodytable.Select(string.Format("表头ID='{0}'", itemRow["表头ID"])))
                     {
-                        if (bodyitemRow["药品ID"] == null || string.IsNullOrWhiteSpace(bodyitemRow["药品ID"].ToString()))
+                        if (LoggerHelper.CheckValue(itemRow, "表明细ID", "药品ID", "仓库"))
                         {
-                            log4net.LogManager.GetLogger("logger").Error(string.Format("外购入库单【{0}】/入库单明细【{1}】的物料为空,已跳过导入", itemRow["表头ID"], bodyitemRow["表明细ID"]));
                             continue;
                         }
                         Body body = new Body
@@ -149,7 +148,7 @@ namespace K3Tool.Extend
                             Fauxqty = bodyitemRow["数量"].ToString(),
                             Famount = bodyitemRow["进货总价"].ToString(),
                             Fauxprice = bodyitemRow["进货单价"].ToString(),
-                            FDCStockID = itemRow["仓库"].ToString(),
+                            FDCStockID = bodyitemRow["仓库"].ToString(),
                             FUnitID = bodyitemRow["药库单位"].ToString(),
                             FEntryID = j
                         };
@@ -253,6 +252,10 @@ namespace K3Tool.Extend
                 var number = CommonFunction.GetMaxNum(RelatedConn, ICStockBill.TableName);
                 foreach (DataRow itemRow in headtable.Rows)
                 {
+                    if (LoggerHelper.CheckValue(itemRow, "表头ID", "供应商", "操作人", "仓库"))
+                    {
+                        continue;
+                    }
                     i = i + 1;
                     Head head = new Head
                     {
@@ -270,7 +273,7 @@ namespace K3Tool.Extend
                     var j = 1;
                     foreach (DataRow bodyitemRow in bodytable.Select(string.Format("表头ID='{0}'", itemRow["表头ID"])))
                     {
-                        if (bodyitemRow["药品ID"].ToString() == "")
+                        if (LoggerHelper.CheckValue(itemRow, "表头ID", "药品ID", "仓库"))
                         {
                             continue;
                         }
@@ -376,6 +379,10 @@ namespace K3Tool.Extend
                 var number = CommonFunction.GetMaxNum(RelatedConn, ICStockBill.TableName);
                 foreach (DataRow itemRow in headtable.Rows)
                 {
+                    if (LoggerHelper.CheckValue(itemRow, "表头ID", "供应商", "操作人", "仓库"))
+                    {
+                        continue;
+                    }
                     i = i + 1;
                     Head head = new Head
                     {
