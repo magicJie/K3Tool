@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Configuration;
 using System.Data;
+using System.Globalization;
 using Tool.Common;
 using Tool.K3;
 using Tool.Sql;
@@ -76,6 +77,12 @@ namespace K3Tool.Extend
                 {
                     var filter = string.Format("FName='{0}'", Funitid);
                     return CommonFunction.Getfitemid(RelatedConn, Fitemclassid.单位, filter);
+                }
+
+                protected override string GetFdcstockid()
+                {
+                    var filter = string.Format("FNumber='{0}'", Fdcstockid);
+                    return CommonFunction.Getfitemid(RelatedConn, Fitemclassid.仓库, filter);
                 }
             }
 
@@ -500,7 +507,7 @@ namespace K3Tool.Extend
                 var number = CommonFunction.GetMaxNum(RelatedConn, ICStockBill.TableName);
                 foreach (DataRow itemRow in headtable.Rows)
                 {
-                    if (LoggerHelper.CheckValue(sourceTableName, itemRow, "FKFPurchaseID", "操作人"))
+                    if (LoggerHelper.CheckValue(sourceTableName, itemRow, "FKFPurchaseID", "操作人", "仓库"))
                     {
                         continue;
                     }
@@ -519,7 +526,7 @@ namespace K3Tool.Extend
                     var j = 1;
                     foreach (DataRow bodyitemRow in bodytable.Select(string.Format("FDepImportID='{0}'", itemRow["FDepImportID"])))
                     {
-                        if (LoggerHelper.CheckValue(sourceDetialTableName, bodyitemRow, "FDepImportDetailID", "药品ID", "仓库"))
+                        if (LoggerHelper.CheckValue(sourceDetialTableName, bodyitemRow, "FDepImportDetailID", "药品ID"))
                         {
                             continue;
                         }
@@ -562,11 +569,11 @@ namespace K3Tool.Extend
                     return 100;
                 }
 
-                //protected override string Getfdeptid()
-                //{
-                //    var filter = string.Format("FNumber='{0}'", Fdeptid);
-                //    return CommonFunction.Getfitemid(RelatedConn, Fitemclassid.部门, filter);
-                //}
+                protected override string Getfdeptid()
+                {
+                    var filter = string.Format("FNumber='{0}'", Fdeptid);
+                    return CommonFunction.Getfitemid(RelatedConn, Fitemclassid.部门, filter);
+                }
 
                 protected override string GetFsmanagerid()
                 {
@@ -600,15 +607,15 @@ namespace K3Tool.Extend
                 /// <summary>
                 /// 医师
                 /// </summary>
-                //public string FHeadSelfB0154
-                //{
-                //    get
-                //    {
-                //        var filter = string.Format("FNumber='{0}'", _ys);
-                //        return CommonFunction.Getfitemid(RelatedConn, Fitemclassid.医师, filter);
-                //    }
-                //    set { _ys = value; }
-                //}
+                public string FHeadSelfB0154
+                {
+                    get
+                    {
+                        var filter = string.Format("FNumber='{0}'", _ys);
+                        return CommonFunction.Getfitemid(RelatedConn, Fitemclassid.医师, filter);
+                    }
+                    set { _ys = value; }
+                }
             }
             public class Body : SalesOutLet.Body
             {
@@ -638,9 +645,11 @@ namespace K3Tool.Extend
                 var headliList = new List<ICStockBill>();
                 var bodyliList = new List<ICStockBillEntry>();
                 var recordlist = new List<string>();
-                var headsqlstring = string.Format(@"select a.FBillNo as 处方号,a.FBillDate as 录入时间,b.FNumber 录入人,a.FMZSaleID 
+                var headsqlstring = string.Format(@"select a.FBillNo as 处方号,a.FBillDate as 录入时间,b.FNumber 录入人,c.FNumber 医生id,d.FNumber 科室id, a.FMZSaleID 
                                          from T_Med_MZSale a
                                          left join T_Sys_User b on b.FUserID = a.FBillUserID 
+                                         left join T_Sys_User c on c.FUserID = a.FRecvUserID 
+                                         left join T_Sys_Group d on d.FGroupID = a.FRecvGroupID 
                                          where a.kindeestate is null and a.FBillDate>='{0}' and a.FBillDate<='{1}'", kstime, jstime);
                 var bodysqlstring = @"select b.FNumber as 收费项目id,FQuantity as 实发数量,a.FUnit as 最小单位,a.FCheckPrice as 新单价,a.FCheckAmt as 新总价格,c.FNumber as 发药库房,a.FMZSaleDetailID, a.FMZSaleID 
                                      from T_Med_MZSaleDetail a
@@ -652,7 +661,7 @@ namespace K3Tool.Extend
                 var number = CommonFunction.GetMaxNum(RelatedConn, ICStockBill.TableName);
                 foreach (DataRow itemRow in headtable.Rows)
                 {
-                    if (LoggerHelper.CheckValue(sourceTableName, itemRow, "FMZSaleID", "录入人"))
+                    if (LoggerHelper.CheckValue(sourceTableName, itemRow, "FMZSaleID", "录入人", "医生id", "科室id"))
                     {
                         continue;
                     }
@@ -661,10 +670,10 @@ namespace K3Tool.Extend
                     {
                         FBillNo = itemRow["处方号"].ToString(),
                         Fdate = DateTime.Parse(itemRow["录入时间"].ToString()),
-                        //FDeptID = itemRow["科室id"].ToString(),
+                        FDeptID = itemRow["科室id"].ToString(),
                         FEmpID = itemRow["录入人"].ToString(),
-                        //FSupplyID = itemRow["科室id"].ToString(),
-                        //FHeadSelfB0154 = itemRow["医生id"].ToString(),
+                        FSupplyID = itemRow["科室id"].ToString(),
+                        FHeadSelfB0154 = itemRow["医生id"].ToString(),
                         FInterID = number + i
                     };
                     headliList.Add(head);
@@ -688,10 +697,10 @@ namespace K3Tool.Extend
                             FInterID = head.FInterID,
                             FEntryID = j
                         };
-                        //if (bodyitemRow["最小单位"].ToString() == "g" && bodyitemRow["单位"].ToString() == "kg")
-                        //{
-                        //    body.FQty = (Convert.ToDouble(body.FQty) / 1000).ToString(CultureInfo.InvariantCulture);
-                        //}
+                        if (bodyitemRow["最小单位"].ToString() == "g" && bodyitemRow["单位"].ToString() == "kg")
+                        {
+                            body.FQty = (Convert.ToDouble(body.FQty) / 1000).ToString(CultureInfo.InvariantCulture);
+                        }
                         bodyliList.Add(body);
                         j = j + 1;
                     }
