@@ -611,7 +611,7 @@ namespace K3Tool.Extend
                 {
                     get
                     {
-                        var filter = string.Format("FNumber='{0}'", _ys);
+                        var filter = string.Format("FName='{0}'", _ys);
                         return CommonFunction.Getfitemid(RelatedConn, Fitemclassid.医师, filter);
                     }
                     set { _ys = value; }
@@ -645,12 +645,15 @@ namespace K3Tool.Extend
                 var headliList = new List<ICStockBill>();
                 var bodyliList = new List<ICStockBillEntry>();
                 var recordlist = new List<string>();
-                var headsqlstring = string.Format(@"select a.FBillNo as 处方号,a.FBillDate as 录入时间,b.FNumber 录入人,c.FNumber 医生id,d.FNumber 科室id, a.FMZSaleID 
-                                         from T_Med_MZSale a
-                                         left join T_Sys_User b on b.FUserID = a.FBillUserID 
-                                         left join T_Sys_User c on c.FUserID = a.FRecvUserID 
-                                         left join T_Sys_Group d on d.FGroupID = a.FRecvGroupID 
-                                         where a.kindeestate is null and a.FBillDate>='{0}' and a.FBillDate<='{1}'", kstime, jstime);
+                var headsqlstring = string.Format(@"select distinct t1.FBillNo as 编号,t1.FBillDate as 录入时间,t7.FNumber 录入人,t5.FName 医生id,t6.FNumber 科室id, t1.FMZSaleID 
+                                                    from T_Med_MZSale t1
+                                                    left join t_MED_MZSALEDETAIL t2 on t2.FMZSaleID=t1.FMZSaleID
+                                                    left join t_FEE_MZFEEINFO t3 on t3.FMZFEEINFOID=t2.FMZFEEINFOID
+                                                    left join V_MZ_ADVICE t4 on t4.FADVICEID=t3.FADVICEID
+                                                    left join T_SYS_USER t5 on t5.FUSERID=t4.FADVICEUSERID
+                                                    left join T_Sys_Group t6 on t6.FGroupID = t1.FRecvGroupID
+                                                    left join T_SYS_USER t7 on t7.FUSERID=t1.FBillUserID
+                                                    where t1.kindeestate is null and t1.FBillDate>='{0}' and t1.FBillDate<='{1}'", kstime, jstime);
                 var bodysqlstring = @"select b.FNumber as 收费项目id,FQuantity as 实发数量,a.FUnit as 最小单位,a.FCheckPrice as 新单价,a.FCheckAmt as 新总价格,c.FNumber as 发药库房,a.FMZSaleDetailID, a.FMZSaleID 
                                      from T_Med_MZSaleDetail a
                                      left join T_Biz_MedSpec b on b.FFeeItemID=a.FFeeItemID
@@ -668,7 +671,7 @@ namespace K3Tool.Extend
                     i = i + 1;
                     Head head = new Head
                     {
-                        FBillNo = itemRow["处方号"].ToString(),
+                        FBillNo = itemRow["编号"].ToString(),
                         Fdate = DateTime.Parse(itemRow["录入时间"].ToString()),
                         FDeptID = itemRow["科室id"].ToString(),
                         FEmpID = itemRow["录入人"].ToString(),
@@ -697,10 +700,10 @@ namespace K3Tool.Extend
                             FInterID = head.FInterID,
                             FEntryID = j
                         };
-                        if (bodyitemRow["最小单位"].ToString() == "g" && bodyitemRow["单位"].ToString() == "kg")
-                        {
-                            body.FQty = (Convert.ToDouble(body.FQty) / 1000).ToString(CultureInfo.InvariantCulture);
-                        }
+                        //if (bodyitemRow["最小单位"].ToString() == "g" && bodyitemRow["单位"].ToString() == "kg")
+                        //{
+                        //    body.FQty = (Convert.ToDouble(body.FQty) / 1000).ToString(CultureInfo.InvariantCulture);
+                        //}
                         bodyliList.Add(body);
                         j = j + 1;
                     }
