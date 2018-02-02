@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "K3Tool", "K3Tool\K3Tool.csp
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tool", "Tool\Tool.csproj", "{3EBC7DB7-FCD8-4C87-8D11-78E33BD60AB6}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ZYJC", "ZYJC\ZYJC.csproj", "{2A63A8F7-0D63-4784-B59B-F1E17F1E29F2}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{3EBC7DB7-FCD8-4C87-8D11-78E33BD60AB6}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3EBC7DB7-FCD8-4C87-8D11-78E33BD60AB6}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3EBC7DB7-FCD8-4C87-8D11-78E33BD60AB6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2A63A8F7-0D63-4784-B59B-F1E17F1E29F2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2A63A8F7-0D63-4784-B59B-F1E17F1E29F2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2A63A8F7-0D63-4784-B59B-F1E17F1E29F2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2A63A8F7-0D63-4784-B59B-F1E17F1E29F2}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
