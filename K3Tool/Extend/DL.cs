@@ -611,6 +611,10 @@ namespace K3Tool.Extend
                 {
                     get
                     {
+                        if (string.IsNullOrWhiteSpace(_ys))
+                        {
+                            return _ys;
+                        }
                         var filter = string.Format("FName='{0}'", _ys);
                         return CommonFunction.Getfitemid(RelatedConn, Fitemclassid.医师, filter);
                     }
@@ -645,7 +649,7 @@ namespace K3Tool.Extend
                 var headliList = new List<ICStockBill>();
                 var bodyliList = new List<ICStockBillEntry>();
                 var recordlist = new List<string>();
-                var headsqlstring = string.Format(@"select distinct t1.FBillNo as 编号,t1.FBillDate as 录入时间,t7.FNumber 录入人,t5.FName 医生id,t6.FNumber 科室id, t1.FMZSaleID 
+                var headsqlstring = string.Format(@"select distinct t8.FMZNO as 门诊号,t1.FBillDate as 录入时间,t7.FNumber 录入人,t5.FName 医生id,t6.FNumber 科室id, t1.FMZSaleID 
                                                     from T_Med_MZSale t1
                                                     left join t_MED_MZSALEDETAIL t2 on t2.FMZSaleID=t1.FMZSaleID
                                                     left join t_FEE_MZFEEINFO t3 on t3.FMZFEEINFOID=t2.FMZFEEINFOID
@@ -653,6 +657,7 @@ namespace K3Tool.Extend
                                                     left join T_SYS_USER t5 on t5.FUSERID=t4.FADVICEUSERID
                                                     left join T_Sys_Group t6 on t6.FGroupID = t1.FRecvGroupID
                                                     left join T_SYS_USER t7 on t7.FUSERID=t1.FBillUserID
+                                                    join T_BIZ_PATIENT t8 on t8.FPATIENTID=t2.FPATIENTID
                                                     where t1.kindeestate is null and t1.FBillDate>='{0}' and t1.FBillDate<='{1}'", kstime, jstime);
                 var bodysqlstring = @"select b.FNumber as 收费项目id,FQuantity as 实发数量,a.FUnit as 最小单位,a.FCheckPrice as 新单价,a.FCheckAmt as 新总价格,c.FNumber as 发药库房,a.FMZSaleDetailID, a.FMZSaleID 
                                      from T_Med_MZSaleDetail a
@@ -664,14 +669,14 @@ namespace K3Tool.Extend
                 var number = CommonFunction.GetMaxNum(RelatedConn, ICStockBill.TableName);
                 foreach (DataRow itemRow in headtable.Rows)
                 {
-                    if (LoggerHelper.CheckValue(sourceTableName, itemRow, "FMZSaleID", "录入人", "医生id", "科室id"))
+                    if (LoggerHelper.CheckValue(sourceTableName, itemRow, "FMZSaleID", "录入人", "科室id"))
                     {
                         continue;
                     }
                     i = i + 1;
                     Head head = new Head
                     {
-                        FBillNo = itemRow["编号"].ToString(),
+                        FBillNo = itemRow["门诊号"].ToString(),
                         Fdate = DateTime.Parse(itemRow["录入时间"].ToString()),
                         FDeptID = itemRow["科室id"].ToString(),
                         FEmpID = itemRow["录入人"].ToString(),
