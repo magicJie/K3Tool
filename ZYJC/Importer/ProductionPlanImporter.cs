@@ -11,7 +11,7 @@ namespace ZYJC.Importer
 {
     public class ProductionPlanImporter : BaseImporter
     {
-        public override int Import()
+        public override int Import(DateTime startTime, DateTime endTime)
         {
             throw new NotImplementedException();
         }

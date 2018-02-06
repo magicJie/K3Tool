@@ -13,25 +13,23 @@ namespace ZYJC.Importer
     {
         public readonly string SourceConnStr = ConfigurationManager.AppSettings["source"];
         public readonly string RelatedConnStr = ConfigurationManager.AppSettings["related"];
-        private static BaseImporter _Instance;
-
-        public static BaseImporter Instance
-        {
-            get
-            {
-                return _Instance == null ? new BaseImporter() : _Instance;
-            }
-        }
-
-        protected BaseImporter()
-        {
-        }
 
         /// <summary>
         /// 导入数据
         /// </summary>
         /// <returns>导入行数</returns>
         public virtual int Import()
+        {
+            return 0;
+        }
+
+        /// <summary>
+        /// 导入数据
+        /// </summary>
+        /// <param name="startTime">开始时间</param>
+        /// <param name="endTime">结束时间</param>
+        /// <returns>导入行数</returns>
+        public virtual int Import(DateTime startTime,DateTime endTime)
         {
             return 0;
         }
