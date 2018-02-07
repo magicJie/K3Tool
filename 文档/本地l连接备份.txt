@@ -10,8 +10,3 @@
     <add name="dprelated" connectionString="data source=192.168.44.128;initial catalog=AIS20150130113659;user id=sa;password=123456"/>
   </connectionStrings>
 </configuration>
-
-
-AfterWorkRequestExpandEventReceiver
-
-Sender	MES.Logic.ItemCore.WorkRequest

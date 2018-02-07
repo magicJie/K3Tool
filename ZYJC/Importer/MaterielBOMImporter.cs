@@ -11,7 +11,7 @@ namespace ZYJC.Importer
 {
     public class MaterielBOMImporter : BaseImporter
     {
-        public override int Import(DateTime startTime, DateTime endTime)
+        public override int InitImport(DateTime startTime, DateTime endTime)
         {
             throw new NotImplementedException();
         }

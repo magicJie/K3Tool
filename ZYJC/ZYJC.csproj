@@ -36,6 +36,10 @@
     <Reference Include="log4net">
       <HintPath>..\lib\log4net.dll</HintPath>
     </Reference>
+    <Reference Include="Oracle.DataAccess, Version=2.112.1.0, Culture=neutral, PublicKeyToken=89b483f429c47342, processorArchitecture=AMD64">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\lib\Oracle.DataAccess.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.configuration" />
     <Reference Include="System.Core" />
@@ -50,16 +54,16 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Importer\BaseImporter.cs" />
+    <Compile Include="Importer\MaterielBOMImporter.cs" />
+    <Compile Include="Importer\MaterielImporter.cs" />
+    <Compile Include="Importer\ProductionPlanImporter.cs" />
     <Compile Include="MainForm.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="MainForm.Designer.cs">
       <DependentUpon>MainForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="Importer\BaseImporter.cs" />
-    <Compile Include="Importer\MaterielBOMImporter.cs" />
-    <Compile Include="Importer\MaterielImporter.cs" />
-    <Compile Include="Importer\ProductionPlanImporter.cs" />
     <Compile Include="Model\BaseModel.cs" />
     <Compile Include="Model\Materiel.cs" />
     <Compile Include="Model\MaterielBOM.cs" />
@@ -93,6 +97,12 @@
       <SubType>Designer</SubType>
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Tool\Tool.csproj">
+      <Project>{3ebc7db7-fcd8-4c87-8d11-78e33bd60ab6}</Project>
+      <Name>Tool</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

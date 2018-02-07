@@ -1,10 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Configuration;
-using System.Data;
-using System.Data.SqlClient;
-using Tool.K3;
-using Tool.Sql;
 
 namespace ZYJC.Model
 {
@@ -13,6 +7,19 @@ namespace ZYJC.Model
     /// </summary>   
     public class ProductionPlan : BaseModel
     {
-
+        public string PlanCode;
+        public string WorkOrder;
+        public string MaterielCode;
+        public string Planner;
+        public string BillDate;
+        public string BOMCode;
+        public string BOMVersion;
+        public string OrderState;
+        public string PlanQuantity;
+        public string BaseUnit;
+        public string ProductionType;
+        public DateTime PlanStartTime;
+        public DateTime PlanEndTime;
+        public string WorkShop;
     }
 }
