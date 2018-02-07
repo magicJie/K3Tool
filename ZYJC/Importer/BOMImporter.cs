@@ -2,16 +2,15 @@
 using System.Collections.Generic;
 using ZYJC.Model;
 using System.Data.SqlClient;
-using System.Linq;
 using Oracle.DataAccess.Client;
 
 namespace ZYJC.Importer
 {
-    public class MaterielImporter : BaseImporter
+    public class BOMImporter : BaseImporter
     {
         public override Type GetModeType()
         {
-            return typeof(Materiel);
+            return typeof(BOM);
         }
 
         public override int InitImport(DateTime startTime, DateTime endTime)
@@ -25,40 +24,45 @@ namespace ZYJC.Importer
             {
                 Connection = SourceConn,
                 CommandText =
-                    $@"select (SELECT FName FROM T_MeasureUnit where FMeasureUnitID=FUnitID) unit,
-                                    FModel,FName,FItemID,FModifyTime,FShortNumber,FErpClsID,FTypeID,FLastCheckDate
-                                from t_icitem 
-                                    where FLastCheckDate between CONVERT(datetime, '{startTime}') and CONVERT(datetime, '{endTime}')"
+                    $@"select * from 
+                            (select FBOMNumber,FItemID,FVersion,FStatus,FQty,FunitID,FInterID,FEnterTime from icbom) a right join (
+                                  select FEntryID,FItemID,FQty,FInterID from  ICBOMCHILD  ) b on a.FInterID=b.FInterID
+                       where FEnterTime between CONVERT(datetime, '{startTime}') and CONVERT(datetime, '{endTime}')"
             };
             var reader = sourceCmd.ExecuteReader();
-            var relatedCmd = new OracleCommand()
+            var relatedCmd = new OracleCommand
             {
                 Connection = RelatedConn,
                 CommandText = GetInsertCmdText()
             };
+            var i = 0;
             try
             {
-                var i = 0;
                 while (reader.Read())
                 {
-                    var materiel = new Materiel();
-                    if (string.IsNullOrWhiteSpace(reader["FShortNumber"] as string))
+                    var bom = new BOM();
+                    if (string.IsNullOrWhiteSpace(reader["FBOMNumber"] as string))
                         continue;
-                    materiel.Code = (string)reader["FShortNumber"];
-                    materiel.Name = reader["FName"] as string;
-                    materiel.Type = reader["FTypeID"]?.ToString() ?? "";
-                    materiel.BaseUnit = reader["unit"] as string;
-                    materiel.Specification = reader["FModel"] as string;
-                    materiel.Flag = 'C';
-                    materiel.K3TimeStamp = DateTime.Parse(reader["FLastCheckDate"].ToString());
-                    models[i] = materiel;
+                    bom.BOMCode = reader["FBOMNumber"].ToString();
+                    bom.MaterielCode = reader["FItemID"] as string;
+                    bom.Version = reader["FVersion"] as string;
+                    bom.UseState = reader["FStatus"] as string;
+                    bom.MaterielQuantity = reader["FQty"]==null?0: double.Parse(reader["FQty"].ToString());
+                    bom.MaterielUnit = reader["FunitID"] as string;
+                    bom.DetailCode = reader["FEntryID"] as string;
+                    bom.DetailMaterielCode = reader["FItemID"] as string;
+                    bom.DetailQuantity = reader["FQty"]==null?0: double.Parse(reader["FQty"].ToString());
+                    bom.DetailUnit = "";//TODO
+                    bom.Flag = 'C';
+                    bom.K3TimeStamp = DateTime.Parse(reader["FEnterTime"].ToString());
+                    models[i] = bom;
                     i++;
                     if (i == BatchNum)
                     {
                         CommitBatch(models, relatedCmd);
                         result += i;
                         i = 0;
-                        models=new BaseModel[BatchNum];//重置批
+                        models = new BaseModel[BatchNum];//重置批
                     }
                 }
                 if (i > 0)
@@ -66,7 +70,7 @@ namespace ZYJC.Importer
                     var oddModels = new BaseModel[i];
                     for (int j = 0; j < i; j++)
                     {
-                        oddModels[j] = models[i-1];
+                        oddModels[j] = models[i - 1];
                     }
                     CommitBatch(oddModels, relatedCmd);
                     result += i;
@@ -84,11 +88,6 @@ namespace ZYJC.Importer
                 RelatedConn.Close();
             }
             return result;
-        }
-
-        public override int UpdateImport(DateTime startTime, DateTime endTime)
-        {
-            throw new NotImplementedException();
         }
     }
 }

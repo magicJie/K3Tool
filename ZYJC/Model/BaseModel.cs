@@ -3,8 +3,11 @@ namespace ZYJC.Model
 {
     public abstract class BaseModel
     {
-        public char Flag;
-        public DateTime K3TimeStamp;
-        public DateTime MESTimeStamp;
+        [DbType(DbDataType = "Char")]
+        public char Flag { set; get; }
+        [DbType(DbDataType = "TimeStamp")]
+        public DateTime K3TimeStamp { set; get; }
+        [DbType(DbDataType = "TimeStamp")]
+        public DateTime MESTimeStamp { set; get; }
     }
 }

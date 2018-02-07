@@ -7,19 +7,22 @@ namespace ZYJC.Model
     /// </summary>   
     public class ProductionPlan : BaseModel
     {
-        public string PlanCode;
-        public string WorkOrder;
-        public string MaterielCode;
-        public string Planner;
-        public string BillDate;
-        public string BOMCode;
-        public string BOMVersion;
-        public string OrderState;
-        public string PlanQuantity;
-        public string BaseUnit;
-        public string ProductionType;
-        public DateTime PlanStartTime;
-        public DateTime PlanEndTime;
-        public string WorkShop;
+        public string PlanCode { set; get; }
+        public string WorkOrder { set; get; }
+        public string MaterielCode { set; get; }
+        public string Planner { set; get; }
+        [DbType(DbDataType = "TimeStamp")]
+        public DateTime BillDate { set; get; }
+        public string BOMCode { set; get; }
+        public string BOMVersion { set; get; }
+        public string OrderState { set; get; }
+        public double PlanQuantity { set; get; }
+        public string BaseUnit { set; get; }
+        public string ProductionType { set; get; }
+        [DbType(DbDataType = "TimeStamp")]
+        public DateTime PlanStartTime { set; get; }
+        [DbType(DbDataType = "TimeStamp")]
+        public DateTime PlanEndTime { set; get; }
+        public string WorkShop { set; get; }
     }
 }

@@ -19,7 +19,7 @@ namespace ZYJC
 
         private void button2_Click(object sender, EventArgs e)
         {
-            MessageBox.Show(@"成功新增" + new MaterielBOMImporter().InitImport(kstime.Value, jstime.Value));
+            MessageBox.Show(@"成功新增" + new BOMImporter().InitImport(kstime.Value, jstime.Value));
         }
 
         private void button3_Click(object sender, EventArgs e)

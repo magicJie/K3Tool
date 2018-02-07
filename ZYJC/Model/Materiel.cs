@@ -5,10 +5,10 @@
     /// </summary>   
     public class Materiel: BaseModel
     {
-        public string Code;
-        public string Name;
-        public string Type;
-        public string BaseUnit;
-        public string Specification;
+        public string Code { set; get; }
+        public string Name { set; get; }
+        public string Type { set; get; }
+        public string BaseUnit { set; get; }
+        public string Specification { set; get; }
     }
 }

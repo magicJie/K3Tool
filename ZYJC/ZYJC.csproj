@@ -54,8 +54,10 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="DbDataTypeMapper.cs" />
+    <Compile Include="DbTypeAttribute.cs" />
     <Compile Include="Importer\BaseImporter.cs" />
-    <Compile Include="Importer\MaterielBOMImporter.cs" />
+    <Compile Include="Importer\BOMImporter.cs" />
     <Compile Include="Importer\MaterielImporter.cs" />
     <Compile Include="Importer\ProductionPlanImporter.cs" />
     <Compile Include="MainForm.cs">
@@ -66,7 +68,8 @@
     </Compile>
     <Compile Include="Model\BaseModel.cs" />
     <Compile Include="Model\Materiel.cs" />
-    <Compile Include="Model\MaterielBOM.cs" />
+    <Compile Include="Model\BOM.cs" />
+    <Compile Include="Model\ModelCollection.cs" />
     <Compile Include="Model\ProductionPlan.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
