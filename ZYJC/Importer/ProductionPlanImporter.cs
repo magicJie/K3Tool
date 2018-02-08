@@ -25,8 +25,8 @@ namespace ZYJC.Importer
                 Connection = SourceConn,
                 CommandText =
                     $@"SELECT FBrNo,(select FShortNumber from t_icitem where t_icitem.FItemID=ICmo.FItemID) as FShortNumber,
-             FBillerID,FCheckDate,(select FBOMNumber from icbom where icbom.FInterID= ICmo.FBomInterID) as FBOMNumber,(select FVersion from icbom where icbom.FInterID= ICmo.FBomInterID) as FVersion,FStatus,FAuxQty,FUnitID,FType,
-            FPlanCommitDate,FPlanFinishDate,FWorkShop,FWorkTypeID,FConfirmDate FROM ICmo 
+(select FName from t_Item where t_Item.FItemID=ICmo.FBillerID) FBillerID,FCheckDate,(select FBOMNumber from icbom where icbom.FInterID= ICmo.FBomInterID) as FBOMNumber,(select FVersion from icbom where icbom.FInterID= ICmo.FBomInterID) as FVersion,FStatus,FAuxQty,(SELECT FName FROM T_MeasureUnit where T_MeasureUnit.FMeasureUnitID=ICmo.FUnitID)  FUnitID,FType,
+FPlanCommitDate,FPlanFinishDate,FWorkShop,FWorkTypeID,FConfirmDate,FGMPBatchNo FROM ICmo   
                                     where FCheckDate between CONVERT(datetime, '{startTime}') and CONVERT(datetime, '{endTime}')"
             };
             var reader = sourceCmd.ExecuteReader();
@@ -44,7 +44,7 @@ namespace ZYJC.Importer
                     if (string.IsNullOrWhiteSpace(reader["FBrNo"] as string))
                         continue;
                     plan.PlanCode = (string)reader["FBrNo"];
-                    plan.WorkOrder = "";//TODO
+                    plan.WorkOrder = (string)reader["FGMPBatchNo"];
                     plan.MaterielCode = reader["fshortnumber"] as string;
                     plan.Planner = reader["FBillerID"] as string;
                     plan.BillDate = DateTime.Parse(reader["FCheckDate"].ToString());
