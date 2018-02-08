@@ -8,7 +8,7 @@ namespace ZYJC.Importer
 {
     public class ProductionPlanImporter : BaseImporter
     {
-        public override Type GetModeType()
+        public override Type GetModelType()
         {
             return typeof(ProductionPlan);
         }

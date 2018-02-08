@@ -9,7 +9,7 @@ namespace ZYJC.Importer
 {
     public class MaterielImporter : BaseImporter
     {
-        public override Type GetModeType()
+        public override Type GetModelType()
         {
             return typeof(Materiel);
         }

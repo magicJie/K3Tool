@@ -15,7 +15,7 @@ namespace ZYJC.Importer
         public readonly OracleConnection RelatedConn =new OracleConnection(ConfigurationManager.ConnectionStrings["related"].ConnectionString);
         public const int BatchNum = 2000;
 
-        public virtual Type GetModeType()
+        public virtual Type GetModelType()
         {
             return typeof(BaseModel);
         }
@@ -43,7 +43,7 @@ namespace ZYJC.Importer
             {
                 relatedCommand.Transaction = tx;
                 relatedCommand.ArrayBindCount = modelList.Length;
-                var propertyInfos = GetModeType().GetProperties().Where(x => x.Name != "MESTimeStamp").ToArray();
+                var propertyInfos = GetModelType().GetProperties().Where(x => x.Name != "MESTimeStamp").ToArray();
                 var arry = new object[propertyInfos.Length][];
                 for (var i = 0; i < arry.Length; i++)
                 {
@@ -75,7 +75,7 @@ namespace ZYJC.Importer
 
         protected virtual string GetInsertCmdText()
         {
-            var type = GetModeType();
+            var type = GetModelType();
             var propInfos = type.GetProperties().Where(x => x.Name != "MESTimeStamp").ToArray();
             return
                 $"insert into {type.Name} ({string.Join(",",propInfos.Select(x => x.Name))}) values({string.Join(",",propInfos.Select(x => ":" + x.Name))})";
