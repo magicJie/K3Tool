@@ -25,8 +25,9 @@ namespace ZYJC.Importer
                 Connection = SourceConn,
                 CommandText =
                     $@"select * from 
-                            (select FBOMNumber,FItemID,FVersion,FStatus,FQty,FunitID,FInterID,FEnterTime from icbom) a right join (
-                                  select FEntryID,FItemID,FQty,FInterID from  ICBOMCHILD  ) b on a.FInterID=b.FInterID
+(select FBOMNumber,(select FShortNumber from t_icitem where t_icitem.FItemID=icbom.FItemID) fshortnumber,FVersion,FStatus,FQty, (SELECT FName FROM T_MeasureUnit where T_MeasureUnit.FMeasureUnitID=icbom.FUnitID) FUnitID
+,FInterID,FEnterTime from icbom) a right join (
+select FEntryID,(select FShortNumber from t_icitem where t_icitem.FItemID=ICBOMCHILD.FItemID) detailfshortnumber,(select (SELECT FName FROM T_MeasureUnit where T_MeasureUnit.FMeasureUnitID=t_icitem.FUnitID)from t_icitem where t_icitem.FItemID=ICBOMCHILD.FItemID) detailFUnitID,FQty as detailfqty,FInterID from  ICBOMCHILD  ) b on a.FInterID=b.FInterID
                        where FEnterTime between CONVERT(datetime, '{startTime}') and CONVERT(datetime, '{endTime}')"
             };
             var reader = sourceCmd.ExecuteReader();
@@ -44,15 +45,15 @@ namespace ZYJC.Importer
                     if (string.IsNullOrWhiteSpace(reader["FBOMNumber"] as string))
                         continue;
                     bom.BOMCode = reader["FBOMNumber"].ToString();
-                    bom.MaterielCode = reader["FItemID"] as string;
+                    bom.MaterielCode = reader["fshortnumber"] as string;
                     bom.Version = reader["FVersion"] as string;
                     bom.UseState = reader["FStatus"] as string;
                     bom.MaterielQuantity = reader["FQty"]==null?0: double.Parse(reader["FQty"].ToString());
                     bom.MaterielUnit = reader["FunitID"] as string;
                     bom.DetailCode = reader["FEntryID"] as string;
-                    bom.DetailMaterielCode = reader["FItemID"] as string;
-                    bom.DetailQuantity = reader["FQty"]==null?0: double.Parse(reader["FQty"].ToString());
-                    bom.DetailUnit = "";//TODO
+                    bom.DetailMaterielCode = reader["detailfshortnumber"] as string;
+                    bom.DetailQuantity = reader["detailfqty"] ==null?0: double.Parse(reader["FQty"].ToString());
+                    bom.DetailUnit = reader["detailFUnitID"] as string;
                     bom.Flag = 'C';
                     bom.K3TimeStamp = DateTime.Parse(reader["FEnterTime"].ToString());
                     models[i] = bom;

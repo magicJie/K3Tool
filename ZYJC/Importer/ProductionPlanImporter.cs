@@ -24,10 +24,9 @@ namespace ZYJC.Importer
             {
                 Connection = SourceConn,
                 CommandText =
-                    $@"select * from 
-                                    (SELECT FBrNo,FItemID,FBillerID,FCheckDate,FBomInterID,FStatus,FAuxQty,FUnitID,FType,
-                                    FPlanCommitDate,FPlanFinishDate,FWorkShop,FWorkTypeID,FConfirmDate FROM ICmo) a
-                                    left join (select FShortNumber,FItemID from t_icitem) b on a.FItemID=b.FItemID
+                    $@"SELECT FBrNo,(select FShortNumber from t_icitem where t_icitem.FItemID=ICmo.FItemID) as FShortNumber,
+             FBillerID,FCheckDate,(select FBOMNumber from icbom where icbom.FInterID= ICmo.FBomInterID) as FBOMNumber,(select FVersion from icbom where icbom.FInterID= ICmo.FBomInterID) as FVersion,FStatus,FAuxQty,FUnitID,FType,
+            FPlanCommitDate,FPlanFinishDate,FWorkShop,FWorkTypeID,FConfirmDate FROM ICmo 
                                     where FCheckDate between CONVERT(datetime, '{startTime}') and CONVERT(datetime, '{endTime}')"
             };
             var reader = sourceCmd.ExecuteReader();
@@ -49,8 +48,8 @@ namespace ZYJC.Importer
                     plan.MaterielCode = reader["fshortnumber"] as string;
                     plan.Planner = reader["FBillerID"] as string;
                     plan.BillDate = DateTime.Parse(reader["FCheckDate"].ToString());
-                    plan.BOMCode = reader["FBomInterID"] as string;
-                    plan.BOMVersion = "";//TODO
+                    plan.BOMCode = reader["FBOMNumber"] as string;
+                    plan.BOMVersion = reader["FVersion"] as string;
                     plan.OrderState = reader["FStatus"] as string;
                     plan.PlanQuantity = reader["FAuxQty"] == null ? 0 : double.Parse(reader["FAuxQty"].ToString());
                     plan.BaseUnit = reader["FUnitID"] as string;

@@ -25,9 +25,8 @@ namespace ZYJC.Importer
             {
                 Connection = SourceConn,
                 CommandText =
-                    $@"select (SELECT FName FROM T_MeasureUnit where FMeasureUnitID=FUnitID) unit,
-                                    FModel,FName,FItemID,FModifyTime,FShortNumber,FErpClsID,FTypeID,FLastCheckDate
-                                from t_icitem 
+                    $@"select FShortNumber,FName,FTypeID,(SELECT FName FROM T_MeasureUnit where T_MeasureUnit.FMeasureUnitID=t_icitem.FUnitID) unit,
+                                 FModel,FModifyTime,FItemID from t_icitem 
                                     where FLastCheckDate between CONVERT(datetime, '{startTime}') and CONVERT(datetime, '{endTime}')"
             };
             var reader = sourceCmd.ExecuteReader();
