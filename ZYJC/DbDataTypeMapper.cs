@@ -37,5 +37,25 @@ namespace ZYJC
                 return OracleDbType.Char;
             throw new ArgumentOutOfRangeException(@"未能识别的数据类型"+type.FullName);
         }
+
+        /// <summary>
+        /// 将
+        /// </summary>
+        /// <param name="o1"></param>
+        /// <param name="o2"></param>
+        public static void SetValue(object o1,out object o2)
+        {
+            var type = o1.GetType();
+            object a = null;
+            if (o1.)
+            {
+
+            }
+            if (type.FullName == "System.String")
+            {
+                o2 = (string) o1;
+            }
+            throw new Exception("数据类型不匹配或不支持的数据类型");
+        }
     }
 }
