@@ -41,24 +41,24 @@ FPlanCommitDate,FPlanFinishDate,FWorkShop,FWorkTypeID,FConfirmDate,FGMPBatchNo F
                 while (reader.Read())
                 {
                     var plan = new ProductionPlan();
-                    if (string.IsNullOrWhiteSpace(reader["FBrNo"] as string))
+                    if (reader["FBrNo"] == DBNull.Value)
                         continue;
-                    plan.PlanCode = (string)reader["FBrNo"];
-                    plan.WorkOrder = (string)reader["FGMPBatchNo"];
-                    plan.MaterielCode = reader["fshortnumber"] as string;
-                    plan.Planner = reader["FBillerID"] as string;
+                    plan.PlanCode = reader["FBrNo"].ToString();
+                    plan.WorkOrder = reader["FGMPBatchNo"].ToString();
+                    plan.MaterielCode = reader["fshortnumber"].ToString();
+                    plan.Planner = reader["FBillerID"].ToString();
                     plan.BillDate = DateTime.Parse(reader["FCheckDate"].ToString());
-                    plan.BOMCode = reader["FBOMNumber"] as string;
-                    plan.BOMVersion = reader["FVersion"] as string;
-                    plan.OrderState = reader["FStatus"] as string;
-                    plan.PlanQuantity = reader["FAuxQty"] == null ? 0 : double.Parse(reader["FAuxQty"].ToString());
-                    plan.BaseUnit = reader["FUnitID"] as string;
-                    plan.ProductionType = reader["FType"]?.ToString() ?? "";
-                    if (reader["FPlanCommitDate"] != null)
+                    plan.BOMCode = reader["FBOMNumber"].ToString();
+                    plan.BOMVersion = reader["FVersion"].ToString();
+                    plan.OrderState = reader["FStatus"].ToString();
+                    plan.PlanQuantity = reader["FAuxQty"] == DBNull.Value ? 0 : double.Parse(reader["FAuxQty"].ToString());
+                    plan.BaseUnit = reader["FUnitID"].ToString();
+                    plan.ProductionType = reader["FType"].ToString();
+                    if (reader["FPlanCommitDate"] != DBNull.Value)
                         plan.PlanStartTime = DateTime.Parse(reader["FPlanCommitDate"].ToString());
-                    if (reader["FPlanFinishDate"] != null)
+                    if (reader["FPlanFinishDate"] != DBNull.Value)
                         plan.PlanEndTime = DateTime.Parse(reader["FPlanFinishDate"].ToString());
-                    plan.WorkShop = reader["FWorkShop"] as string;
+                    plan.WorkShop = reader["FWorkShop"].ToString();
                     plan.Flag = 'C';
                     plan.K3TimeStamp = DateTime.Parse(reader["FCheckDate"].ToString());
                     models[i] = plan;
