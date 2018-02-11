@@ -10,40 +10,47 @@ namespace DataTool
 {
     public class Importer
     {
-        public readonly SqlConnection SourceConn;
-        public readonly OracleConnection RelatedConn;
+        public readonly DbConnection _sourceConn;
+        public readonly DbConnection _targetConn;
+        private readonly DbCommand _sourceCmd;
+        private readonly DbCommand _targetCmd;
         private const int DefaultBatchNum = 2000;
+        private readonly int _batchNum = DefaultBatchNum;
         private DumpTask _task;
+        private Scheme _scheme;
 
         public Importer(DumpTask dumpTask)
         {
             _task = dumpTask;
+            _scheme = dumpTask.Scheme;
+            _sourceConn = GetSourceConn();
+            _targetConn = GetTargetConn();
+            _sourceCmd = GetSourceCmd();
+            _targetCmd = GetTargetCmd();
+            _sourceCmd.Connection = _sourceConn;
+            _targetCmd.Connection = _targetConn;
+            if (_scheme.BatchNum.HasValue)
+                _batchNum = _scheme.BatchNum.Value;
         }
 
         public int Import()
         {
-            var ds=new DataColumnMapping();
             var batchNum = DefaultBatchNum;
             var result = 0;
             //定义批处理的
             var models = new object[_task.MappingList.Count][];
-            SourceConn.Open();
-            RelatedConn.Open();
-            var sourceCmd = new SqlCommand
+            _sourceConn.Open();
+            _targetConn.Open();
+            //反向对比数据
+            if (_scheme.DeleteMode != DeleteMode.Ignore)
             {
-                Connection = SourceConn,
-                CommandText =_task.SourceSqlStr
-            };
-            var reader = sourceCmd.ExecuteReader();
-            var relatedCmd = new OracleCommand
-            {
-                Connection = RelatedConn,
-                CommandText = GetInsertCmdText()
-            };
+                BackUpdate();
+            }
+
             var i = 0;
             try
             {
-                while (reader.Read())
+                while (sourceCmd.Read())
                 {
                     var objs = new object[DefaultBatchNum];
                     
@@ -71,50 +78,91 @@ namespace DataTool
             }
             catch (Exception e)
             {
-                log4net.LogManager.GetLogger("Logger").Error(e.Message + "\r\n" + sourceCmd.CommandText + "\r\n" + relatedCmd.CommandText);
+                log4net.LogManager.GetLogger("Logger").Error(e.Message + "\r\n" + _sourceCmd.CommandText + "\r\n" + _targetCmd.CommandText);
                 throw;
             }
             finally
             {
-                SourceConn.Close();
-                RelatedConn.Close();
+                _sourceConn.Close();
+                _targetConn.Close();
             }
             return result;
         }
 
-        protected virtual void CommitBatch(object[][] objects, OracleCommand relatedCommand)
+        /// <summary>
+        /// 反向更新
+        /// </summary>
+        /// <param name="cmd"></param>
+        /// <returns></returns>
+        private int BackUpdate()
         {
-            var tx = RelatedConn.BeginTransaction();
+            var result = 0;
+            if (_scheme.DeleteMode == DeleteMode.Flag)
+            {
+                _targetCmd.CommandText = $@"update {_task.TargetTableName} set xxx=xxx where xxx=xxx";
+            }
+            else if(_scheme.DeleteMode==DeleteMode.Delete)
+            {
+                _targetCmd.CommandText = $@"delete from  {_task.TargetTableName} where xxx=xxx";
+            }
+            _sourceCmd.CommandText = $@"select xxx from xxx where xxx in (xxx)";
+            var targetReader = _targetCmd.ExecuteReader();
+            var i = 0;
+            var models=new object[_task.PrimaryKey.Length][];
+            var models1 = new object[1][];
+            while (targetReader.Read())
+            {
+                var objs = new object[DefaultBatchNum];
+                for (int j = 0; j < models.Length; j++)
+                {
+                    objs[j] =
+                        _task.MappingList.First(x => x.TargetColumn == _task.PrimaryKey[j])
+                            .GetMappingValue(targetReader);
+                }
+                models[i] = objs;
+                i++;
+                if (i == _batchNum)
+                {
+                    CommitBatch(models, _targetCmd);
+                    result += i;
+                    i = 0;
+                    models = new object[_task.PrimaryKey.Length][];//重置批
+                }
+            }
+            if (i > 0)
+            {
+                var oddModels = new object[1][];
+                for (int j = 0; j < i; j++)
+                {
+                    oddModels[j] = models[i - 1];
+                }
+                CommitBatch(oddModels, _targetCmd);
+                result += i;
+            }
+            targetReader.Close();
+        }
+
+        protected virtual void CommitBatch(object[][] objects, DbCommand cmd)
+        {
+            var tx = _sourceConn.BeginTransaction();
             try
             {
-                relatedCommand.Transaction = tx;
-                relatedCommand.ArrayBindCount = modelList.Length;
-                var propertyInfos = GetModelType().GetProperties().Where(x => x.Name != "MESTimeStamp").ToArray();
-                var arry = new object[propertyInfos.Length][];
-                for (var i = 0; i < arry.Length; i++)
+                cmd.Transaction = tx;
+                for (var i = 0; i < objects.Length; i++)
                 {
-                    arry[i] = new object[BatchNum];
-                }
-                for (var i = 0; i < propertyInfos.Length; i++)
-                {
-                    for (var j = 0; j < modelList.Length; j++)
-                    {
-                        arry[i][j] = propertyInfos[i].GetValue(modelList[j]);
-                    }
-                }
-                for (var i = 0; i < propertyInfos.Length; i++)
-                {
-                    relatedCommand.Parameters.Add(new OracleParameter(propertyInfos[i].Name, DbDataTypeMapper.GetOracleDataType(propertyInfos[i])) { Value = arry[i] });
+                    DbParameter para = GetDbParameter();
+                    para.Value = objects[i];
+                    cmd.Parameters.Add(para);
                 }
 
-                relatedCommand.ExecuteNonQuery();
+                cmd.ExecuteNonQuery();
                 tx.Commit();
-                relatedCommand.Parameters.Clear();
+                cmd.Parameters.Clear();
             }
             catch (Exception)
             {
                 tx.Rollback();
-                log4net.LogManager.GetLogger("Logger").Error(relatedCommand.CommandText);
+                log4net.LogManager.GetLogger("Logger").Error(cmd.CommandText);
                 throw;
             }
         }
@@ -125,5 +173,43 @@ namespace DataTool
             return
                 $"insert into {type.Name} ({string.Join(",", propInfos.Select(x => x.Name))}) values({string.Join(",", propInfos.Select(x => ":" + x.Name))})";
         }
+
+        private DbCommand GetSourceCmd()
+        {
+            if(_scheme.SourceDbType==DatabaseType.SqlServer)
+                return new SqlCommand();
+            else if(_scheme.SourceDbType == DatabaseType.Oracle)
+                return new OracleCommand();
+            throw new Exception("不支持的数据库"+_scheme.SourceDbType.ToString());
+        }
+
+        private DbCommand GetTargetCmd()
+        {
+            if (_scheme.TargetDbType == DatabaseType.SqlServer)
+                return new SqlCommand();
+            else if (_scheme.TargetDbType == DatabaseType.Oracle)
+                return new OracleCommand();
+            throw new Exception("不支持的数据库" + _scheme.TargetDbType.ToString());
+        }
+
+        private DbConnection GetSourceConn()
+        {
+            if (_scheme.SourceDbType == DatabaseType.SqlServer)
+                return new SqlConnection();
+            else if (_scheme.SourceDbType == DatabaseType.Oracle)
+                return new OracleConnection();
+            throw new Exception("不支持的数据库" + _scheme.SourceDbType.ToString());
+        }
+
+        private DbConnection GetTargetConn()
+        {
+            if (_scheme.TargetDbType == DatabaseType.SqlServer)
+                return new SqlConnection();
+            else if (_scheme.TargetDbType == DatabaseType.Oracle)
+                return new OracleConnection();
+            throw new Exception("不支持的数据库" + _scheme.TargetDbType.ToString());
+        }
+
+        
     }
 }

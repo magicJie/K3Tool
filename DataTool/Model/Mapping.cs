@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Data.Common;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -22,5 +23,16 @@ namespace DataTool.Model
         /// <para>设置为true的列，会用来表示行的更新时间</para>
         /// </summary>
         public bool IsTimeStamp { set; get; }
+
+        /// <summary>
+        /// 根据映射信息返回映射值
+        /// </summary>
+        /// <param name="targetReader">源数据读取器</param>
+        /// <returns>映射值（根据表达式运算）</returns>
+        public object GetMappingValue(DbDataReader targetReader)
+        {
+
+            return "";
+        }
     }
 }

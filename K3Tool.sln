@@ -11,6 +11,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ZYJC", "ZYJC\ZYJC.csproj", 
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DataTool", "DataTool\DataTool.csproj", "{71CB3A81-4A52-4496-8CCE-9C6EE8732EE7}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MagicBox.Common", "..\MagicBox\MagicBox.Common\MagicBox.Common.csproj", "{4539136E-2F6C-4E72-BE3A-9DE59E1337EF}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -33,6 +35,10 @@ Global
 		{71CB3A81-4A52-4496-8CCE-9C6EE8732EE7}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{71CB3A81-4A52-4496-8CCE-9C6EE8732EE7}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{71CB3A81-4A52-4496-8CCE-9C6EE8732EE7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4539136E-2F6C-4E72-BE3A-9DE59E1337EF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4539136E-2F6C-4E72-BE3A-9DE59E1337EF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4539136E-2F6C-4E72-BE3A-9DE59E1337EF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4539136E-2F6C-4E72-BE3A-9DE59E1337EF}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
