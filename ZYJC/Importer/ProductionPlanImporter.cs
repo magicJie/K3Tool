@@ -61,6 +61,7 @@ FPlanCommitDate,FPlanFinishDate,FWorkShop,FWorkTypeID,FConfirmDate,FGMPBatchNo F
                     plan.WorkShop = reader["FWorkShop"].ToString();
                     plan.Flag = 'C';
                     plan.K3TimeStamp = DateTime.Parse(reader["FCheckDate"].ToString());
+                    plan.SourceDb = "HW";
                     models[i] = plan;
                     i++;
                     if (i == BatchNum)

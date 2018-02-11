@@ -56,6 +56,7 @@ select FEntryID,(select FShortNumber from t_icitem where t_icitem.FItemID=ICBOMC
                     bom.DetailUnit = reader["detailFUnitID"].ToString();
                     bom.Flag = 'C';
                     bom.K3TimeStamp = DateTime.Parse(reader["FEnterTime"].ToString());
+                    bom.SourceDb = "HW";
                     models[i] = bom;
                     i++;
                     if (i == BatchNum)

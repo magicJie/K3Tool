@@ -1,11 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Configuration;
+using System.Data;
 using System.Data.Common;
 using System.Data.SqlClient;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Oracle.DataAccess.Client;
 using DataTool.Model;
 
@@ -13,19 +10,19 @@ namespace DataTool
 {
     public class Importer
     {
-        public readonly SqlConnection SourceConn = new SqlConnection(ConfigurationManager.ConnectionStrings["source"].ConnectionString);
-        public readonly OracleConnection RelatedConn = new OracleConnection(ConfigurationManager.ConnectionStrings["related"].ConnectionString);
+        public readonly SqlConnection SourceConn;
+        public readonly OracleConnection RelatedConn;
         private const int DefaultBatchNum = 2000;
         private DumpTask _task;
-        private 
 
         public Importer(DumpTask dumpTask)
         {
             _task = dumpTask;
         }
 
-        public override int InitImport()
+        public int Import()
         {
+            var ds=new DataColumnMapping();
             var batchNum = DefaultBatchNum;
             var result = 0;
             //定义批处理的
