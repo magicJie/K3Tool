@@ -42,18 +42,18 @@ select FEntryID,(select FShortNumber from t_icitem where t_icitem.FItemID=ICBOMC
                 while (reader.Read())
                 {
                     var bom = new BOM();
-                    if (string.IsNullOrWhiteSpace(reader["FBOMNumber"] as string))
+                    if (reader["FBOMNumber"]==DBNull.Value)
                         continue;
                     bom.BOMCode = reader["FBOMNumber"].ToString();
-                    bom.MaterielCode = reader["fshortnumber"] as string;
-                    bom.Version = reader["FVersion"] as string;
-                    bom.UseState = reader["FStatus"] as string;
-                    bom.MaterielQuantity = reader["FQty"]==null?0: double.Parse(reader["FQty"].ToString());
-                    bom.MaterielUnit = reader["FunitID"] as string;
-                    bom.DetailCode = reader["FEntryID"] as string;
-                    bom.DetailMaterielCode = reader["detailfshortnumber"] as string;
-                    bom.DetailQuantity = reader["detailfqty"] ==null?0: double.Parse(reader["FQty"].ToString());
-                    bom.DetailUnit = reader["detailFUnitID"] as string;
+                    bom.MaterielCode = reader["fshortnumber"].ToString();
+                    bom.Version = reader["FVersion"].ToString();
+                    bom.UseState = reader["FStatus"].ToString();
+                    bom.MaterielQuantity = reader["FQty"]==DBNull.Value?0: double.Parse(reader["FQty"].ToString());
+                    bom.MaterielUnit = reader["FunitID"].ToString();
+                    bom.DetailCode = reader["FEntryID"].ToString();
+                    bom.DetailMaterielCode = reader["detailfshortnumber"].ToString();
+                    bom.DetailQuantity = reader["detailfqty"] ==DBNull.Value?0: double.Parse(reader["FQty"].ToString());
+                    bom.DetailUnit = reader["detailFUnitID"].ToString();
                     bom.Flag = 'C';
                     bom.K3TimeStamp = DateTime.Parse(reader["FEnterTime"].ToString());
                     models[i] = bom;

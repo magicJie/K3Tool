@@ -41,15 +41,16 @@ namespace ZYJC.Importer
                 while (reader.Read())
                 {
                     var materiel = new Materiel();
-                    if (string.IsNullOrWhiteSpace(reader["FShortNumber"] as string))
+                    if (reader["FShortNumber"]==DBNull.Value)
                         continue;
-                    materiel.Code = (string)reader["FShortNumber"];
-                    materiel.Name = reader["FName"] as string;
-                    materiel.Type = reader["FTypeID"]?.ToString() ?? "";
-                    materiel.BaseUnit = reader["unit"] as string;
-                    materiel.Specification = reader["FModel"] as string;
+                    materiel.Code = reader["FShortNumber"].ToString();
+                    materiel.Name = reader["FName"].ToString();
+                    materiel.Type = reader["FTypeID"].ToString();
+                    materiel.BaseUnit = reader["unit"].ToString();
+                    materiel.Specification = reader["FModel"].ToString();
                     materiel.Flag = 'C';
                     materiel.K3TimeStamp = DateTime.Parse(reader["FLastCheckDate"].ToString());
+                    materiel.SourceDb = "HW";
                     models[i] = materiel;
                     i++;
                     if (i == BatchNum)
