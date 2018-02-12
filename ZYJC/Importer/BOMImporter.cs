@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using ZYJC.Model;
 using System.Data.SqlClient;
+using System.Linq;
 using Oracle.DataAccess.Client;
 
 namespace ZYJC.Importer
@@ -72,7 +73,7 @@ select FEntryID,(select FShortNumber from t_icitem where t_icitem.FItemID=ICBOMC
                     var oddModels = new BaseModel[i];
                     for (int j = 0; j < i; j++)
                     {
-                        oddModels[j] = models[i - 1];
+                        oddModels[j] = models[j];
                     }
                     CommitBatch(oddModels, relatedCmd);
                     result += i;

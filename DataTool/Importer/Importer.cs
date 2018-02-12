@@ -35,7 +35,6 @@ namespace DataTool
 
         public int Import()
         {
-            var batchNum = DefaultBatchNum;
             var result = 0;
             //定义批处理的
             var models = new object[_task.MappingList.Count][];
@@ -105,22 +104,31 @@ namespace DataTool
             {
                 _targetCmd.CommandText = $@"delete from  {_task.TargetTableName} where xxx=xxx";
             }
-            _sourceCmd.CommandText = $@"select xxx from xxx where xxx in (xxx)";
-            var targetReader = _targetCmd.ExecuteReader();
+            var readCmd = GetTargetCmd();
+            readCmd.Connection = _targetConn;
+            readCmd.CommandText = $@"select {string.Join(",",_task.PrimaryKey.Select(x=>x.ColumnName))} from {_task.TargetTableName}";
+            var reader = readCmd.ExecuteReader();
             var i = 0;
             var models=new object[_task.PrimaryKey.Length][];
-            var models1 = new object[1][];
-            while (targetReader.Read())
+            for (int j = 0; j < models.Length; j++)
             {
-                var objs = new object[DefaultBatchNum];
-                for (int j = 0; j < models.Length; j++)
+                models[j]=new object[_batchNum];
+            }
+            while (reader.Read())
+            {
+                _sourceCmd.CommandText = $@"select 0 from xxx where xxx in({string.Join(",", reader)})";
+                var obj = _sourceCmd.ExecuteScalar();
+                if (obj == DBNull.Value)
                 {
-                    objs[j] =
-                        _task.MappingList.First(x => x.TargetColumn == _task.PrimaryKey[j])
-                            .GetMappingValue(targetReader);
+                    var objs = new object[_batchNum];
+                    for (int j = 0; j < models.Length; j++)
+                    {
+                        models[j][i] = reader[j];
+                    }
+                    models[i] = objs;
+                    i++;
                 }
-                models[i] = objs;
-                i++;
+                
                 if (i == _batchNum)
                 {
                     CommitBatch(models, _targetCmd);
@@ -131,15 +139,16 @@ namespace DataTool
             }
             if (i > 0)
             {
-                var oddModels = new object[1][];
+                var oddModels = new object[_task.PrimaryKey.Length][];
                 for (int j = 0; j < i; j++)
                 {
-                    oddModels[j] = models[i - 1];
+                    oddModels[j] = models[j];
                 }
                 CommitBatch(oddModels, _targetCmd);
                 result += i;
             }
-            targetReader.Close();
+            reader.Close();
+            return result;
         }
 
         protected virtual void CommitBatch(object[][] objects, DbCommand cmd)
