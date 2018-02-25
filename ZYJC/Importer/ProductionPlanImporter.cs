@@ -24,7 +24,7 @@ namespace ZYJC.Importer
             {
                 Connection = SourceConn,
                 CommandText =
-                    $@"SELECT FBrNo,(select FShortNumber from t_icitem where t_icitem.FItemID=ICmo.FItemID) as FShortNumber,
+                    $@"SELECT FBillNo,(select FShortNumber from t_icitem where t_icitem.FItemID=ICmo.FItemID) as FShortNumber,
 (select FName from t_Item where t_Item.FItemID=ICmo.FBillerID) FBillerID,FCheckDate,(select FBOMNumber from icbom where icbom.FInterID= ICmo.FBomInterID) as FBOMNumber,(select FVersion from icbom where icbom.FInterID= ICmo.FBomInterID) as FVersion,FStatus,FAuxQty,(SELECT FName FROM T_MeasureUnit where T_MeasureUnit.FMeasureUnitID=ICmo.FUnitID)  FUnitID,FType,
 FPlanCommitDate,FPlanFinishDate,(select FName from t_Department where t_Department.FItemID=ICmo.FWorkShop) FWorkShop,FWorkTypeID,FConfirmDate,FGMPBatchNo FROM ICmo   
                                     where FCheckDate between CONVERT(datetime, '{startTime}') and CONVERT(datetime, '{endTime}')"
@@ -41,9 +41,9 @@ FPlanCommitDate,FPlanFinishDate,(select FName from t_Department where t_Departme
                 while (reader.Read())
                 {
                     var plan = new ProductionPlan();
-                    if (reader["FBrNo"] == DBNull.Value)
+                    if (reader["FBillNo"] == DBNull.Value)
                         continue;
-                    plan.PlanCode = reader["FBrNo"].ToString();
+                    plan.PlanCode = reader["FBillNo"].ToString();
                     plan.WorkOrder = reader["FGMPBatchNo"].ToString();
                     plan.MaterielCode = reader["fshortnumber"].ToString();
                     plan.Planner = reader["FBillerID"].ToString();
