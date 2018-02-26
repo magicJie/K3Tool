@@ -27,9 +27,9 @@ namespace ZYJC.Importer
                 CommandText =
                     $@"select * from 
 (select FBOMNumber,(select FNumber from t_icitem where t_icitem.FItemID=icbom.FItemID) fshortnumber,FVersion,FStatus,FQty, (SELECT FName FROM T_MeasureUnit where T_MeasureUnit.FMeasureUnitID=icbom.FUnitID) FUnitID
-,FInterID,FEnterTime from icbom where fshortnumber like '30%') a right join (
-select FEntryID,(select FNumber from t_icitem where t_icitem.FItemID=ICBOMCHILD.FItemID) detailfshortnumber,(select (SELECT FName FROM T_MeasureUnit where T_MeasureUnit.FMeasureUnitID=t_icitem.FUnitID) from t_icitem where t_icitem.FItemID=ICBOMCHILD.FItemID) detailFUnitID,FQty as detailfqty,FInterID from  ICBOMCHILD where detailfshortnumber like '30%' ) b on a.FInterID=b.FInterID
-                       where FEnterTime between CONVERT(datetime, '{startTime}') and CONVERT(datetime, '{endTime}')"
+,FInterID,FEnterTime from icbom) a right join (
+select FEntryID,(select FNumber from t_icitem where t_icitem.FItemID=ICBOMCHILD.FItemID) detailfshortnumber,(select (SELECT FName FROM T_MeasureUnit where T_MeasureUnit.FMeasureUnitID=t_icitem.FUnitID) from t_icitem where t_icitem.FItemID=ICBOMCHILD.FItemID) detailFUnitID,FQty as detailfqty,FInterID from  ICBOMCHILD ) b on a.FInterID=b.FInterID where fshortnumber like '30%' and detailfshortnumber like '30%'
+                       and FEnterTime between CONVERT(datetime, '{startTime}') and CONVERT(datetime, '{endTime}')"
             };
             var reader = sourceCmd.ExecuteReader();
             var relatedCmd = new OracleCommand

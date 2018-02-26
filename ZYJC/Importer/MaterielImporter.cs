@@ -27,7 +27,7 @@ namespace ZYJC.Importer
                 CommandText =
                     $@"select FNumber,FName,FTypeID,(SELECT FName FROM T_MeasureUnit where T_MeasureUnit.FMeasureUnitID=t_icitem.FUnitID) unit,
                                  FModel,FLastCheckDate,FItemID from t_icitem 
-                                    where FNumber like '30%' and FLastCheckDate between CONVERT(datetime, '{startTime}') and CONVERT(datetime, '{endTime}')"
+                                    where FNumber like '30%'"
             };
             var reader = sourceCmd.ExecuteReader();
             var relatedCmd = new OracleCommand()
@@ -41,15 +41,15 @@ namespace ZYJC.Importer
                 while (reader.Read())
                 {
                     var materiel = new Materiel();
-                    if (reader["FShortNumber"]==DBNull.Value)
+                    if (reader["FNumber"] ==DBNull.Value)
                         continue;
-                    materiel.Code = reader["FShortNumber"].ToString();
+                    materiel.Code = reader["FNumber"].ToString();
                     materiel.Name = reader["FName"].ToString();
                     materiel.Type = reader["FTypeID"].ToString();
                     materiel.BaseUnit = reader["unit"].ToString();
                     materiel.Specification = reader["FModel"].ToString();
                     materiel.Flag = 'C';
-                    materiel.K3TimeStamp = DateTime.Parse(reader["FLastCheckDate"].ToString());
+                    materiel.K3TimeStamp = DateTime.Now;
                     materiel.SourceDb = "HW";
                     models[i] = materiel;
                     i++;
