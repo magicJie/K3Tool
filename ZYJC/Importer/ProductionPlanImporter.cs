@@ -25,7 +25,7 @@ namespace ZYJC.Importer
             {
                 Connection = SourceConn,
                 CommandText =
-                    $@"SELECT FBillNo,(select FShortNumber from t_icitem where t_icitem.FItemID=ICmo.FItemID) as FShortNumber,
+                    $@"SELECT FBillNo,(select FNumber from t_icitem where t_icitem.FItemID=ICmo.FItemID) as FShortNumber,
 (select FName from t_Item where t_Item.FItemID=ICmo.FBillerID) FBillerID,FCheckDate,(select FBOMNumber from icbom where icbom.FInterID= ICmo.FBomInterID) as FBOMNumber,(select FVersion from icbom where icbom.FInterID= ICmo.FBomInterID) as FVersion,FStatus,FAuxQty,(SELECT FName FROM T_MeasureUnit where T_MeasureUnit.FMeasureUnitID=ICmo.FUnitID)  FUnitID,FType,
 FPlanCommitDate,FPlanFinishDate,(select FName from t_Department where t_Department.FItemID=ICmo.FWorkShop) FWorkShop,FWorkTypeID,FConfirmDate,FGMPBatchNo FROM ICmo   
                                     where FCheckDate between CONVERT(datetime, '{startTime}') and CONVERT(datetime, '{endTime}')"
