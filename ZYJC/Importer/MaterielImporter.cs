@@ -25,7 +25,7 @@ namespace ZYJC.Importer
             {
                 Connection = SourceConn,
                 CommandText =
-                    $@"select FNumber,FName,FTypeID,(SELECT FName FROM T_MeasureUnit where T_MeasureUnit.FMeasureUnitID=t_icitem.FUnitID) unit,
+                    $@"select FNumber,FName,(select FName from t_SubMessage where t_SubMessage.FInterID=t_icitem.FErpClsID) FTypeName,(SELECT FName FROM T_MeasureUnit where T_MeasureUnit.FMeasureUnitID=t_icitem.FUnitID) unit,
                                  FModel,FLastCheckDate,FItemID from t_icitem 
                                     where FNumber like '30%'"
             };
@@ -45,7 +45,7 @@ namespace ZYJC.Importer
                         continue;
                     materiel.Code = reader["FNumber"].ToString();
                     materiel.Name = reader["FName"].ToString();
-                    materiel.Type = reader["FTypeID"].ToString();
+                    materiel.Type = reader["FTypeName"].ToString();
                     materiel.BaseUnit = reader["unit"].ToString();
                     materiel.Specification = reader["FModel"].ToString();
                     materiel.Flag = 'C';
