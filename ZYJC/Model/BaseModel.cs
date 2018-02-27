@@ -10,5 +10,6 @@ namespace ZYJC.Model
         [DbType(DbDataType = "TimeStamp")]
         public DateTime MESTimeStamp { set; get; }
         public string SourceDb { set; get; }
+        public string ID { set; get; }
     }
 }

@@ -66,6 +66,7 @@ FPlanCommitDate,FPlanFinishDate,(select FName from t_Department where t_Departme
                     plan.Flag = 'C';
                     plan.K3TimeStamp = DateTime.Parse(reader["FCheckDate"].ToString());
                     plan.SourceDb = "HW";
+                    plan.ID = Guid.NewGuid().ToString();
                     models[i] = plan;
                     i++;
                     if (i == BatchNum)
@@ -81,7 +82,7 @@ FPlanCommitDate,FPlanFinishDate,(select FName from t_Department where t_Departme
                     var oddModels = new BaseModel[i];
                     for (int j = 0; j < i; j++)
                     {
-                        oddModels[j] = models[i - 1];
+                        oddModels[j] = models[j];
                     }
                     CommitBatch(oddModels, relatedCmd);
                     result += i;

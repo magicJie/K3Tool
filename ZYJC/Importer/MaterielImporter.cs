@@ -51,6 +51,7 @@ namespace ZYJC.Importer
                     materiel.Flag = 'C';
                     materiel.K3TimeStamp = DateTime.Now;
                     materiel.SourceDb = "HW";
+                    materiel.ID = Guid.NewGuid().ToString();
                     models[i] = materiel;
                     i++;
                     if (i == BatchNum)
@@ -66,7 +67,7 @@ namespace ZYJC.Importer
                     var oddModels = new BaseModel[i];
                     for (int j = 0; j < i; j++)
                     {
-                        oddModels[j] = models[i-1];
+                        oddModels[j] = models[j];
                     }
                     CommitBatch(oddModels, relatedCmd);
                     result += i;
