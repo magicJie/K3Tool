@@ -44,8 +44,8 @@ FPlanCommitDate,FPlanFinishDate,(select FName from t_Department where t_Departme
                     var plan = new ProductionPlan();
                     if (reader["FBillNo"] == DBNull.Value)
                         continue;
-                    //武汉调账只要"JP"开头单据，孝感套账只需要“BB”开头单据
-                    if(!reader["FBillNo"].ToString().ToUpper().StartsWith(ConfigurationManager.AppSettings["PlanCodePrefix"]))
+                    //武汉套账只要"JP"开头单据，孝感套账只需要“BB”开头单据
+                    if (!reader["FBillNo"].ToString().ToUpper().StartsWith(ConfigurationManager.AppSettings["PlanCodePrefix"]))
                         continue;
                     plan.PlanCode = reader["FBillNo"].ToString();
                     plan.WorkOrder = reader["FGMPBatchNo"].ToString();
