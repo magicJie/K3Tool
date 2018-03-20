@@ -649,15 +649,17 @@ namespace K3Tool.Extend
                 var headliList = new List<ICStockBill>();
                 var bodyliList = new List<ICStockBillEntry>();
                 var recordlist = new List<string>();
-                var headsqlstring = string.Format(@"select distinct t8.FMZNO as 门诊号,t1.FBillDate as 录入时间,t7.FNumber 录入人,t5.FName 医生id,t6.FNumber 科室id, t1.FMZSaleID 
-                                                    from T_Med_MZSale t1
-                                                    left join t_MED_MZSALEDETAIL t2 on t2.FMZSaleID=t1.FMZSaleID
-                                                    left join t_FEE_MZFEEINFO t3 on t3.FMZFEEINFOID=t2.FMZFEEINFOID
-                                                    left join V_MZ_ADVICE t4 on t4.FADVICEID=t3.FADVICEID
-                                                    left join T_SYS_USER t5 on t5.FUSERID=t4.FADVICEUSERID
-                                                    left join T_Sys_Group t6 on t6.FGroupID = t1.FRecvGroupID
-                                                    left join T_SYS_USER t7 on t7.FUSERID=t1.FBillUserID
-                                                    join T_BIZ_PATIENT t8 on t8.FPATIENTID=t2.FPATIENTID
+                var headsqlstring = string.Format(@"select t1.FMZSaleID,t8.FMZNO as 门诊号,t1.FBillDate as 录入时间,t7.FNumber 录入人,t6.FNumber 科室id,
+		                                            case 
+		                                            when t3.FBillUser is not null then t3.FBillUser
+		                                            else (select a1.FBillUser from t_FEE_MZFEEINFO a1 where a1.FMZFEEINFOID=t2.FOriginalFeeInfoID)
+		                                            end 医师
+		                                            from T_Med_MZSale t1
+		                                            left join t_MED_MZSALEDETAIL t2 on t2.FMZSaleID=t1.FMZSaleID
+		                                            left join t_FEE_MZFEEINFO t3 on t3.FMZFEEINFOID=t2.FMZFEEINFOID
+		                                            left join T_Sys_Group t6 on t6.FGroupID = t1.FRecvGroupID
+		                                            left join T_SYS_USER t7 on t7.FUSERID=t1.FBillUserID
+		                                            join T_BIZ_PATIENT t8 on t8.FPATIENTID=t2.FPATIENTID
                                                     where t1.kindeestate is null and t1.FBillDate>='{0}' and t1.FBillDate<='{1}'", kstime, jstime);
                 var bodysqlstring = @"select b.FNumber as 收费项目id,FQuantity as 实发数量,a.FUnit as 最小单位,a.FCheckPrice as 新单价,a.FCheckAmt as 新总价格,c.FNumber as 发药库房,a.FMZSaleDetailID, a.FMZSaleID 
                                      from T_Med_MZSaleDetail a
@@ -681,7 +683,7 @@ namespace K3Tool.Extend
                         FDeptID = itemRow["科室id"].ToString(),
                         FEmpID = itemRow["录入人"].ToString(),
                         FSupplyID = itemRow["科室id"].ToString(),
-                        FHeadSelfB0154 = itemRow["医生id"].ToString(),
+                        FHeadSelfB0154 = itemRow["医师"].ToString(),
                         FInterID = number + i
                     };
                     headliList.Add(head);
