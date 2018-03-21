@@ -65,7 +65,8 @@ FPlanCommitDate,FPlanFinishDate,(select FName from t_Department where t_Departme
                     plan.WorkShop = reader["FWorkShop"].ToString();
                     plan.Flag = 'C';
                     plan.K3TimeStamp = DateTime.Parse(reader["FCheckDate"].ToString());
-                    plan.SourceDb = "FH";
+                    plan.SourceDb = "XG";
+                    plan.Line ="FH";
                     plan.ID = Guid.NewGuid().ToString();
                     models[i] = plan;
                     i++;

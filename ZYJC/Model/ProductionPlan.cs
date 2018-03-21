@@ -24,5 +24,6 @@ namespace ZYJC.Model
         [DbType(DbDataType = "TimeStamp")]
         public DateTime PlanEndTime { set; get; }
         public string WorkShop { set; get; }
+        public string Line { set; get; }
     }
 }

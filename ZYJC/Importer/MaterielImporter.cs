@@ -50,7 +50,7 @@ namespace ZYJC.Importer
                     materiel.Specification = reader["FModel"].ToString();
                     materiel.Flag = 'C';
                     materiel.K3TimeStamp = DateTime.Now;
-                    materiel.SourceDb = "FH";
+                    materiel.SourceDb = "XG";
                     materiel.ID = Guid.NewGuid().ToString();
                     models[i] = materiel;
                     i++;

@@ -57,7 +57,7 @@ select FEntryID,(select FNumber from t_icitem where t_icitem.FItemID=ICBOMCHILD.
                     bom.DetailUnit = reader["detailFUnitID"].ToString();
                     bom.Flag = 'C';
                     bom.K3TimeStamp = DateTime.Parse(reader["FEnterTime"].ToString());
-                    bom.SourceDb = "FH";
+                    bom.SourceDb = "XG";
                     bom.ID = Guid.NewGuid().ToString();
                     models[i] = bom;
                     i++;
