@@ -90,23 +90,179 @@ namespace ZYJC.Importer
         public override int UpdateImport(DateTime startTime, DateTime endTime)
         {
             var a = BackUpdate(startTime, endTime);
-            var b = UpdateImport(startTime, endTime);
+            var b = Update(startTime, endTime);
             return a + b;
         }
 
         private int BackUpdate(DateTime startTime, DateTime endTime)
         {
+            var result = 0;
+            SourceConn.Open();
+            RelatedConn.Open();
             var readCmd= new OracleCommand()
             {
                 Connection = RelatedConn,
-                CommandText = "select id from "
+                CommandText = $"select Code from materiel"
             };
-            return 0;
+            var updateCmd = new OracleCommand
+            {
+                Connection = RelatedConn,
+                CommandText = $@"update materiel set flag='D' where FNumber=:FNumber"
+            };
+            updateCmd.Parameters.Add(new OracleParameter("FNumber", ""));
+            updateCmd.Prepare();
+            var reader = readCmd.ExecuteReader();
+            var sourceCmd = new SqlCommand
+            {
+                Connection = SourceConn,
+                CommandText = $@"select FNumber,FName,(select FName from t_SubMessage where t_SubMessage.FInterID=t_icitem.FErpClsID) FTypeName,(SELECT FName FROM T_MeasureUnit where T_MeasureUnit.FMeasureUnitID=t_icitem.FUnitID) unit,
+                                 FModel, FLastCheckDate, FItemID from t_icitem where FNumber like '30%' and FNumber=@FNumber"
+            };
+            sourceCmd.Parameters.Add(new SqlParameter("FNumber", ""));
+            sourceCmd.Prepare();
+            while (reader.Read())
+            {
+                sourceCmd.Parameters[0].Value = reader[0];
+                if (sourceCmd.ExecuteScalar() == DBNull.Value)//如果找不到了，则说明源对应的行被删除，需要标记中间表数据为删除状态
+                {
+                    updateCmd.Parameters[0].Value = reader[0];
+                    updateCmd.ExecuteNonQuery();
+                    result++;
+                }
+            }
+            return result;
         }
 
         private int Update(DateTime startTime, DateTime endTime)
         {
-            return 0;
+            var result = 0;
+            SourceConn.Open();
+            RelatedConn.Open();
+            //定义批处理的
+            var insertModels = new BaseModel[BatchNum];
+            var updateModels = new BaseModel[BatchNum];
+            var sourceCmd = new SqlCommand
+            {
+                Connection = SourceConn,
+                CommandText =
+                    $@"select FNumber,FName,(select FName from t_SubMessage where t_SubMessage.FInterID=t_icitem.FErpClsID) FTypeName,(SELECT FName FROM T_MeasureUnit where T_MeasureUnit.FMeasureUnitID=t_icitem.FUnitID) unit,
+                                 FModel,FLastCheckDate,FItemID from t_icitem 
+                                    where FNumber like '30%'"
+            };
+            var relatedCmd = new OracleCommand
+            {
+                Connection = RelatedConn,
+                CommandText = "select ID from Materiel where FNumber=:FNumber"
+            };
+            relatedCmd.Parameters.Add(new OracleParameter("FNumber", ""));
+            relatedCmd.Prepare();
+            var reader = sourceCmd.ExecuteReader();
+            var insertCmd = new OracleCommand()
+            {
+                Connection = RelatedConn,
+                CommandText = GetInsertCmdText()
+            };
+            var updateCmd = new OracleCommand()
+            {
+                Connection = RelatedConn,
+                CommandText = GetUpdateCmdText()
+            };
+            try
+            {
+                var i = 0;
+                var j = 0;
+                while (reader.Read())
+                {
+                    var materiel = new Materiel();
+                    if (reader["FNumber"] == DBNull.Value)
+                        continue;
+                    materiel.Code = reader["FNumber"].ToString();
+                    materiel.Name = reader["FName"].ToString();
+                    materiel.Type = reader["FTypeName"].ToString();
+                    materiel.BaseUnit = reader["unit"].ToString();
+                    materiel.Specification = reader["FModel"].ToString();
+                    materiel.Flag = 'C';
+                    materiel.K3TimeStamp = DateTime.Now;
+                    materiel.SourceDb = "XG";
+                    relatedCmd.Parameters[0].Value = materiel.Code;
+                    var id = relatedCmd.ExecuteScalar();
+                    if (id == DBNull.Value)
+                    {
+                        materiel.ID = Guid.NewGuid().ToString();
+                        insertModels[i] = materiel;
+                        i++;
+                        if (i == BatchNum)
+                        {
+                            CommitBatch(insertModels, insertCmd);
+                            result += i;
+                            i = 0;
+                            insertModels = new BaseModel[BatchNum];//重置批
+                        }
+                    }
+                    else
+                    {
+                        materiel.ID = id.ToString();
+                        updateModels[i] = materiel;
+                        j++;
+                        if (j == BatchNum)
+                        {
+                            CommitBatch(updateModels, updateCmd);
+                            result += j;
+                            j = 0;
+                            updateModels = new BaseModel[BatchNum];//重置批
+                        }
+                    }
+
+                    
+                }
+                if (i > 0)
+                {
+                    var oddModels = new BaseModel[i];
+                    for (int k = 0; k < i; k++)
+                    {
+                        oddModels[k] = insertModels[k];
+                    }
+                    CommitBatch(oddModels, insertCmd);
+                    result += i;
+                }
+                if (j > 0)
+                {
+                    var oddModels = new BaseModel[j];
+                    for (int k = 0; k < j; k++)
+                    {
+                        oddModels[k] = insertModels[k];
+                    }
+                    CommitBatch(oddModels, updateCmd);
+                    result += j;
+                }
+                reader.Close();
+            }
+            catch (Exception e)
+            {
+                log4net.LogManager.GetLogger("Logger").Error(e.Message + "\r\n" + sourceCmd.CommandText + "\r\n" + insertCmd.CommandText);
+                throw;
+            }
+            finally
+            {
+                SourceConn.Close();
+                RelatedConn.Close();
+            }
+            return result;
+        }
+
+        public void Insert(Materiel materiel)
+        {
+
+        }
+
+        public void Delete(Materiel materiel)
+        {
+
+        }
+
+        public void Update(Materiel materiel)
+        {
+
         }
     }
 }

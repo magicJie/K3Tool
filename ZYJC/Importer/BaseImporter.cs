@@ -80,5 +80,13 @@ namespace ZYJC.Importer
             return
                 $"insert into {type.Name} ({string.Join(",",propInfos.Select(x => x.Name))}) values({string.Join(",",propInfos.Select(x => ":" + x.Name))})";
         }
+
+        protected virtual string GetUpdateCmdText()
+        {
+            var type = GetModelType();
+            var propInfos = type.GetProperties().Where(x => x.Name != "MESTimeStamp").ToArray();
+            return
+                $"update {type.Name} ({string.Join(",", propInfos.Select(x => x.Name))}) values({string.Join(",", propInfos.Select(x => ":" + x.Name))})";
+        }
     }
 }

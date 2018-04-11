@@ -102,5 +102,201 @@ FPlanCommitDate,FPlanFinishDate,(select FName from t_Department where t_Departme
             }
             return result;
         }
+
+        public override int UpdateImport(DateTime startTime, DateTime endTime)
+        {
+            var a = BackUpdate(startTime, endTime);
+            var b = Update(startTime, endTime);
+            return a + b;
+        }
+
+        private int BackUpdate(DateTime startTime, DateTime endTime)
+        {
+            var result = 0;
+            SourceConn.Open();
+            RelatedConn.Open();
+            var readCmd = new OracleCommand()
+            {
+                Connection = RelatedConn,
+                CommandText = $"select PlanCode from ProductionPlan"
+            };
+            var updateCmd = new OracleCommand
+            {
+                Connection = RelatedConn,
+                CommandText = $@"update ProductionPlan set flag='D' where PlanCode=:PlanCode"
+            };
+            updateCmd.Parameters.Add(new OracleParameter("PlanCode", ""));
+            updateCmd.Prepare();
+            var reader = readCmd.ExecuteReader();
+            var sourceCmd = new SqlCommand
+            {
+                Connection = SourceConn,
+                CommandText = $@"SELECT FBillNo,(select FNumber from t_icitem where t_icitem.FItemID=ICmo.FItemID) as FShortNumber,
+(select FName from t_User where t_User.FUserID=ICmo.FBillerID) FBillerID,FCheckDate,(select FBOMNumber from icbom where icbom.FInterID= ICmo.FBomInterID) as FBOMNumber,(select FVersion from icbom where icbom.FInterID= ICmo.FBomInterID) as FVersion,FStatus,FAuxQty,(SELECT FName FROM T_MeasureUnit where T_MeasureUnit.FMeasureUnitID=ICmo.FUnitID)  FUnitID,FType,
+FPlanCommitDate,FPlanFinishDate,(select FName from t_Department where t_Department.FItemID=ICmo.FWorkShop) FWorkShop,FWorkTypeID,FConfirmDate,FGMPBatchNo FROM ICmo   
+                                    where FStatus=1 and FBillNo=:FBillNo"
+            };
+            sourceCmd.Parameters.Add(new OracleParameter("FBillNo", ""));
+            sourceCmd.Prepare();
+            while (reader.Read())
+            {
+                sourceCmd.Parameters[0].Value = reader[0];
+                if (sourceCmd.ExecuteScalar() == DBNull.Value)//如果找不到了，则说明源对应的行被删除，需要标记中间表数据为删除状态
+                {
+                    updateCmd.Parameters[0].Value = reader[0];
+                    updateCmd.ExecuteNonQuery();
+                    result++;
+                }
+            }
+            return result;
+        }
+
+        private int Update(DateTime startTime, DateTime endTime)
+        {
+            var result = 0;
+            SourceConn.Open();
+            RelatedConn.Open();
+            //定义批处理的
+            var insertModels = new BaseModel[BatchNum];
+            var updateModels = new BaseModel[BatchNum];
+            var sourceCmd = new SqlCommand
+            {
+                Connection = SourceConn,
+                CommandText =
+                    $@"SELECT FBillNo,(select FNumber from t_icitem where t_icitem.FItemID=ICmo.FItemID) as FShortNumber,
+(select FName from t_User where t_User.FUserID=ICmo.FBillerID) FBillerID,FCheckDate,(select FBOMNumber from icbom where icbom.FInterID= ICmo.FBomInterID) as FBOMNumber,(select FVersion from icbom where icbom.FInterID= ICmo.FBomInterID) as FVersion,FStatus,FAuxQty,(SELECT FName FROM T_MeasureUnit where T_MeasureUnit.FMeasureUnitID=ICmo.FUnitID)  FUnitID,FType,
+FPlanCommitDate,FPlanFinishDate,(select FName from t_Department where t_Department.FItemID=ICmo.FWorkShop) FWorkShop,FWorkTypeID,FConfirmDate,FGMPBatchNo FROM ICmo   
+                                    where FStatus=1 and FCheckDate between CONVERT(datetime, '{startTime}') and CONVERT(datetime, '{endTime}')"
+            };
+            var relatedCmd = new OracleCommand
+            {
+                Connection = RelatedConn,
+                CommandText = "select ID from ProductionPlan where PlanCode=:PlanCode"
+            };
+            relatedCmd.Parameters.Add(new OracleParameter("PlanCode", ""));
+            relatedCmd.Prepare();
+            var reader = sourceCmd.ExecuteReader();
+            var insertCmd = new OracleCommand()
+            {
+                Connection = RelatedConn,
+                CommandText = GetInsertCmdText()
+            };
+            var updateCmd = new OracleCommand()
+            {
+                Connection = RelatedConn,
+                CommandText = GetUpdateCmdText()
+            };
+            try
+            {
+                var i = 0;
+                var j = 0;
+                while (reader.Read())
+                {
+                    var plan = new ProductionPlan();
+                    if (reader["FBillNo"] == DBNull.Value)
+                        continue;
+                    //华为只要"JP"开头单据，烽火套账只需要“BB”开头单据
+                    if (!reader["FBillNo"].ToString().ToUpper().StartsWith(ConfigurationManager.AppSettings["PlanCodePrefix"]))
+                        continue;
+                    plan.PlanCode = reader["FBillNo"].ToString();
+                    plan.WorkOrder = reader["FGMPBatchNo"].ToString();
+                    plan.MaterielCode = reader["fshortnumber"].ToString();
+                    plan.Planner = reader["FBillerID"].ToString();
+                    plan.BillDate = DateTime.Parse(reader["FCheckDate"].ToString());
+                    plan.BOMCode = reader["FBOMNumber"].ToString();
+                    plan.BOMVersion = reader["FVersion"].ToString();
+                    plan.OrderState = reader["FStatus"].ToString();
+                    plan.PlanQuantity = reader["FAuxQty"] == DBNull.Value ? 0 : double.Parse(reader["FAuxQty"].ToString());
+                    plan.BaseUnit = reader["FUnitID"].ToString();
+                    plan.ProductionType = reader["FType"].ToString();
+                    if (reader["FPlanCommitDate"] != DBNull.Value)
+                        plan.PlanStartTime = DateTime.Parse(reader["FPlanCommitDate"].ToString());
+                    if (reader["FPlanFinishDate"] != DBNull.Value)
+                        plan.PlanEndTime = DateTime.Parse(reader["FPlanFinishDate"].ToString());
+                    plan.WorkShop = reader["FWorkShop"].ToString();
+                    plan.Flag = 'C';
+                    plan.K3TimeStamp = DateTime.Parse(reader["FCheckDate"].ToString());
+                    plan.SourceDb = "XG";
+                    plan.Line = "FH";
+                    relatedCmd.Parameters[0].Value = plan.PlanCode;
+                    var id = relatedCmd.ExecuteScalar();
+                    if (id == DBNull.Value)
+                    {
+                        plan.ID = Guid.NewGuid().ToString();
+                        insertModels[i] = plan;
+                        i++;
+                        if (i == BatchNum)
+                        {
+                            CommitBatch(insertModels, insertCmd);
+                            result += i;
+                            i = 0;
+                            insertModels = new BaseModel[BatchNum];//重置批
+                        }
+                    }
+                    else
+                    {
+                        plan.ID = id.ToString();
+                        updateModels[i] = plan;
+                        j++;
+                        if (j == BatchNum)
+                        {
+                            CommitBatch(updateModels, updateCmd);
+                            result += j;
+                            j = 0;
+                            updateModels = new BaseModel[BatchNum];//重置批
+                        }
+                    }
+
+
+                }
+                if (i > 0)
+                {
+                    var oddModels = new BaseModel[i];
+                    for (int k = 0; k < i; k++)
+                    {
+                        oddModels[k] = insertModels[k];
+                    }
+                    CommitBatch(oddModels, insertCmd);
+                    result += i;
+                }
+                if (j > 0)
+                {
+                    var oddModels = new BaseModel[j];
+                    for (int k = 0; k < j; k++)
+                    {
+                        oddModels[k] = insertModels[k];
+                    }
+                    CommitBatch(oddModels, updateCmd);
+                    result += j;
+                }
+                reader.Close();
+            }
+            catch (Exception e)
+            {
+                log4net.LogManager.GetLogger("Logger").Error(e.Message + "\r\n" + sourceCmd.CommandText + "\r\n" + insertCmd.CommandText);
+                throw;
+            }
+            finally
+            {
+                SourceConn.Close();
+                RelatedConn.Close();
+            }
+            return result;
+        }
+
+        public void Insert(ProductionPlan productionPlan)
+        {
+
+        }
+
+        public void Delete(ProductionPlan productionPlan)
+        {
+
+        }
+
+        public void Update(ProductionPlan productionPlan)
+        {
+
+        }
     }
 }
