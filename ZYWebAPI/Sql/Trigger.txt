@@ -1,0 +1,17 @@
+--在对应表上创建 更新触发器，监控数据是否有变化，变化即刻通知应用程序  
+CREATE TRIGGER notify_trigger ON  [dbo].[Test]  
+   AFTER UPDATE   
+AS     
+BEGIN    
+    /*  
+        update触发器会在更新数据后，  
+        将更新前的数据保存在deleted表中，更  
+        新后的数据保存在inserted表中。  
+    */  
+    DECLARE @UpdateID NVARCHAR(20)  
+    DECLARE @UpdateContent Varchar(MAX)   
+    set @UpdateID=(select Deleted.C1 from Deleted)   
+    set @UpdateContent=(select Inserted.C2 from Inserted)   
+  
+    EXEC pro_NotifyApp @UpdateID, @UpdateContent  
+END  

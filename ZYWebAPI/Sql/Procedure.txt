@@ -1,0 +1,25 @@
+---通过sql server 2008 调用应用程序    
+alter PROCEDURE  [dbo].[pro_NotifyApp](  
+    @Id NVARCHAR(20),  
+    @Content NVARCHAR(MAX)  
+)       
+AS    
+BEGIN    
+    declare @ServiceUrl as varchar(1000)     
+    
+     PRINT  'http://10.50.10.248:5848/api/data/GetNotify?id=' + @Id + '&message=' + @Content   
+    --通过http协议调用的接口地址'     
+    set @ServiceUrl = 'http://10.50.10.248:5848/api/data/GetNotify?id=' + @Id + '&message=' + @Content    
+    
+    Declare @Object as Int    
+    Declare @ResponseText as Varchar(8000)    
+    
+    Exec sp_OACreate 'MSXML2.XMLHTTP', @Object OUT;    
+    Exec sp_OAMethod @Object, 'open', NULL, 'get',@ServiceUrl,'false'    
+    Exec sp_OAMethod @Object, 'send'    
+    Exec sp_OAMethod @Object, 'responseText', @ResponseText OUTPUT    
+    
+    Select @ResponseText         
+    Exec sp_OADestroy @Object
+END   
+ 

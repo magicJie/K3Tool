@@ -13,6 +13,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DataTool", "DataTool\DataTo
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MagicBox.Common", "..\MagicBox\MagicBox.Common\MagicBox.Common.csproj", "{4539136E-2F6C-4E72-BE3A-9DE59E1337EF}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ZYWebAPI", "ZYWebAPI\ZYWebAPI.csproj", "{62DBB341-8CCB-4DF3-8E1E-D8BF7B65B384}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -61,6 +63,14 @@ Global
 		{4539136E-2F6C-4E72-BE3A-9DE59E1337EF}.Release|Any CPU.Build.0 = Release|Any CPU
 		{4539136E-2F6C-4E72-BE3A-9DE59E1337EF}.Release|x64.ActiveCfg = Release|Any CPU
 		{4539136E-2F6C-4E72-BE3A-9DE59E1337EF}.Release|x64.Build.0 = Release|Any CPU
+		{62DBB341-8CCB-4DF3-8E1E-D8BF7B65B384}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{62DBB341-8CCB-4DF3-8E1E-D8BF7B65B384}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{62DBB341-8CCB-4DF3-8E1E-D8BF7B65B384}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{62DBB341-8CCB-4DF3-8E1E-D8BF7B65B384}.Debug|x64.Build.0 = Debug|Any CPU
+		{62DBB341-8CCB-4DF3-8E1E-D8BF7B65B384}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{62DBB341-8CCB-4DF3-8E1E-D8BF7B65B384}.Release|Any CPU.Build.0 = Release|Any CPU
+		{62DBB341-8CCB-4DF3-8E1E-D8BF7B65B384}.Release|x64.ActiveCfg = Release|Any CPU
+		{62DBB341-8CCB-4DF3-8E1E-D8BF7B65B384}.Release|x64.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

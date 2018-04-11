@@ -89,7 +89,24 @@ namespace ZYJC.Importer
 
         public override int UpdateImport(DateTime startTime, DateTime endTime)
         {
-            throw new NotImplementedException();
+            var a = BackUpdate(startTime, endTime);
+            var b = UpdateImport(startTime, endTime);
+            return a + b;
+        }
+
+        private int BackUpdate(DateTime startTime, DateTime endTime)
+        {
+            var readCmd= new OracleCommand()
+            {
+                Connection = RelatedConn,
+                CommandText = "select id from "
+            };
+            return 0;
+        }
+
+        private int Update(DateTime startTime, DateTime endTime)
+        {
+            return 0;
         }
     }
 }

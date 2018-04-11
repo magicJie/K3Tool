@@ -61,6 +61,8 @@
     <Compile Include="MainForm.Designer.cs">
       <DependentUpon>MainForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="Model\Model.cs" />
+    <Compile Include="Model\ConfigSettings.cs" />
     <Compile Include="Model\Mapping.cs" />
     <Compile Include="Model\Scheme.cs" />
     <Compile Include="Model\DumpTask.cs" />

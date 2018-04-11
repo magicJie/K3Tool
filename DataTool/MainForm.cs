@@ -11,7 +11,7 @@ using DataTool.Model;
 
 namespace DataTool
 {
-    public partial class MainForm : Form
+    public partial class MainForm : Office2007RibbonForm
     {
         public MainForm()
         {
