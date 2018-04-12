@@ -116,8 +116,8 @@ select FEntryID,(select FNumber from t_icitem where t_icitem.FItemID=ICBOMCHILD.
                 Connection = RelatedConn,
                 CommandText = $@"update BOM set flag='D' where BOMCode=:BOMCode and DetailCode=:DetailCode"
             };
-            updateCmd.Parameters.Add(new OracleParameter("BOMCode", ""));
-            updateCmd.Parameters.Add(new OracleParameter("DetailCode", ""));
+            updateCmd.Parameters.Add(new OracleParameter("BOMCode", OracleDbType.Char));
+            updateCmd.Parameters.Add(new OracleParameter("DetailCode", OracleDbType.Char));
             updateCmd.Prepare();
             var reader = readCmd.ExecuteReader();
             var sourceCmd = new SqlCommand
@@ -129,8 +129,8 @@ select FEntryID,(select FNumber from t_icitem where t_icitem.FItemID=ICBOMCHILD.
 select FEntryID,(select FNumber from t_icitem where t_icitem.FItemID=ICBOMCHILD.FItemID) detailfshortnumber,(select (SELECT FName FROM T_MeasureUnit where T_MeasureUnit.FMeasureUnitID=t_icitem.FUnitID) from t_icitem where t_icitem.FItemID=ICBOMCHILD.FItemID) detailFUnitID,FQty as detailfqty,FInterID from  ICBOMCHILD ) b on a.FInterID=b.FInterID where fshortnumber like '30%' and detailfshortnumber like '30%'
                        and (FBOMNumber=:FBOMNumber and FEntryID=:FEntryID)"
             };
-            sourceCmd.Parameters.Add(new OracleParameter("FBOMNumber", ""));
-            sourceCmd.Parameters.Add(new OracleParameter("FEntryID", ""));
+            sourceCmd.Parameters.Add(new SqlParameter("FBOMNumber", System.Data.SqlDbType.Char,8000));
+            sourceCmd.Parameters.Add(new SqlParameter("FEntryID", System.Data.SqlDbType.Char, 8000));
             sourceCmd.Prepare();
             while (reader.Read())
             {
@@ -169,8 +169,8 @@ select FEntryID,(select FNumber from t_icitem where t_icitem.FItemID=ICBOMCHILD.
                 Connection = RelatedConn,
                 CommandText = "select ID from BOM where BOMCode=:BOMCode and DetailCode=:DetailCode"
             };
-            relatedCmd.Parameters.Add(new OracleParameter("BOMCode", ""));
-            relatedCmd.Parameters.Add(new OracleParameter("DetailCode", ""));
+            relatedCmd.Parameters.Add(new OracleParameter("BOMCode", OracleDbType.Char));
+            relatedCmd.Parameters.Add(new OracleParameter("DetailCode", OracleDbType.Char));
             relatedCmd.Prepare();
             var reader = sourceCmd.ExecuteReader();
             var insertCmd = new OracleCommand()
@@ -224,7 +224,7 @@ select FEntryID,(select FNumber from t_icitem where t_icitem.FItemID=ICBOMCHILD.
                     else
                     {
                         bom.ID = id.ToString();
-                        updateModels[i] = bom;
+                        updateModels[j] = bom;
                         j++;
                         if (j == BatchNum)
                         {
@@ -261,7 +261,7 @@ select FEntryID,(select FNumber from t_icitem where t_icitem.FItemID=ICBOMCHILD.
             }
             catch (Exception e)
             {
-                log4net.LogManager.GetLogger("Logger").Error(e.Message + "\r\n" + sourceCmd.CommandText + "\r\n" + insertCmd.CommandText);
+                log4net.LogManager.GetLogger("Logger").Error(e.ToString() + "\r\n" + sourceCmd.CommandText + "\r\n" + insertCmd.CommandText);
                 throw;
             }
             finally

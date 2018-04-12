@@ -27,7 +27,7 @@ namespace ZYWebAPI.Controllers
             materiel.ID = Guid.NewGuid().ToString();
             var importer = new MaterielImporter();
             importer.Insert(materiel);
-            return "";
+            return "Insert Materiel Success!";
         }
 
         public string UpdateMateriel()
@@ -44,7 +44,7 @@ namespace ZYWebAPI.Controllers
             //materiel.ID = Guid.NewGuid().ToString();
             var importer = new MaterielImporter();
             importer.Update(materiel);
-            return "";
+            return "Update Materiel Success!";
         }
 
         public string DeleteMateriel()
@@ -53,7 +53,7 @@ namespace ZYWebAPI.Controllers
             materiel.Code = HttpContext.Current.Request["FNumber"];
             var importer = new MaterielImporter();
             importer.Delete(materiel);
-            return "";
+            return "Delete Materiel Success!";
         }
 
         public string InsertBOM()
@@ -75,7 +75,7 @@ namespace ZYWebAPI.Controllers
             bom.ID = Guid.NewGuid().ToString();
             var importer = new BOMImporter();
             importer.Insert(bom);
-            return "";
+            return "Insert BOM Success!";
         }
 
         public string UpdateBOM()
@@ -97,7 +97,7 @@ namespace ZYWebAPI.Controllers
             //bom.ID = Guid.NewGuid().ToString();
             var importer = new BOMImporter();
             importer.Update(bom);
-            return "";
+            return "Update BOM Success!";
         }
 
         public string DeleteBOM()
@@ -107,7 +107,7 @@ namespace ZYWebAPI.Controllers
             bom.DetailCode = HttpContext.Current.Request["FEntryID"];
             var importer = new BOMImporter();
             importer.Delete(bom);
-            return "";
+            return "Delete BOM Success!";
         }
 
         public string InsertProductionPlan()
@@ -141,7 +141,7 @@ namespace ZYWebAPI.Controllers
             plan.ID = Guid.NewGuid().ToString();
             var importer = new ProductionPlanImporter();
             importer.Insert(plan);
-            return "";
+            return "Insert ProductionPlan Success!";
         }
 
         public string UpdateProductionPlan()
@@ -175,7 +175,7 @@ namespace ZYWebAPI.Controllers
             //plan.ID = Guid.NewGuid().ToString();
             var importer = new ProductionPlanImporter();
             importer.Update(plan);
-            return "";
+            return "Update Production Success!";
         }
 
         public string DeleteProductionPlan()
@@ -184,12 +184,15 @@ namespace ZYWebAPI.Controllers
             if (HttpContext.Current.Request["FBillNo"] == "")
                 return "";
             //华为只要"JP"开头单据，烽火套账只需要“BB”开头单据
-            if (!HttpContext.Current.Request["FBillNo"].ToUpper().StartsWith(ConfigurationManager.AppSettings["PlanCodePrefix"]))
+            if (HttpContext.Current.Request["DataSource"] == "HW" && !HttpContext.Current.Request["FBillNo"].ToUpper().StartsWith("JP") ||
+                HttpContext.Current.Request["DataSource"] == "FH" && !HttpContext.Current.Request["FBillNo"].ToUpper().StartsWith("BB"))
+            {
                 return "";
+            }
             plan.PlanCode = HttpContext.Current.Request["FBillNo"];
             var importer = new ProductionPlanImporter();
             importer.Delete(plan);
-            return "";
+            return "Delete ProductionPlan Success!";
         }
     }
 }

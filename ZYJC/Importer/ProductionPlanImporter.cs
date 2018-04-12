@@ -92,7 +92,7 @@ FPlanCommitDate,FPlanFinishDate,(select FName from t_Department where t_Departme
             }
             catch (Exception e)
             {
-                log4net.LogManager.GetLogger("Logger").Error(e.Message + "\r\n" + sourceCmd.CommandText + "\r\n" + relatedCmd.CommandText);
+                log4net.LogManager.GetLogger("Logger").Error(e.ToString() + "\r\n" + sourceCmd.CommandText + "\r\n" + relatedCmd.CommandText);
                 throw;
             }
             finally
@@ -125,7 +125,7 @@ FPlanCommitDate,FPlanFinishDate,(select FName from t_Department where t_Departme
                 Connection = RelatedConn,
                 CommandText = $@"update ProductionPlan set flag='D' where PlanCode=:PlanCode"
             };
-            updateCmd.Parameters.Add(new OracleParameter("PlanCode", ""));
+            updateCmd.Parameters.Add(new OracleParameter("PlanCode", OracleDbType.Char));
             updateCmd.Prepare();
             var reader = readCmd.ExecuteReader();
             var sourceCmd = new SqlCommand
@@ -136,7 +136,7 @@ FPlanCommitDate,FPlanFinishDate,(select FName from t_Department where t_Departme
 FPlanCommitDate,FPlanFinishDate,(select FName from t_Department where t_Department.FItemID=ICmo.FWorkShop) FWorkShop,FWorkTypeID,FConfirmDate,FGMPBatchNo FROM ICmo   
                                     where FStatus=1 and FBillNo=:FBillNo"
             };
-            sourceCmd.Parameters.Add(new OracleParameter("FBillNo", ""));
+            sourceCmd.Parameters.Add(new SqlParameter("FBillNo", System.Data.SqlDbType.Char,8000));
             sourceCmd.Prepare();
             while (reader.Read())
             {
@@ -173,7 +173,7 @@ FPlanCommitDate,FPlanFinishDate,(select FName from t_Department where t_Departme
                 Connection = RelatedConn,
                 CommandText = "select ID from ProductionPlan where PlanCode=:PlanCode"
             };
-            relatedCmd.Parameters.Add(new OracleParameter("PlanCode", ""));
+            relatedCmd.Parameters.Add(new OracleParameter("PlanCode", OracleDbType.Char));
             relatedCmd.Prepare();
             var reader = sourceCmd.ExecuteReader();
             var insertCmd = new OracleCommand()
@@ -236,7 +236,7 @@ FPlanCommitDate,FPlanFinishDate,(select FName from t_Department where t_Departme
                     else
                     {
                         plan.ID = id.ToString();
-                        updateModels[i] = plan;
+                        updateModels[j] = plan;
                         j++;
                         if (j == BatchNum)
                         {
@@ -273,7 +273,7 @@ FPlanCommitDate,FPlanFinishDate,(select FName from t_Department where t_Departme
             }
             catch (Exception e)
             {
-                log4net.LogManager.GetLogger("Logger").Error(e.Message + "\r\n" + sourceCmd.CommandText + "\r\n" + insertCmd.CommandText);
+                log4net.LogManager.GetLogger("Logger").Error(e.ToString() + "\r\n" + sourceCmd.CommandText + "\r\n" + insertCmd.CommandText);
                 throw;
             }
             finally

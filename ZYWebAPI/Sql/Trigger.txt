@@ -14,4 +14,5 @@ BEGIN
     set @UpdateContent=(select Inserted.C2 from Inserted)   
   
     EXEC pro_NotifyApp @UpdateID, @UpdateContent  
-END  
+END
+
