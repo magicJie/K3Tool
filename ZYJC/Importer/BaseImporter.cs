@@ -54,7 +54,6 @@ namespace ZYJC.Importer
                     for (var j = 0; j < modelList.Length; j++)
                     {
                         arry[i][j] = propertyInfos[i].GetValue(modelList[j]);
-                        log4net.LogManager.GetLogger("Logger").Debug($@"{i},{j}.{propertyInfos[i].Name}");
                     }
                 }
                 for (var i = 0; i < propertyInfos.Length; i++)
@@ -86,7 +85,7 @@ namespace ZYJC.Importer
         {
             var type = GetModelType();
             var propInfos = type.GetProperties().Where(x => x.Name != "MESTimeStamp").ToArray();
-            return $@"update {type.Name} set {string.Join(" and ",propInfos.Select(x=>x.Name +"=" +":"+x.Name))}";
+            return $@"update {type.Name} set {string.Join(",",propInfos.Select(x=>x.Name +"=" +":"+x.Name))}";
         }
     }
 }

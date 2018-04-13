@@ -178,7 +178,7 @@ namespace ZYJC.Importer
             var updateCmd = new OracleCommand()
             {
                 Connection = RelatedConn,
-                CommandText = GetUpdateCmdText()
+                CommandText = GetUpdateCmdText()+ $@" where Code=:Code"
             };
             try
             {
@@ -199,7 +199,7 @@ namespace ZYJC.Importer
                     materiel.SourceDb = "XG";
                     relatedCmd.Parameters[0].Value = materiel.Code;
                     var id = relatedCmd.ExecuteScalar();
-                    if (id == DBNull.Value)
+                    if (id == null)
                     {
                         materiel.ID = Guid.NewGuid().ToString();
                         insertModels[i] = materiel;
@@ -241,7 +241,7 @@ namespace ZYJC.Importer
                     var oddModels = new BaseModel[j];
                     for (int k = 0; k < j; k++)
                     {
-                        oddModels[k] = insertModels[k];
+                        oddModels[k] = updateModels[k];
                     }
                     CommitBatch(oddModels, updateCmd);
                     result += j;

@@ -43,17 +43,17 @@ select FEntryID,(select FNumber from t_icitem where t_icitem.FItemID=ICBOMCHILD.
                 while (reader.Read())
                 {
                     var bom = new BOM();
-                    if (reader["FBOMNumber"]==DBNull.Value)
+                    if (reader["FBOMNumber"] == DBNull.Value)
                         continue;
                     bom.BOMCode = reader["FBOMNumber"].ToString();
                     bom.MaterielCode = reader["fshortnumber"].ToString();
                     bom.Version = reader["FVersion"].ToString();
                     bom.UseState = reader["FStatus"].ToString();
-                    bom.MaterielQuantity = reader["FQty"]==DBNull.Value?0: double.Parse(reader["FQty"].ToString());
+                    bom.MaterielQuantity = reader["FQty"] == DBNull.Value ? 0 : double.Parse(reader["FQty"].ToString());
                     bom.MaterielUnit = reader["FunitID"].ToString();
                     bom.DetailCode = reader["FEntryID"].ToString();
                     bom.DetailMaterielCode = reader["detailfshortnumber"].ToString();
-                    bom.DetailQuantity = reader["detailfqty"] ==DBNull.Value?0: double.Parse(reader["FQty"].ToString());
+                    bom.DetailQuantity = reader["detailfqty"] == DBNull.Value ? 0 : double.Parse(reader["FQty"].ToString());
                     bom.DetailUnit = reader["detailFUnitID"].ToString();
                     bom.Flag = 'C';
                     bom.K3TimeStamp = DateTime.Parse(reader["FEnterTime"].ToString());
@@ -106,42 +106,55 @@ select FEntryID,(select FNumber from t_icitem where t_icitem.FItemID=ICBOMCHILD.
             var result = 0;
             SourceConn.Open();
             RelatedConn.Open();
-            var readCmd = new OracleCommand()
+            try
             {
-                Connection = RelatedConn,
-                CommandText = $"select BOMCode,DetailCode from BOM"
-            };
-            var updateCmd = new OracleCommand
-            {
-                Connection = RelatedConn,
-                CommandText = $@"update BOM set flag='D' where BOMCode=:BOMCode and DetailCode=:DetailCode"
-            };
-            updateCmd.Parameters.Add(new OracleParameter("BOMCode", OracleDbType.Char));
-            updateCmd.Parameters.Add(new OracleParameter("DetailCode", OracleDbType.Char));
-            updateCmd.Prepare();
-            var reader = readCmd.ExecuteReader();
-            var sourceCmd = new SqlCommand
-            {
-                Connection = SourceConn,
-                CommandText = $@"select * from 
+                var readCmd = new OracleCommand()
+                {
+                    Connection = RelatedConn,
+                    CommandText = $"select BOMCode,DetailCode from BOM"
+                };
+                var updateCmd = new OracleCommand
+                {
+                    Connection = RelatedConn,
+                    CommandText = $@"update BOM set flag='D' where BOMCode=:BOMCode and DetailCode=:DetailCode"
+                };
+                updateCmd.Parameters.Add(new OracleParameter("BOMCode", OracleDbType.Char));
+                updateCmd.Parameters.Add(new OracleParameter("DetailCode", OracleDbType.Char));
+                updateCmd.Prepare();
+                var reader = readCmd.ExecuteReader();
+                var sourceCmd = new SqlCommand
+                {
+                    Connection = SourceConn,
+                    CommandText = $@"select * from 
 (select FBOMNumber,(select FNumber from t_icitem where t_icitem.FItemID=icbom.FItemID) fshortnumber,FVersion,FStatus,FQty, (SELECT FName FROM T_MeasureUnit where T_MeasureUnit.FMeasureUnitID=icbom.FUnitID) FUnitID
 ,FInterID,FEnterTime from icbom) a right join (
 select FEntryID,(select FNumber from t_icitem where t_icitem.FItemID=ICBOMCHILD.FItemID) detailfshortnumber,(select (SELECT FName FROM T_MeasureUnit where T_MeasureUnit.FMeasureUnitID=t_icitem.FUnitID) from t_icitem where t_icitem.FItemID=ICBOMCHILD.FItemID) detailFUnitID,FQty as detailfqty,FInterID from  ICBOMCHILD ) b on a.FInterID=b.FInterID where fshortnumber like '30%' and detailfshortnumber like '30%'
                        and (FBOMNumber=:FBOMNumber and FEntryID=:FEntryID)"
-            };
-            sourceCmd.Parameters.Add(new SqlParameter("FBOMNumber", System.Data.SqlDbType.Char,8000));
-            sourceCmd.Parameters.Add(new SqlParameter("FEntryID", System.Data.SqlDbType.Char, 8000));
-            sourceCmd.Prepare();
-            while (reader.Read())
-            {
-                sourceCmd.Parameters[0].Value = reader[0];
-                if (sourceCmd.ExecuteScalar() == DBNull.Value)//如果找不到了，则说明源对应的行被删除，需要标记中间表数据为删除状态
+                };
+                sourceCmd.Parameters.Add(new SqlParameter("FBOMNumber", System.Data.SqlDbType.Char, 8000));
+                sourceCmd.Parameters.Add(new SqlParameter("FEntryID", System.Data.SqlDbType.Char, 8000));
+                sourceCmd.Prepare();
+                while (reader.Read())
                 {
-                    updateCmd.Parameters[0].Value = reader[0];
-                    updateCmd.Parameters[1].Value = reader[1];
-                    updateCmd.ExecuteNonQuery();
-                    result++;
+                    sourceCmd.Parameters[0].Value = reader[0];
+                    if (sourceCmd.ExecuteScalar() == DBNull.Value)//如果找不到了，则说明源对应的行被删除，需要标记中间表数据为删除状态
+                    {
+                        updateCmd.Parameters[0].Value = reader[0];
+                        updateCmd.Parameters[1].Value = reader[1];
+                        updateCmd.ExecuteNonQuery();
+                        result++;
+                    }
                 }
+            }
+            catch (Exception ex)
+            {
+                log4net.LogManager.GetLogger("Logger").Error(ex.ToString());
+                throw;
+            }
+            finally
+            {
+                SourceConn.Close();
+                RelatedConn.Close();
             }
             return result;
         }
@@ -181,7 +194,7 @@ select FEntryID,(select FNumber from t_icitem where t_icitem.FItemID=ICBOMCHILD.
             var updateCmd = new OracleCommand()
             {
                 Connection = RelatedConn,
-                CommandText = GetUpdateCmdText()
+                CommandText = GetUpdateCmdText() + $@" where BOMCode=:BOMCode and DetailCode=:DetailCode"
             };
             try
             {
@@ -208,7 +221,7 @@ select FEntryID,(select FNumber from t_icitem where t_icitem.FItemID=ICBOMCHILD.
                     relatedCmd.Parameters[0].Value = bom.BOMCode;
                     relatedCmd.Parameters[1].Value = bom.DetailCode;
                     var id = relatedCmd.ExecuteScalar();
-                    if (id == DBNull.Value)
+                    if (id == null)
                     {
                         bom.ID = Guid.NewGuid().ToString();
                         insertModels[i] = bom;
@@ -234,8 +247,6 @@ select FEntryID,(select FNumber from t_icitem where t_icitem.FItemID=ICBOMCHILD.
                             updateModels = new BaseModel[BatchNum];//重置批
                         }
                     }
-
-
                 }
                 if (i > 0)
                 {
@@ -252,7 +263,7 @@ select FEntryID,(select FNumber from t_icitem where t_icitem.FItemID=ICBOMCHILD.
                     var oddModels = new BaseModel[j];
                     for (int k = 0; k < j; k++)
                     {
-                        oddModels[k] = insertModels[k];
+                        oddModels[k] = updateModels[k];
                     }
                     CommitBatch(oddModels, updateCmd);
                     result += j;
