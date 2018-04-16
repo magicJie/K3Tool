@@ -72,7 +72,7 @@ FPlanCommitDate,FPlanFinishDate,(select FName from t_Department where t_Departme
                     i++;
                     if (i == BatchNum)
                     {
-                        CommitBatch(models, relatedCmd);
+                        CommitBatch(relatedCmd, models);
                         result += i;
                         i = 0;
                         models = new BaseModel[BatchNum];//重置批
@@ -85,7 +85,7 @@ FPlanCommitDate,FPlanFinishDate,(select FName from t_Department where t_Departme
                     {
                         oddModels[j] = models[j];
                     }
-                    CommitBatch(oddModels, relatedCmd);
+                    CommitBatch(relatedCmd, oddModels);
                     result += i;
                 }
                 reader.Close();
@@ -240,7 +240,7 @@ FPlanCommitDate,FPlanFinishDate,(select FName from t_Department where t_Departme
                         i++;
                         if (i == BatchNum)
                         {
-                            CommitBatch(insertModels, insertCmd);
+                            CommitBatch(insertCmd, insertModels);
                             result += i;
                             i = 0;
                             insertModels = new BaseModel[BatchNum];//重置批
@@ -253,7 +253,7 @@ FPlanCommitDate,FPlanFinishDate,(select FName from t_Department where t_Departme
                         j++;
                         if (j == BatchNum)
                         {
-                            CommitBatch(updateModels, updateCmd);
+                            CommitBatch(updateCmd, updateModels);
                             result += j;
                             j = 0;
                             updateModels = new BaseModel[BatchNum];//重置批
@@ -267,7 +267,7 @@ FPlanCommitDate,FPlanFinishDate,(select FName from t_Department where t_Departme
                     {
                         oddModels[k] = insertModels[k];
                     }
-                    CommitBatch(oddModels, insertCmd);
+                    CommitBatch(insertCmd, oddModels);
                     result += i;
                 }
                 if (j > 0)
@@ -277,7 +277,7 @@ FPlanCommitDate,FPlanFinishDate,(select FName from t_Department where t_Departme
                     {
                         oddModels[k] = updateModels[k];
                     }
-                    CommitBatch(oddModels, updateCmd);
+                    CommitBatch(updateCmd, oddModels);
                     result += j;
                 }
                 reader.Close();
@@ -295,19 +295,13 @@ FPlanCommitDate,FPlanFinishDate,(select FName from t_Department where t_Departme
             return result;
         }
 
-        public void Insert(ProductionPlan productionPlan)
+        protected override string GetDeleteCmdText()
         {
-
+            return $@"update ProductionPlan set flag='D' where PlanCode=:PlanCode";
         }
-
-        public void Delete(ProductionPlan productionPlan)
+        protected override void AddDeleteParameter(OracleCommand cmd, BaseModel model)
         {
-
-        }
-
-        public void Update(ProductionPlan productionPlan)
-        {
-
+            cmd.Parameters.Add(new OracleParameter("PlanCode", ((ProductionPlan)model).PlanCode));
         }
     }
 }

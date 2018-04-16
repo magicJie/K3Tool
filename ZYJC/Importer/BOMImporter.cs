@@ -63,7 +63,7 @@ select FEntryID,(select FNumber from t_icitem where t_icitem.FItemID=ICBOMCHILD.
                     i++;
                     if (i == BatchNum)
                     {
-                        CommitBatch(models, relatedCmd);
+                        CommitBatch(relatedCmd, models);
                         result += i;
                         i = 0;
                         models = new BaseModel[BatchNum];//重置批
@@ -76,7 +76,7 @@ select FEntryID,(select FNumber from t_icitem where t_icitem.FItemID=ICBOMCHILD.
                     {
                         oddModels[j] = models[j];
                     }
-                    CommitBatch(oddModels, relatedCmd);
+                    CommitBatch(relatedCmd, oddModels);
                     result += i;
                 }
                 reader.Close();
@@ -228,7 +228,7 @@ select FEntryID,(select FNumber from t_icitem where t_icitem.FItemID=ICBOMCHILD.
                         i++;
                         if (i == BatchNum)
                         {
-                            CommitBatch(insertModels, insertCmd);
+                            CommitBatch(insertCmd, insertModels);
                             result += i;
                             i = 0;
                             insertModels = new BaseModel[BatchNum];//重置批
@@ -241,7 +241,7 @@ select FEntryID,(select FNumber from t_icitem where t_icitem.FItemID=ICBOMCHILD.
                         j++;
                         if (j == BatchNum)
                         {
-                            CommitBatch(updateModels, updateCmd);
+                            CommitBatch(updateCmd, updateModels);
                             result += j;
                             j = 0;
                             updateModels = new BaseModel[BatchNum];//重置批
@@ -255,7 +255,7 @@ select FEntryID,(select FNumber from t_icitem where t_icitem.FItemID=ICBOMCHILD.
                     {
                         oddModels[k] = insertModels[k];
                     }
-                    CommitBatch(oddModels, insertCmd);
+                    CommitBatch(insertCmd, oddModels);
                     result += i;
                 }
                 if (j > 0)
@@ -265,7 +265,7 @@ select FEntryID,(select FNumber from t_icitem where t_icitem.FItemID=ICBOMCHILD.
                     {
                         oddModels[k] = updateModels[k];
                     }
-                    CommitBatch(oddModels, updateCmd);
+                    CommitBatch(updateCmd, oddModels);
                     result += j;
                 }
                 reader.Close();
@@ -283,19 +283,14 @@ select FEntryID,(select FNumber from t_icitem where t_icitem.FItemID=ICBOMCHILD.
             return result;
         }
 
-        public void Insert(BOM bom)
+        protected override string GetDeleteCmdText()
         {
-
+            return $@"update BOM set flag='D' where BOMCode=:BOMCode and DetailCode=:DetailCode";
         }
-
-        public void Delete(BOM bom)
+        protected override void AddDeleteParameter(OracleCommand cmd, BaseModel model)
         {
-
-        }
-
-        public void Update(BOM bom)
-        {
-
+            cmd.Parameters.Add(new OracleParameter("BOMCode", ((BOM)model).BOMCode));
+            cmd.Parameters.Add(new OracleParameter("BOMCode", ((BOM)model).DetailCode));
         }
     }
 }

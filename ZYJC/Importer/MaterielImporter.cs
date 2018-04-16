@@ -56,7 +56,7 @@ namespace ZYJC.Importer
                     i++;
                     if (i == BatchNum)
                     {
-                        CommitBatch(models, relatedCmd);
+                        CommitBatch(relatedCmd, models);
                         result += i;
                         i = 0;
                         models=new BaseModel[BatchNum];//重置批
@@ -69,7 +69,7 @@ namespace ZYJC.Importer
                     {
                         oddModels[j] = models[j];
                     }
-                    CommitBatch(oddModels, relatedCmd);
+                    CommitBatch(relatedCmd, oddModels);
                     result += i;
                 }
                 reader.Close();
@@ -109,7 +109,7 @@ namespace ZYJC.Importer
                 var updateCmd = new OracleCommand
                 {
                     Connection = RelatedConn,
-                    CommandText = $@"update materiel set flag='D' where FNumber=:FNumber"
+                    CommandText = GetDeleteCmdText()
                 };
                 updateCmd.Parameters.Add(new OracleParameter("FNumber",OracleDbType.Char));
                 updateCmd.Prepare();
@@ -206,7 +206,7 @@ namespace ZYJC.Importer
                         i++;
                         if (i == BatchNum)
                         {
-                            CommitBatch(insertModels, insertCmd);
+                            CommitBatch(insertCmd, insertModels);
                             result += i;
                             i = 0;
                             insertModels = new BaseModel[BatchNum];//重置批
@@ -219,7 +219,7 @@ namespace ZYJC.Importer
                         j++;
                         if (j == BatchNum)
                         {
-                            CommitBatch(updateModels, updateCmd);
+                            CommitBatch(updateCmd, updateModels);
                             result += j;
                             j = 0;
                             updateModels = new BaseModel[BatchNum];//重置批
@@ -233,7 +233,7 @@ namespace ZYJC.Importer
                     {
                         oddModels[k] = insertModels[k];
                     }
-                    CommitBatch(oddModels, insertCmd);
+                    CommitBatch(insertCmd, oddModels);
                     result += i;
                 }
                 if (j > 0)
@@ -243,7 +243,7 @@ namespace ZYJC.Importer
                     {
                         oddModels[k] = updateModels[k];
                     }
-                    CommitBatch(oddModels, updateCmd);
+                    CommitBatch(updateCmd, oddModels);
                     result += j;
                 }
                 reader.Close();
@@ -261,19 +261,13 @@ namespace ZYJC.Importer
             return result;
         }
 
-        public void Insert(Materiel materiel)
+        protected override string GetDeleteCmdText()
         {
-
+            return $@"update materiel set flag = 'D' where Code =:Code";
         }
-
-        public void Delete(Materiel materiel)
+        protected override void AddDeleteParameter(OracleCommand cmd, BaseModel model)
         {
-
-        }
-
-        public void Update(Materiel materiel)
-        {
-
+            cmd.Parameters.Add(new OracleParameter("Code", ((Materiel)model).Code));
         }
     }
 }

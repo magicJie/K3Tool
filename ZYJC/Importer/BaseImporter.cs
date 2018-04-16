@@ -12,7 +12,7 @@ namespace ZYJC.Importer
     public class BaseImporter
     {
         public readonly SqlConnection SourceConn = new SqlConnection(ConfigurationManager.ConnectionStrings["source"].ConnectionString);
-        public readonly OracleConnection RelatedConn =new OracleConnection(ConfigurationManager.ConnectionStrings["related"].ConnectionString);
+        public readonly OracleConnection RelatedConn = new OracleConnection(ConfigurationManager.ConnectionStrings["related"].ConnectionString);
         public const int BatchNum = 2000;
 
         public virtual Type GetModelType()
@@ -26,7 +26,7 @@ namespace ZYJC.Importer
         /// <param name="startTime">开始时间</param>
         /// <param name="endTime">结束时间</param>
         /// <returns>导入行数</returns>
-        public virtual int InitImport(DateTime startTime,DateTime endTime)
+        public virtual int InitImport(DateTime startTime, DateTime endTime)
         {
             return 0;
         }
@@ -36,7 +36,7 @@ namespace ZYJC.Importer
             return 0;
         }
 
-        protected virtual void CommitBatch(BaseModel[] modelList, OracleCommand relatedCommand)
+        protected virtual void CommitBatch(OracleCommand relatedCommand, params BaseModel[] modelList)
         {
             var tx = RelatedConn.BeginTransaction();
             try
@@ -68,7 +68,7 @@ namespace ZYJC.Importer
             catch (Exception ex)
             {
                 tx.Rollback();
-                log4net.LogManager.GetLogger("Logger").Error(ex.ToString()+relatedCommand.CommandText);
+                log4net.LogManager.GetLogger("Logger").Error(ex.ToString() + relatedCommand.CommandText);
                 throw;
             }
         }
@@ -78,14 +78,89 @@ namespace ZYJC.Importer
             var type = GetModelType();
             var propInfos = type.GetProperties().Where(x => x.Name != "MESTimeStamp").ToArray();
             return
-                $"insert into {type.Name} ({string.Join(",",propInfos.Select(x => x.Name))}) values({string.Join(",",propInfos.Select(x => ":" + x.Name))})";
+                $"insert into {type.Name} ({string.Join(",", propInfos.Select(x => x.Name))}) values({string.Join(",", propInfos.Select(x => ":" + x.Name))})";
         }
 
         protected virtual string GetUpdateCmdText()
         {
             var type = GetModelType();
             var propInfos = type.GetProperties().Where(x => x.Name != "MESTimeStamp").ToArray();
-            return $@"update {type.Name} set {string.Join(",",propInfos.Select(x=>x.Name +"=" +":"+x.Name))}";
+            return $@"update {type.Name} set {string.Join(",", propInfos.Select(x => x.Name + "=" + ":" + x.Name))}";
+        }
+
+        protected virtual string GetDeleteCmdText() { throw new NotImplementedException(); }
+
+        public virtual void Insert(BaseModel model)
+        {
+            RelatedConn.Open();
+            try
+            {
+                var cmd = new OracleCommand
+                {
+                    Connection = RelatedConn,
+                    CommandText = GetInsertCmdText()
+                };
+                CommitBatch(cmd, model);
+            }
+            catch
+            {
+                throw;
+            }
+            finally
+            {
+                RelatedConn.Close();
+            }
+        }
+
+        public virtual void Update(BaseModel model)
+        {
+            RelatedConn.Open();
+            try
+            {
+                var cmd = new OracleCommand
+                {
+                    Connection = RelatedConn,
+                    CommandText = GetUpdateCmdText()
+                };
+                CommitBatch(cmd, model);
+            }
+            catch
+            {
+                throw;
+            }
+            finally
+            {
+                RelatedConn.Close();
+            }
+        }
+
+        protected virtual void AddDeleteParameter(OracleCommand cmd, BaseModel model)
+        {
+            throw new NotImplementedException();
+        }
+
+        public virtual void Delete(BaseModel model)
+        {
+            RelatedConn.Open();
+            try
+            {
+                var cmd = new OracleCommand
+                {
+                    Connection = RelatedConn,
+                    CommandText = GetDeleteCmdText()
+                };
+                AddDeleteParameter(cmd, model);
+                cmd.ExecuteNonQuery();
+            }
+            catch (Exception ex)
+            {
+                log4net.LogManager.GetLogger("Logger").Error(ex.ToString());
+                throw;
+            }
+            finally
+            {
+                RelatedConn.Close();
+            }
         }
     }
 }
