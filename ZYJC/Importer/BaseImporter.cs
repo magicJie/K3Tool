@@ -53,7 +53,7 @@ namespace ZYJC.Importer
                 {
                     for (var j = 0; j < modelList.Length; j++)
                     {
-                        arry[i][j] = propertyInfos[i].GetValue(modelList[j]);
+                        arry[i][j] = propertyInfos[i].GetValue(modelList[j], null);
                     }
                 }
                 for (var i = 0; i < propertyInfos.Length; i++)
@@ -89,6 +89,10 @@ namespace ZYJC.Importer
         }
 
         protected virtual string GetDeleteCmdText() { throw new NotImplementedException(); }
+
+        public virtual int BackUpdate(DateTime startTime, DateTime endTime) { throw new NotImplementedException(); }
+
+        public virtual int Update(DateTime startTime, DateTime endTime) { throw new NotImplementedException(); }
 
         public virtual void Insert(BaseModel model)
         {
@@ -161,6 +165,16 @@ namespace ZYJC.Importer
             {
                 RelatedConn.Close();
             }
+        }
+
+        public virtual DateTime GetLastUpdateTime()
+        {
+            throw new NotImplementedException();
+        }
+
+        public virtual void SetLastUpdateTime()
+        {
+            throw new NotImplementedException();
         }
     }
 }

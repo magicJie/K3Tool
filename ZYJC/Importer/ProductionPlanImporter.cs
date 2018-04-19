@@ -110,7 +110,7 @@ FPlanCommitDate,FPlanFinishDate,(select FName from t_Department where t_Departme
             return a + b;
         }
 
-        private int BackUpdate(DateTime startTime, DateTime endTime)
+        public int BackUpdate(DateTime startTime, DateTime endTime)
         {
             var result = 0;
             try
@@ -164,7 +164,7 @@ FPlanCommitDate,FPlanFinishDate,(select FName from t_Department where t_Departme
             return result;
         }
 
-        private int Update(DateTime startTime, DateTime endTime)
+        public int Update(DateTime startTime, DateTime endTime)
         {
             var result = 0;
             SourceConn.Open();
@@ -302,6 +302,42 @@ FPlanCommitDate,FPlanFinishDate,(select FName from t_Department where t_Departme
         protected override void AddDeleteParameter(OracleCommand cmd, BaseModel model)
         {
             cmd.Parameters.Add(new OracleParameter("PlanCode", ((ProductionPlan)model).PlanCode));
+        }
+
+        public override DateTime GetLastUpdateTime()
+        {
+            RelatedConn.Open();
+            try
+            {
+                var cmd = new OracleCommand
+                {
+                    Connection = RelatedConn,
+                    CommandText = "select t3 from LastUpdateTime where id=1"
+                };
+                return (DateTime)(cmd.ExecuteScalar());
+            }
+            finally
+            {
+                RelatedConn.Close();
+            }
+        }
+
+        public override void SetLastUpdateTime()
+        {
+            RelatedConn.Open();
+            try
+            {
+                var cmd = new OracleCommand
+                {
+                    Connection = RelatedConn,
+                    CommandText = "update LastUpdateTime set t3=sysdate where id=1"
+                };
+                cmd.ExecuteNonQuery();
+            }
+            finally
+            {
+                RelatedConn.Close();
+            }
         }
     }
 }

@@ -1,0 +1,30 @@
+--物料更新
+CREATE TRIGGER notify_trigger ON[dbo].[t_icitem]
+AFTER UPDATE
+AS
+BEGIN
+/*  
+    update触发器会在更新数据后，  
+    将更新前的数据保存在deleted表中，更  
+    新后的数据保存在inserted表中。  
+*/
+DECLARE @Type NVARCHAR(50)
+DECLARE @FShortNumber NVARCHAR(50)
+DECLARE @FName NVARCHAR(50)
+DECLARE @FTypeID NVARCHAR(50)
+DECLARE @FUnitID NVARCHAR(50)
+DECLARE @FModel NVARCHAR(50)
+DECLARE @FModifyTime NVARCHAR(50)
+DECLARE @FItemID NVARCHAR(50)
+DECLARE @Detail NVARCHAR(50)
+set @Type='UPDATE'
+set @FShortNumber=(select Inserted.FShortNumber from Inserted)
+set @FName=(select Inserted.FName from Inserted)
+set @FTypeID=(select Inserted.FTypeID from Inserted)
+set @FUnitID=(SELECT FName FROM T_MeasureUnit where T_MeasureUnit.FMeasureUnitID = (select Inserted.FUnitID from Inserted))
+set @FModel=(select Inserted.FModel from Inserted)
+set @FModifyTime=(select Inserted.FModifyTime from Inserted)
+set @FItemID=(select Inserted.FItemID from Deleted)
+set @Detail='{FShortNumber:' + @FShortNumber+' ,FName:' + @FName+',FTypeID:' +@FTypeID+',FUnitID:' +@FUnitID+',FModel:' +@FModel+',FModifyTime:' +@FModifyTime+',FItemID:' +@FItemID+',Detail:' +@Detail+'}'
+EXEC pro_NotifyApp @Type, @Detail
+END  

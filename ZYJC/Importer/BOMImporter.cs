@@ -101,7 +101,7 @@ select FEntryID,(select FNumber from t_icitem where t_icitem.FItemID=ICBOMCHILD.
             return a + b;
         }
 
-        private int BackUpdate(DateTime startTime, DateTime endTime)
+        public override int BackUpdate(DateTime startTime, DateTime endTime)
         {
             var result = 0;
             SourceConn.Open();
@@ -159,7 +159,7 @@ select FEntryID,(select FNumber from t_icitem where t_icitem.FItemID=ICBOMCHILD.
             return result;
         }
 
-        private int Update(DateTime startTime, DateTime endTime)
+        public override int Update(DateTime startTime, DateTime endTime)
         {
             var result = 0;
             SourceConn.Open();
@@ -291,6 +291,42 @@ select FEntryID,(select FNumber from t_icitem where t_icitem.FItemID=ICBOMCHILD.
         {
             cmd.Parameters.Add(new OracleParameter("BOMCode", ((BOM)model).BOMCode));
             cmd.Parameters.Add(new OracleParameter("BOMCode", ((BOM)model).DetailCode));
+        }
+
+        public override DateTime GetLastUpdateTime()
+        {
+            RelatedConn.Open();
+            try
+            {
+                var cmd = new OracleCommand
+                {
+                    Connection = RelatedConn,
+                    CommandText = "select t2 from LastUpdateTime where id=1"
+                };
+                return (DateTime)(cmd.ExecuteScalar());
+            }
+            finally
+            {
+                RelatedConn.Close();
+            }
+        }
+
+        public override void SetLastUpdateTime()
+        {
+            RelatedConn.Open();
+            try
+            {
+                var cmd = new OracleCommand
+                {
+                    Connection = RelatedConn,
+                    CommandText = "update LastUpdateTime set t2=sysdate where id=1"
+                };
+                cmd.ExecuteNonQuery();
+            }
+            finally
+            {
+                RelatedConn.Close();
+            }
         }
     }
 }

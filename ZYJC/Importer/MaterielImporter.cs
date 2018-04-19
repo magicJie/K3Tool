@@ -94,7 +94,7 @@ namespace ZYJC.Importer
             return a + b;
         }
 
-        private int BackUpdate(DateTime startTime, DateTime endTime)
+        public int BackUpdate(DateTime startTime, DateTime endTime)
         {
             var result = 0;
             try
@@ -146,7 +146,7 @@ namespace ZYJC.Importer
             return result;
         }
 
-        private int Update(DateTime startTime, DateTime endTime)
+        public int Update(DateTime startTime, DateTime endTime)
         {
             var result = 0;
             SourceConn.Open();
@@ -268,6 +268,45 @@ namespace ZYJC.Importer
         protected override void AddDeleteParameter(OracleCommand cmd, BaseModel model)
         {
             cmd.Parameters.Add(new OracleParameter("Code", ((Materiel)model).Code));
+        }
+
+        public override DateTime GetLastUpdateTime()
+        {
+            RelatedConn.Open();
+            try
+            {
+                var cmd = new OracleCommand
+                {
+                    Connection = RelatedConn,
+                    CommandText = "select t1 from LastUpdateTime where id=1"
+                };
+                var time = cmd.ExecuteScalar();
+                if (time == null)
+                    return new DateTime();
+                return (DateTime)(time);
+            }
+            finally
+            {
+                RelatedConn.Close();
+            }
+        }
+
+        public override void SetLastUpdateTime()
+        {
+            RelatedConn.Open();
+            try
+            {
+                var cmd = new OracleCommand
+                {
+                    Connection = RelatedConn,
+                    CommandText = "update LastUpdateTime set t1=sysdate where id=1"
+                };
+                cmd.ExecuteNonQuery();
+            }
+            finally
+            {
+                RelatedConn.Close();
+            }
         }
     }
 }
