@@ -42,7 +42,7 @@ namespace ZYJC
             var trigger1 = triggerBuilder.Build();
 
             var job = JobBuilder.Create<BackUpdateJob>().WithIdentity(BackUpdateJobId).Build();
-            var job1 = JobBuilder.Create<BackUpdateJob>().WithIdentity(UpdateJobId).Build();
+            var job1 = JobBuilder.Create<UpdateJob>().WithIdentity(UpdateJobId).Build();
             _scheduler.ScheduleJob(job, trigger);
             _scheduler.ScheduleJob(job1, trigger1);
         }

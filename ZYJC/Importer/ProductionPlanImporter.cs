@@ -110,7 +110,7 @@ FPlanCommitDate,FPlanFinishDate,(select FName from t_Department where t_Departme
             return a + b;
         }
 
-        public int BackUpdate(DateTime startTime, DateTime endTime)
+        public override int BackUpdate(DateTime startTime, DateTime endTime)
         {
             var result = 0;
             try
@@ -136,14 +136,14 @@ FPlanCommitDate,FPlanFinishDate,(select FName from t_Department where t_Departme
                     CommandText = $@"SELECT FBillNo,(select FNumber from t_icitem where t_icitem.FItemID=ICmo.FItemID) as FShortNumber,
 (select FName from t_User where t_User.FUserID=ICmo.FBillerID) FBillerID,FCheckDate,(select FBOMNumber from icbom where icbom.FInterID= ICmo.FBomInterID) as FBOMNumber,(select FVersion from icbom where icbom.FInterID= ICmo.FBomInterID) as FVersion,FStatus,FAuxQty,(SELECT FName FROM T_MeasureUnit where T_MeasureUnit.FMeasureUnitID=ICmo.FUnitID)  FUnitID,FType,
 FPlanCommitDate,FPlanFinishDate,(select FName from t_Department where t_Department.FItemID=ICmo.FWorkShop) FWorkShop,FWorkTypeID,FConfirmDate,FGMPBatchNo FROM ICmo   
-                                    where FStatus=1 and FBillNo=:FBillNo"
+                                    where FStatus=1 and FBillNo=@FBillNo"
                 };
                 sourceCmd.Parameters.Add(new SqlParameter("FBillNo", System.Data.SqlDbType.Char, 8000));
                 sourceCmd.Prepare();
                 while (reader.Read())
                 {
                     sourceCmd.Parameters[0].Value = reader[0];
-                    if (sourceCmd.ExecuteScalar() == DBNull.Value)//如果找不到了，则说明源对应的行被删除，需要标记中间表数据为删除状态
+                    if (sourceCmd.ExecuteScalar() == null)//如果找不到了，则说明源对应的行被删除，需要标记中间表数据为删除状态
                     {
                         updateCmd.Parameters[0].Value = reader[0];
                         updateCmd.ExecuteNonQuery();
@@ -164,7 +164,7 @@ FPlanCommitDate,FPlanFinishDate,(select FName from t_Department where t_Departme
             return result;
         }
 
-        public int Update(DateTime startTime, DateTime endTime)
+        public override int Update(DateTime startTime, DateTime endTime)
         {
             var result = 0;
             SourceConn.Open();
@@ -208,7 +208,7 @@ FPlanCommitDate,FPlanFinishDate,(select FName from t_Department where t_Departme
                     var plan = new ProductionPlan();
                     if (reader["FBillNo"] == DBNull.Value)
                         continue;
-                    //华为只要"JP"开头单据，烽火套账只需要“BB”开头单据
+                    //武汉华为只要"JP"开头单据，孝感烽火只需要“BB”开头单据
                     if (!reader["FBillNo"].ToString().ToUpper().StartsWith(ConfigurationManager.AppSettings["PlanCodePrefix"]))
                         continue;
                     plan.PlanCode = reader["FBillNo"].ToString();
@@ -229,8 +229,8 @@ FPlanCommitDate,FPlanFinishDate,(select FName from t_Department where t_Departme
                     plan.WorkShop = reader["FWorkShop"].ToString();
                     plan.Flag = 'C';
                     plan.K3TimeStamp = DateTime.Parse(reader["FCheckDate"].ToString());
-                    plan.SourceDb = "XG";
-                    plan.Line = "FH";
+                    plan.SourceDb = ConfigurationManager.AppSettings["SourceDB"];
+                    plan.Line = ConfigurationManager.AppSettings["Line"];
                     relatedCmd.Parameters[0].Value = plan.PlanCode;
                     var id = relatedCmd.ExecuteScalar();
                     if (id == null)
@@ -248,6 +248,7 @@ FPlanCommitDate,FPlanFinishDate,(select FName from t_Department where t_Departme
                     }
                     else
                     {
+                        plan.Flag = 'U';
                         plan.ID = id.ToString();
                         updateModels[j] = plan;
                         j++;
@@ -312,7 +313,7 @@ FPlanCommitDate,FPlanFinishDate,(select FName from t_Department where t_Departme
                 var cmd = new OracleCommand
                 {
                     Connection = RelatedConn,
-                    CommandText = "select t3 from LastUpdateTime where id=1"
+                    CommandText = $@"select t3 from LastUpdateTime where id={ConfigurationManager.AppSettings["SourceDB"]}"
                 };
                 return (DateTime)(cmd.ExecuteScalar());
             }
@@ -325,14 +326,22 @@ FPlanCommitDate,FPlanFinishDate,(select FName from t_Department where t_Departme
         public override void SetLastUpdateTime()
         {
             RelatedConn.Open();
+            var tx = RelatedConn.BeginTransaction();
             try
             {
                 var cmd = new OracleCommand
                 {
                     Connection = RelatedConn,
-                    CommandText = "update LastUpdateTime set t3=sysdate where id=1"
+                    CommandText = $@"update LastUpdateTime set t3=sysdate where id={ConfigurationManager.AppSettings["SourceDB"]}",
+                    Transaction = tx
                 };
                 cmd.ExecuteNonQuery();
+                tx.Commit();
+            }
+            catch
+            {
+                tx.Rollback();
+                throw;
             }
             finally
             {

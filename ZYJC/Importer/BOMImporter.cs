@@ -4,6 +4,7 @@ using ZYJC.Model;
 using System.Data.SqlClient;
 using System.Linq;
 using Oracle.DataAccess.Client;
+using System.Configuration;
 
 namespace ZYJC.Importer
 {
@@ -129,7 +130,7 @@ select FEntryID,(select FNumber from t_icitem where t_icitem.FItemID=ICBOMCHILD.
 (select FBOMNumber,(select FNumber from t_icitem where t_icitem.FItemID=icbom.FItemID) fshortnumber,FVersion,FStatus,FQty, (SELECT FName FROM T_MeasureUnit where T_MeasureUnit.FMeasureUnitID=icbom.FUnitID) FUnitID
 ,FInterID,FEnterTime from icbom) a right join (
 select FEntryID,(select FNumber from t_icitem where t_icitem.FItemID=ICBOMCHILD.FItemID) detailfshortnumber,(select (SELECT FName FROM T_MeasureUnit where T_MeasureUnit.FMeasureUnitID=t_icitem.FUnitID) from t_icitem where t_icitem.FItemID=ICBOMCHILD.FItemID) detailFUnitID,FQty as detailfqty,FInterID from  ICBOMCHILD ) b on a.FInterID=b.FInterID where fshortnumber like '30%' and detailfshortnumber like '30%'
-                       and (FBOMNumber=:FBOMNumber and FEntryID=:FEntryID)"
+                       and (FBOMNumber=@FBOMNumber and FEntryID=@FEntryID)"
                 };
                 sourceCmd.Parameters.Add(new SqlParameter("FBOMNumber", System.Data.SqlDbType.Char, 8000));
                 sourceCmd.Parameters.Add(new SqlParameter("FEntryID", System.Data.SqlDbType.Char, 8000));
@@ -137,7 +138,8 @@ select FEntryID,(select FNumber from t_icitem where t_icitem.FItemID=ICBOMCHILD.
                 while (reader.Read())
                 {
                     sourceCmd.Parameters[0].Value = reader[0];
-                    if (sourceCmd.ExecuteScalar() == DBNull.Value)//如果找不到了，则说明源对应的行被删除，需要标记中间表数据为删除状态
+                    sourceCmd.Parameters[1].Value = reader[1];
+                    if (sourceCmd.ExecuteScalar() == null)//如果找不到了，则说明源对应的行被删除，需要标记中间表数据为删除状态
                     {
                         updateCmd.Parameters[0].Value = reader[0];
                         updateCmd.Parameters[1].Value = reader[1];
@@ -217,7 +219,7 @@ select FEntryID,(select FNumber from t_icitem where t_icitem.FItemID=ICBOMCHILD.
                     bom.DetailUnit = reader["detailFUnitID"].ToString();
                     bom.Flag = 'C';
                     bom.K3TimeStamp = DateTime.Parse(reader["FEnterTime"].ToString());
-                    bom.SourceDb = "XG";
+                    bom.SourceDb = ConfigurationManager.AppSettings["SourceDB"];
                     relatedCmd.Parameters[0].Value = bom.BOMCode;
                     relatedCmd.Parameters[1].Value = bom.DetailCode;
                     var id = relatedCmd.ExecuteScalar();
@@ -237,6 +239,7 @@ select FEntryID,(select FNumber from t_icitem where t_icitem.FItemID=ICBOMCHILD.
                     else
                     {
                         bom.ID = id.ToString();
+                        bom.Flag = 'U';
                         updateModels[j] = bom;
                         j++;
                         if (j == BatchNum)
@@ -301,7 +304,7 @@ select FEntryID,(select FNumber from t_icitem where t_icitem.FItemID=ICBOMCHILD.
                 var cmd = new OracleCommand
                 {
                     Connection = RelatedConn,
-                    CommandText = "select t2 from LastUpdateTime where id=1"
+                    CommandText = $@"select t2 from LastUpdateTime where id={ConfigurationManager.AppSettings["SourceDB"]}"
                 };
                 return (DateTime)(cmd.ExecuteScalar());
             }
@@ -314,14 +317,22 @@ select FEntryID,(select FNumber from t_icitem where t_icitem.FItemID=ICBOMCHILD.
         public override void SetLastUpdateTime()
         {
             RelatedConn.Open();
+            var tx = RelatedConn.BeginTransaction();
             try
             {
                 var cmd = new OracleCommand
                 {
                     Connection = RelatedConn,
-                    CommandText = "update LastUpdateTime set t2=sysdate where id=1"
+                    CommandText = $@"update LastUpdateTime set t2=sysdate where id={ConfigurationManager.AppSettings["SourceDB"]}",
+                    Transaction = tx
                 };
                 cmd.ExecuteNonQuery();
+                tx.Commit();
+            }
+            catch
+            {
+                tx.Rollback();
+                throw;
             }
             finally
             {

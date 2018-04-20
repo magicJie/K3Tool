@@ -25,13 +25,13 @@ namespace ZYJC
                 Scheduler.Instance.SetExecuting(id);
                 BaseImporter importer = new MaterielImporter();
                 importer.SetLastUpdateTime();
-                logger.Info($"计划任务成功更新物料{importer.Update(importer.GetLastUpdateTime(), DateTime.Now)}条");
+                logger.Info($"计划任务成功更新物料 {importer.Update(importer.GetLastUpdateTime(), DateTime.Now)}条");
                 importer = new BOMImporter();
                 importer.SetLastUpdateTime();
-                logger.Info($"计划任务成功更新BOM{importer.Update(importer.GetLastUpdateTime(), DateTime.Now)}条");
+                logger.Info($"计划任务成功更新BOM {importer.Update(importer.GetLastUpdateTime(), DateTime.Now)}条");
                 importer = new ProductionPlanImporter();
                 importer.SetLastUpdateTime();
-                logger.Info($"计划任务成功更新生成计划{importer.Update(importer.GetLastUpdateTime(), DateTime.Now)}条");
+                logger.Info($"计划任务成功更新生产计划 {importer.Update(importer.GetLastUpdateTime(), DateTime.Now)}条");
             }
             catch (Exception ex)
             {

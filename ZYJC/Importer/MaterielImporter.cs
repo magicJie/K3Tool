@@ -4,6 +4,7 @@ using ZYJC.Model;
 using System.Data.SqlClient;
 using System.Linq;
 using Oracle.DataAccess.Client;
+using System.Configuration;
 
 namespace ZYJC.Importer
 {
@@ -27,7 +28,7 @@ namespace ZYJC.Importer
                 CommandText =
                     $@"select FNumber,FName,(select FName from t_SubMessage where t_SubMessage.FInterID=t_icitem.FErpClsID) FTypeName,(SELECT FName FROM T_MeasureUnit where T_MeasureUnit.FMeasureUnitID=t_icitem.FUnitID) unit,
                                  FModel,FLastCheckDate,FItemID from t_icitem 
-                                    where FNumber like '30%'"
+                                    where FNumber like '30%' and FLastCheckDate between CONVERT(datetime, '{startTime}') and CONVERT(datetime, '{endTime}')"
             };
             var reader = sourceCmd.ExecuteReader();
             var relatedCmd = new OracleCommand()
@@ -94,7 +95,7 @@ namespace ZYJC.Importer
             return a + b;
         }
 
-        public int BackUpdate(DateTime startTime, DateTime endTime)
+        public override int BackUpdate(DateTime startTime, DateTime endTime)
         {
             var result = 0;
             try
@@ -125,7 +126,7 @@ namespace ZYJC.Importer
                 while (reader.Read())
                 {
                     sourceCmd.Parameters[0].Value = reader[0];
-                    if (sourceCmd.ExecuteScalar() == DBNull.Value)//如果找不到了，则说明源对应的行被删除，需要标记中间表数据为删除状态
+                    if (sourceCmd.ExecuteScalar() == null)//如果找不到了，则说明源对应的行被删除，需要标记中间表数据为删除状态
                     {
                         updateCmd.Parameters[0].Value = reader[0];
                         updateCmd.ExecuteNonQuery();
@@ -146,7 +147,7 @@ namespace ZYJC.Importer
             return result;
         }
 
-        public int Update(DateTime startTime, DateTime endTime)
+        public override int Update(DateTime startTime, DateTime endTime)
         {
             var result = 0;
             SourceConn.Open();
@@ -160,7 +161,7 @@ namespace ZYJC.Importer
                 CommandText =
                     $@"select FNumber,FName,(select FName from t_SubMessage where t_SubMessage.FInterID=t_icitem.FErpClsID) FTypeName,(SELECT FName FROM T_MeasureUnit where T_MeasureUnit.FMeasureUnitID=t_icitem.FUnitID) unit,
                                  FModel,FLastCheckDate,FItemID from t_icitem 
-                                    where FNumber like '30%'"
+                                    where FNumber like '30%' and FLastCheckDate between CONVERT(datetime, '{startTime}') and CONVERT(datetime, '{endTime}')"
             };
             var relatedCmd = new OracleCommand
             {
@@ -196,7 +197,7 @@ namespace ZYJC.Importer
                     materiel.Specification = reader["FModel"].ToString();
                     materiel.Flag = 'C';
                     materiel.K3TimeStamp = DateTime.Now;
-                    materiel.SourceDb = "XG";
+                    materiel.SourceDb = ConfigurationManager.AppSettings["SourceDB"];
                     relatedCmd.Parameters[0].Value = materiel.Code;
                     var id = relatedCmd.ExecuteScalar();
                     if (id == null)
@@ -215,6 +216,7 @@ namespace ZYJC.Importer
                     else
                     {
                         materiel.ID = id.ToString();
+                        materiel.Flag = 'U';
                         updateModels[j] = materiel;
                         j++;
                         if (j == BatchNum)
@@ -278,7 +280,7 @@ namespace ZYJC.Importer
                 var cmd = new OracleCommand
                 {
                     Connection = RelatedConn,
-                    CommandText = "select t1 from LastUpdateTime where id=1"
+                    CommandText = $@"select t1 from LastUpdateTime where id={ConfigurationManager.AppSettings["SourceDB"]}"
                 };
                 var time = cmd.ExecuteScalar();
                 if (time == null)
@@ -294,14 +296,22 @@ namespace ZYJC.Importer
         public override void SetLastUpdateTime()
         {
             RelatedConn.Open();
+            var tx = RelatedConn.BeginTransaction();
             try
             {
                 var cmd = new OracleCommand
                 {
                     Connection = RelatedConn,
-                    CommandText = "update LastUpdateTime set t1=sysdate where id=1"
+                    CommandText = $@"update LastUpdateTime set t1=sysdate where id={ConfigurationManager.AppSettings["SourceDB"]}",
+                    Transaction = tx
                 };
                 cmd.ExecuteNonQuery();
+                tx.Commit();
+            }
+            catch
+            {
+                tx.Rollback();
+                throw;
             }
             finally
             {
