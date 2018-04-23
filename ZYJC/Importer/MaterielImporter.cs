@@ -105,14 +105,15 @@ namespace ZYJC.Importer
                 var readCmd = new OracleCommand()
                 {
                     Connection = RelatedConn,
-                    CommandText = $"select Code from materiel"
+                    CommandText = $"select Code from materiel where SourceDb='{ConfigurationManager.AppSettings["SourceDB"]}'"
                 };
                 var updateCmd = new OracleCommand
                 {
                     Connection = RelatedConn,
                     CommandText = GetDeleteCmdText()
                 };
-                updateCmd.Parameters.Add(new OracleParameter("FNumber",OracleDbType.Char));
+                updateCmd.Parameters.Add(new OracleParameter("Code", OracleDbType.Char));
+                updateCmd.Parameters.Add(new OracleParameter("SourceDb", OracleDbType.Char));
                 updateCmd.Prepare();
                 var reader = readCmd.ExecuteReader();
                 var sourceCmd = new SqlCommand
@@ -129,6 +130,7 @@ namespace ZYJC.Importer
                     if (sourceCmd.ExecuteScalar() == null)//如果找不到了，则说明源对应的行被删除，需要标记中间表数据为删除状态
                     {
                         updateCmd.Parameters[0].Value = reader[0];
+                        updateCmd.Parameters[1].Value = ConfigurationManager.AppSettings["SourceDB"];
                         updateCmd.ExecuteNonQuery();
                         result++;
                     }
@@ -161,14 +163,16 @@ namespace ZYJC.Importer
                 CommandText =
                     $@"select FNumber,FName,(select FName from t_SubMessage where t_SubMessage.FInterID=t_icitem.FErpClsID) FTypeName,(SELECT FName FROM T_MeasureUnit where T_MeasureUnit.FMeasureUnitID=t_icitem.FUnitID) unit,
                                  FModel,FLastCheckDate,FItemID from t_icitem 
-                                    where FNumber like '30%' and FLastCheckDate between CONVERT(datetime, '{startTime}') and CONVERT(datetime, '{endTime}')"
+                                    where FNumber like '30%' "
+                // and FLastCheckDate between CONVERT(datetime, '{startTime}') and CONVERT(datetime, '{endTime}')
             };
             var relatedCmd = new OracleCommand
             {
                 Connection = RelatedConn,
-                CommandText = "select ID from Materiel where Code=:Code"
+                CommandText = "select ID from Materiel where Code=:Code and SourceDb=:SourceDb"
             };
             relatedCmd.Parameters.Add(new OracleParameter("Code", OracleDbType.Char));
+            relatedCmd.Parameters.Add(new OracleParameter("SourceDb", OracleDbType.Char));
             relatedCmd.Prepare();
             var reader = sourceCmd.ExecuteReader();
             var insertCmd = new OracleCommand()
@@ -179,7 +183,7 @@ namespace ZYJC.Importer
             var updateCmd = new OracleCommand()
             {
                 Connection = RelatedConn,
-                CommandText = GetUpdateCmdText()+ $@" where Code=:Code"
+                CommandText = GetUpdateCmdText()+ $@" where Code=:Code  and SourceDb=:SourceDb"
             };
             try
             {
@@ -199,6 +203,7 @@ namespace ZYJC.Importer
                     materiel.K3TimeStamp = DateTime.Now;
                     materiel.SourceDb = ConfigurationManager.AppSettings["SourceDB"];
                     relatedCmd.Parameters[0].Value = materiel.Code;
+                    relatedCmd.Parameters[1].Value = materiel.SourceDb;
                     var id = relatedCmd.ExecuteScalar();
                     if (id == null)
                     {
@@ -265,7 +270,7 @@ namespace ZYJC.Importer
 
         protected override string GetDeleteCmdText()
         {
-            return $@"update materiel set flag = 'D' where Code =:Code";
+            return $@"update materiel set flag = 'D' where Code =:Code and SourceDb=:SourceDb";
         }
         protected override void AddDeleteParameter(OracleCommand cmd, BaseModel model)
         {
@@ -284,7 +289,7 @@ namespace ZYJC.Importer
                 };
                 var time = cmd.ExecuteScalar();
                 if (time == null)
-                    return new DateTime();
+                    return new DateTime(1970,1,1);
                 return (DateTime)(time);
             }
             finally

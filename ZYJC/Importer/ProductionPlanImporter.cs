@@ -120,14 +120,15 @@ FPlanCommitDate,FPlanFinishDate,(select FName from t_Department where t_Departme
                 var readCmd = new OracleCommand()
                 {
                     Connection = RelatedConn,
-                    CommandText = $"select PlanCode from ProductionPlan"
+                    CommandText = $"select PlanCode from ProductionPlan where SourceDb='{ ConfigurationManager.AppSettings["SourceDB"]}'"
                 };
                 var updateCmd = new OracleCommand
                 {
                     Connection = RelatedConn,
-                    CommandText = $@"update ProductionPlan set flag='D' where PlanCode=:PlanCode"
+                    CommandText = $@"update ProductionPlan set flag='D' where PlanCode=:PlanCode and SourceDb=:SourceDb"
                 };
                 updateCmd.Parameters.Add(new OracleParameter("PlanCode", OracleDbType.Char));
+                updateCmd.Parameters.Add(new OracleParameter("SourceDb", OracleDbType.Char));
                 updateCmd.Prepare();
                 var reader = readCmd.ExecuteReader();
                 var sourceCmd = new SqlCommand
@@ -179,14 +180,16 @@ FPlanCommitDate,FPlanFinishDate,(select FName from t_Department where t_Departme
                     $@"SELECT FBillNo,(select FNumber from t_icitem where t_icitem.FItemID=ICmo.FItemID) as FShortNumber,
 (select FName from t_User where t_User.FUserID=ICmo.FBillerID) FBillerID,FCheckDate,(select FBOMNumber from icbom where icbom.FInterID= ICmo.FBomInterID) as FBOMNumber,(select FVersion from icbom where icbom.FInterID= ICmo.FBomInterID) as FVersion,FStatus,FAuxQty,(SELECT FName FROM T_MeasureUnit where T_MeasureUnit.FMeasureUnitID=ICmo.FUnitID)  FUnitID,FType,
 FPlanCommitDate,FPlanFinishDate,(select FName from t_Department where t_Department.FItemID=ICmo.FWorkShop) FWorkShop,FWorkTypeID,FConfirmDate,FGMPBatchNo FROM ICmo   
-                                    where FStatus=1 and FCheckDate between CONVERT(datetime, '{startTime}') and CONVERT(datetime, '{endTime}')"
+                                    where FStatus=1 "
+                //and FConfirmDate between CONVERT(datetime, '{startTime}') and CONVERT(datetime, '{endTime}')
             };
             var relatedCmd = new OracleCommand
             {
                 Connection = RelatedConn,
-                CommandText = "select ID from ProductionPlan where PlanCode=:PlanCode"
+                CommandText = "select ID from ProductionPlan where PlanCode=:PlanCode and SourceDb=:SourceDb"
             };
             relatedCmd.Parameters.Add(new OracleParameter("PlanCode", OracleDbType.Char));
+            relatedCmd.Parameters.Add(new OracleParameter("SourceDb", OracleDbType.Char));
             relatedCmd.Prepare();
             var reader = sourceCmd.ExecuteReader();
             var insertCmd = new OracleCommand()
@@ -197,7 +200,7 @@ FPlanCommitDate,FPlanFinishDate,(select FName from t_Department where t_Departme
             var updateCmd = new OracleCommand()
             {
                 Connection = RelatedConn,
-                CommandText = GetUpdateCmdText() + $@" where PlanCode=:PlanCode"
+                CommandText = GetUpdateCmdText() + $@" where PlanCode=:PlanCode and SourceDb=:SourceDb"
             };
             try
             {
@@ -232,6 +235,7 @@ FPlanCommitDate,FPlanFinishDate,(select FName from t_Department where t_Departme
                     plan.SourceDb = ConfigurationManager.AppSettings["SourceDB"];
                     plan.Line = ConfigurationManager.AppSettings["Line"];
                     relatedCmd.Parameters[0].Value = plan.PlanCode;
+                    relatedCmd.Parameters[1].Value = plan.SourceDb;
                     var id = relatedCmd.ExecuteScalar();
                     if (id == null)
                     {
@@ -298,7 +302,7 @@ FPlanCommitDate,FPlanFinishDate,(select FName from t_Department where t_Departme
 
         protected override string GetDeleteCmdText()
         {
-            return $@"update ProductionPlan set flag='D' where PlanCode=:PlanCode";
+            return $@"update ProductionPlan set flag='D' where PlanCode=:PlanCode and SourceDb=:SourceDb";
         }
         protected override void AddDeleteParameter(OracleCommand cmd, BaseModel model)
         {

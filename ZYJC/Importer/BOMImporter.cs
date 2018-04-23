@@ -112,15 +112,16 @@ select FEntryID,(select FNumber from t_icitem where t_icitem.FItemID=ICBOMCHILD.
                 var readCmd = new OracleCommand()
                 {
                     Connection = RelatedConn,
-                    CommandText = $"select BOMCode,DetailCode from BOM"
+                    CommandText = $"select BOMCode,DetailCode from BOM where SourceDb='{ ConfigurationManager.AppSettings["SourceDB"]}'"
                 };
                 var updateCmd = new OracleCommand
                 {
                     Connection = RelatedConn,
-                    CommandText = $@"update BOM set flag='D' where BOMCode=:BOMCode and DetailCode=:DetailCode"
+                    CommandText = $@"update BOM set flag='D' where BOMCode=:BOMCode and DetailCode=:DetailCode and SourceDb=:SourceDb"
                 };
                 updateCmd.Parameters.Add(new OracleParameter("BOMCode", OracleDbType.Char));
                 updateCmd.Parameters.Add(new OracleParameter("DetailCode", OracleDbType.Char));
+                updateCmd.Parameters.Add(new OracleParameter("SourceDb", OracleDbType.Char));
                 updateCmd.Prepare();
                 var reader = readCmd.ExecuteReader();
                 var sourceCmd = new SqlCommand
@@ -143,6 +144,7 @@ select FEntryID,(select FNumber from t_icitem where t_icitem.FItemID=ICBOMCHILD.
                     {
                         updateCmd.Parameters[0].Value = reader[0];
                         updateCmd.Parameters[1].Value = reader[1];
+                        updateCmd.Parameters[2].Value = ConfigurationManager.AppSettings["SourceDB"];
                         updateCmd.ExecuteNonQuery();
                         result++;
                     }
@@ -177,15 +179,17 @@ select FEntryID,(select FNumber from t_icitem where t_icitem.FItemID=ICBOMCHILD.
 (select FBOMNumber,(select FNumber from t_icitem where t_icitem.FItemID=icbom.FItemID) fshortnumber,FVersion,FStatus,FQty, (SELECT FName FROM T_MeasureUnit where T_MeasureUnit.FMeasureUnitID=icbom.FUnitID) FUnitID
 ,FInterID,FEnterTime from icbom) a right join (
 select FEntryID,(select FNumber from t_icitem where t_icitem.FItemID=ICBOMCHILD.FItemID) detailfshortnumber,(select (SELECT FName FROM T_MeasureUnit where T_MeasureUnit.FMeasureUnitID=t_icitem.FUnitID) from t_icitem where t_icitem.FItemID=ICBOMCHILD.FItemID) detailFUnitID,FQty as detailfqty,FInterID from  ICBOMCHILD ) b on a.FInterID=b.FInterID where fshortnumber like '30%' and detailfshortnumber like '30%'
-                       and FEnterTime between CONVERT(datetime, '{startTime}') and CONVERT(datetime, '{endTime}')"
+                       "
+                //and FEnterTime between CONVERT(datetime, '{startTime}') and CONVERT(datetime, '{endTime}')
             };
             var relatedCmd = new OracleCommand
             {
                 Connection = RelatedConn,
-                CommandText = "select ID from BOM where BOMCode=:BOMCode and DetailCode=:DetailCode"
+                CommandText = "select ID from BOM where BOMCode=:BOMCode and DetailCode=:DetailCode and SourceDb=:SourceDb"
             };
             relatedCmd.Parameters.Add(new OracleParameter("BOMCode", OracleDbType.Char));
             relatedCmd.Parameters.Add(new OracleParameter("DetailCode", OracleDbType.Char));
+            relatedCmd.Parameters.Add(new OracleParameter("SourceDb", OracleDbType.Char));
             relatedCmd.Prepare();
             var reader = sourceCmd.ExecuteReader();
             var insertCmd = new OracleCommand()
@@ -196,7 +200,7 @@ select FEntryID,(select FNumber from t_icitem where t_icitem.FItemID=ICBOMCHILD.
             var updateCmd = new OracleCommand()
             {
                 Connection = RelatedConn,
-                CommandText = GetUpdateCmdText() + $@" where BOMCode=:BOMCode and DetailCode=:DetailCode"
+                CommandText = GetUpdateCmdText() + $@" where BOMCode=:BOMCode and DetailCode=:DetailCode and SourceDb=:SourceDb"
             };
             try
             {
@@ -222,6 +226,7 @@ select FEntryID,(select FNumber from t_icitem where t_icitem.FItemID=ICBOMCHILD.
                     bom.SourceDb = ConfigurationManager.AppSettings["SourceDB"];
                     relatedCmd.Parameters[0].Value = bom.BOMCode;
                     relatedCmd.Parameters[1].Value = bom.DetailCode;
+                    relatedCmd.Parameters[2].Value = bom.SourceDb;
                     var id = relatedCmd.ExecuteScalar();
                     if (id == null)
                     {
@@ -288,7 +293,7 @@ select FEntryID,(select FNumber from t_icitem where t_icitem.FItemID=ICBOMCHILD.
 
         protected override string GetDeleteCmdText()
         {
-            return $@"update BOM set flag='D' where BOMCode=:BOMCode and DetailCode=:DetailCode";
+            return $@"update BOM set flag='D' where BOMCode=:BOMCode and DetailCode=:DetailCode and SourceDb=:SourceDb";
         }
         protected override void AddDeleteParameter(OracleCommand cmd, BaseModel model)
         {
