@@ -11,13 +11,20 @@ namespace ZYJC.Importer
 {
     public class BaseImporter
     {
-        public readonly SqlConnection SourceConn = new SqlConnection(ConfigurationManager.ConnectionStrings["source"].ConnectionString);
-        public readonly OracleConnection RelatedConn = new OracleConnection(ConfigurationManager.ConnectionStrings["related"].ConnectionString);
+        public SqlConnection SourceConn { get; }
+        public Source Source { get; }
+        public OracleConnection RelatedConn { get; } = new OracleConnection(ConfigurationManager.ConnectionStrings["related"].ConnectionString);
         public const int BatchNum = 2000;
 
         public virtual Type GetModelType()
         {
             return typeof(BaseModel);
+        }
+
+        public BaseImporter(Source dataSource)
+        {
+            SourceConn = new SqlConnection(dataSource.ConnectionString);
+            Source = dataSource;
         }
 
         /// <summary>

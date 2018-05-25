@@ -22,9 +22,12 @@ namespace ZYJC
             try
             {
                 Scheduler.Instance.SetExecuting(id);
-                logger.Info($"标记删除物料 {new MaterielImporter().BackUpdate(new DateTime(1970, 1, 1), DateTime.Now)}条");
-                logger.Info($"标记删除BOM {new BOMImporter().BackUpdate(new DateTime(1970, 1, 1), DateTime.Now)}条");
-                logger.Info($"标记删除生产计划 {new ProductionPlanImporter().BackUpdate(new DateTime(1970, 1, 1), DateTime.Now)}条");
+                foreach (Source source in Configuration.Current.Sources)
+                {
+                    logger.Info($"标记删除物料 {new MaterielImporter(source).BackUpdate(new DateTime(1970, 1, 1), DateTime.Now)}条");
+                    logger.Info($"标记删除BOM {new BOMImporter(source).BackUpdate(new DateTime(1970, 1, 1), DateTime.Now)}条");
+                    logger.Info($"标记删除生产计划 {new ProductionPlanImporter(source).BackUpdate(new DateTime(1970, 1, 1), DateTime.Now)}条");
+                }
             }
             catch (Exception ex)
             {

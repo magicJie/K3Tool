@@ -9,6 +9,7 @@ namespace ZYJC.Importer
 {
     public class ProductionPlanImporter : BaseImporter
     {
+        public ProductionPlanImporter(Source source) : base(source) { }
         public override Type GetModelType()
         {
             return typeof(ProductionPlan);
@@ -45,7 +46,7 @@ FPlanCommitDate,FPlanFinishDate,(select FName from t_Department where t_Departme
                     if (reader["FBillNo"] == DBNull.Value)
                         continue;
                     //华为只要"JP"开头单据，烽火套账只需要“BB”开头单据
-                    if (!reader["FBillNo"].ToString().ToUpper().StartsWith(ConfigurationManager.AppSettings["PlanCodePrefix"]))
+                    if (!reader["FBillNo"].ToString().ToUpper().StartsWith(Source.PlanCodePrefix))
                         continue;
                     plan.PlanCode = reader["FBillNo"].ToString();
                     plan.WorkOrder = reader["FGMPBatchNo"].ToString();
@@ -120,7 +121,7 @@ FPlanCommitDate,FPlanFinishDate,(select FName from t_Department where t_Departme
                 var readCmd = new OracleCommand()
                 {
                     Connection = RelatedConn,
-                    CommandText = $"select PlanCode from ProductionPlan where SourceDb='{ ConfigurationManager.AppSettings["SourceDB"]}'"
+                    CommandText = $"select PlanCode from ProductionPlan where SourceDb='{ Source.Name}'"
                 };
                 var updateCmd = new OracleCommand
                 {
@@ -186,7 +187,7 @@ FPlanCommitDate,FPlanFinishDate,(select FName from t_Department where t_Departme
             var relatedCmd = new OracleCommand
             {
                 Connection = RelatedConn,
-                CommandText = "select ID from ProductionPlan where PlanCode=:PlanCode and SourceDb=:SourceDb"
+                CommandText = "select ID||','||HashCode from ProductionPlan where PlanCode=:PlanCode and SourceDb=:SourceDb"
             };
             relatedCmd.Parameters.Add(new OracleParameter("PlanCode", OracleDbType.Char));
             relatedCmd.Parameters.Add(new OracleParameter("SourceDb", OracleDbType.Char));
@@ -212,7 +213,7 @@ FPlanCommitDate,FPlanFinishDate,(select FName from t_Department where t_Departme
                     if (reader["FBillNo"] == DBNull.Value)
                         continue;
                     //武汉华为只要"JP"开头单据，孝感烽火只需要“BB”开头单据
-                    if (!reader["FBillNo"].ToString().ToUpper().StartsWith(ConfigurationManager.AppSettings["PlanCodePrefix"]))
+                    if (!reader["FBillNo"].ToString().ToUpper().StartsWith(Source.PlanCodePrefix))
                         continue;
                     plan.PlanCode = reader["FBillNo"].ToString();
                     plan.WorkOrder = reader["FGMPBatchNo"].ToString();
@@ -232,12 +233,13 @@ FPlanCommitDate,FPlanFinishDate,(select FName from t_Department where t_Departme
                     plan.WorkShop = reader["FWorkShop"].ToString();
                     plan.Flag = 'C';
                     plan.K3TimeStamp = DateTime.Parse(reader["FCheckDate"].ToString());
-                    plan.SourceDb = ConfigurationManager.AppSettings["SourceDB"];
+                    plan.SourceDb = Source.Name;
                     plan.Line = ConfigurationManager.AppSettings["Line"];
+                    plan.CalculateHashCode();
                     relatedCmd.Parameters[0].Value = plan.PlanCode;
                     relatedCmd.Parameters[1].Value = plan.SourceDb;
-                    var id = relatedCmd.ExecuteScalar();
-                    if (id == null)
+                    var obj = relatedCmd.ExecuteScalar();
+                    if (obj==null)
                     {
                         plan.ID = Guid.NewGuid().ToString();
                         insertModels[i] = plan;
@@ -252,16 +254,20 @@ FPlanCommitDate,FPlanFinishDate,(select FName from t_Department where t_Departme
                     }
                     else
                     {
-                        plan.Flag = 'U';
-                        plan.ID = id.ToString();
-                        updateModels[j] = plan;
-                        j++;
-                        if (j == BatchNum)
+                        if (plan.HashCode != obj.ToString().Split(',')[1].ToString())
                         {
-                            CommitBatch(updateCmd, updateModels);
-                            result += j;
-                            j = 0;
-                            updateModels = new BaseModel[BatchNum];//重置批
+                            log4net.LogManager.GetLogger("Logger").Info($"检测到生产计划更新【{plan.PlanCode}】");
+                            plan.Flag = 'U';
+                            plan.ID = obj.ToString().Split(',')[0].ToString();
+                            updateModels[j] = plan;
+                            j++;
+                            if (j == BatchNum)
+                            {
+                                CommitBatch(updateCmd, updateModels);
+                                result += j;
+                                j = 0;
+                                updateModels = new BaseModel[BatchNum];//重置批
+                            }
                         }
                     }
                 }
@@ -317,7 +323,7 @@ FPlanCommitDate,FPlanFinishDate,(select FName from t_Department where t_Departme
                 var cmd = new OracleCommand
                 {
                     Connection = RelatedConn,
-                    CommandText = $@"select t3 from LastUpdateTime where id={ConfigurationManager.AppSettings["SourceDB"]}"
+                    CommandText = $@"select t3 from LastUpdateTime where id={Source.Name}"
                 };
                 return (DateTime)(cmd.ExecuteScalar());
             }
@@ -336,7 +342,7 @@ FPlanCommitDate,FPlanFinishDate,(select FName from t_Department where t_Departme
                 var cmd = new OracleCommand
                 {
                     Connection = RelatedConn,
-                    CommandText = $@"update LastUpdateTime set t3=sysdate where id={ConfigurationManager.AppSettings["SourceDB"]}",
+                    CommandText = $@"update LastUpdateTime set t3=sysdate where id={Source.Name}",
                     Transaction = tx
                 };
                 cmd.ExecuteNonQuery();

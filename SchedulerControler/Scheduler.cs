@@ -29,20 +29,18 @@ namespace ZYJC
                 return;
             _scheduler = StdSchedulerFactory.GetDefaultScheduler();
             _scheduler.Start();
-            _scheduler.DeleteJob(new JobKey(BackUpdateJobId));
             _scheduler.DeleteJob(new JobKey(UpdateJobId));
+            _scheduler.DeleteJob(new JobKey(BackUpdateJobId));
 
-            var triggerBuilder = TriggerBuilder.Create().WithIdentity(BackUpdateJobId);
-            //反向更新因为消耗很大所以每12小时更新一次
-            triggerBuilder.WithSimpleSchedule(x => x.WithIntervalInHours(12).RepeatForever()).StartNow();
+            var triggerBuilder = TriggerBuilder.Create().WithIdentity(UpdateJobId);
+            triggerBuilder.WithSimpleSchedule(x => x.WithIntervalInHours(Convert.ToInt16(Configuration.Current.Cycle)).RepeatForever()).StartNow();
             var trigger = triggerBuilder.Build();
-            triggerBuilder= TriggerBuilder.Create().WithIdentity(UpdateJobId);
-            //新增和修改的数据每小时更新一次
-            triggerBuilder.WithSimpleSchedule(x => x.WithIntervalInHours(1).RepeatForever()).StartNow();
+            triggerBuilder = TriggerBuilder.Create().WithIdentity(BackUpdateJobId);
+            triggerBuilder.WithSimpleSchedule(x => x.WithIntervalInHours(Convert.ToInt16(Configuration.Current.BackCycle)).RepeatForever()).StartNow();
             var trigger1 = triggerBuilder.Build();
 
-            var job = JobBuilder.Create<BackUpdateJob>().WithIdentity(BackUpdateJobId).Build();
-            var job1 = JobBuilder.Create<UpdateJob>().WithIdentity(UpdateJobId).Build();
+            var job = JobBuilder.Create<UpdateJob>().WithIdentity(UpdateJobId).Build();
+            var job1 = JobBuilder.Create<BackUpdateJob>().WithIdentity(BackUpdateJobId).Build();
             _scheduler.ScheduleJob(job, trigger);
             _scheduler.ScheduleJob(job1, trigger1);
         }

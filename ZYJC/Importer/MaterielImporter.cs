@@ -10,6 +10,9 @@ namespace ZYJC.Importer
 {
     public class MaterielImporter : BaseImporter
     {
+        public MaterielImporter(Source source):base(source) {
+        }
+
         public override Type GetModelType()
         {
             return typeof(Materiel);
@@ -105,7 +108,7 @@ namespace ZYJC.Importer
                 var readCmd = new OracleCommand()
                 {
                     Connection = RelatedConn,
-                    CommandText = $"select Code from materiel where SourceDb='{ConfigurationManager.AppSettings["SourceDB"]}'"
+                    CommandText = $"select Code from materiel where SourceDb='{Source.Name}'"
                 };
                 var updateCmd = new OracleCommand
                 {
@@ -130,7 +133,7 @@ namespace ZYJC.Importer
                     if (sourceCmd.ExecuteScalar() == null)//如果找不到了，则说明源对应的行被删除，需要标记中间表数据为删除状态
                     {
                         updateCmd.Parameters[0].Value = reader[0];
-                        updateCmd.Parameters[1].Value = ConfigurationManager.AppSettings["SourceDB"];
+                        updateCmd.Parameters[1].Value = Source.Name;
                         updateCmd.ExecuteNonQuery();
                         result++;
                     }
@@ -169,7 +172,7 @@ namespace ZYJC.Importer
             var relatedCmd = new OracleCommand
             {
                 Connection = RelatedConn,
-                CommandText = "select ID from Materiel where Code=:Code and SourceDb=:SourceDb"
+                CommandText = "select ID||','||HashCode from Materiel where Code=:Code and SourceDb=:SourceDb"
             };
             relatedCmd.Parameters.Add(new OracleParameter("Code", OracleDbType.Char));
             relatedCmd.Parameters.Add(new OracleParameter("SourceDb", OracleDbType.Char));
@@ -201,11 +204,12 @@ namespace ZYJC.Importer
                     materiel.Specification = reader["FModel"].ToString();
                     materiel.Flag = 'C';
                     materiel.K3TimeStamp = DateTime.Now;
-                    materiel.SourceDb = ConfigurationManager.AppSettings["SourceDB"];
+                    materiel.SourceDb = Source.Name;
+                    materiel.CalculateHashCode();
                     relatedCmd.Parameters[0].Value = materiel.Code;
                     relatedCmd.Parameters[1].Value = materiel.SourceDb;
-                    var id = relatedCmd.ExecuteScalar();
-                    if (id == null)
+                    var obj = relatedCmd.ExecuteScalar();
+                    if (obj==null)
                     {
                         materiel.ID = Guid.NewGuid().ToString();
                         insertModels[i] = materiel;
@@ -220,16 +224,21 @@ namespace ZYJC.Importer
                     }
                     else
                     {
-                        materiel.ID = id.ToString();
-                        materiel.Flag = 'U';
-                        updateModels[j] = materiel;
-                        j++;
-                        if (j == BatchNum)
+                        //对比哈希值决定是否需要更新
+                        if (materiel.HashCode != obj.ToString().Split(',')[1].ToString())
                         {
-                            CommitBatch(updateCmd, updateModels);
-                            result += j;
-                            j = 0;
-                            updateModels = new BaseModel[BatchNum];//重置批
+                            log4net.LogManager.GetLogger("Logger").Info($"检测到物料更新【{materiel.Code}】");
+                            materiel.ID = obj.ToString().Split(',')[0].ToString();
+                            materiel.Flag = 'U';
+                            updateModels[j] = materiel;
+                            j++;
+                            if (j == BatchNum)
+                            {
+                                CommitBatch(updateCmd, updateModels);
+                                result += j;
+                                j = 0;
+                                updateModels = new BaseModel[BatchNum];//重置批
+                            }
                         }
                     }
                 }
@@ -272,6 +281,7 @@ namespace ZYJC.Importer
         {
             return $@"update materiel set flag = 'D' where Code =:Code and SourceDb=:SourceDb";
         }
+
         protected override void AddDeleteParameter(OracleCommand cmd, BaseModel model)
         {
             cmd.Parameters.Add(new OracleParameter("Code", ((Materiel)model).Code));
@@ -285,7 +295,7 @@ namespace ZYJC.Importer
                 var cmd = new OracleCommand
                 {
                     Connection = RelatedConn,
-                    CommandText = $@"select t1 from LastUpdateTime where id={ConfigurationManager.AppSettings["SourceDB"]}"
+                    CommandText = $@"select t1 from LastUpdateTime where id={Source.Name}"
                 };
                 var time = cmd.ExecuteScalar();
                 if (time == null)
@@ -307,7 +317,7 @@ namespace ZYJC.Importer
                 var cmd = new OracleCommand
                 {
                     Connection = RelatedConn,
-                    CommandText = $@"update LastUpdateTime set t1=sysdate where id={ConfigurationManager.AppSettings["SourceDB"]}",
+                    CommandText = $@"update LastUpdateTime set t1=sysdate where id={Source.Name}",
                     Transaction = tx
                 };
                 cmd.ExecuteNonQuery();

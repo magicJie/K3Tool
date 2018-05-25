@@ -10,6 +10,9 @@ namespace ZYJC.Importer
 {
     public class BOMImporter : BaseImporter
     {
+        public BOMImporter(Source source):base(source) {
+
+        }
         public override Type GetModelType()
         {
             return typeof(BOM);
@@ -112,7 +115,7 @@ select FEntryID,(select FNumber from t_icitem where t_icitem.FItemID=ICBOMCHILD.
                 var readCmd = new OracleCommand()
                 {
                     Connection = RelatedConn,
-                    CommandText = $"select BOMCode,DetailCode from BOM where SourceDb='{ ConfigurationManager.AppSettings["SourceDB"]}'"
+                    CommandText = $"select BOMCode,DetailCode from BOM where SourceDb='{ Source.Name}'"
                 };
                 var updateCmd = new OracleCommand
                 {
@@ -144,7 +147,7 @@ select FEntryID,(select FNumber from t_icitem where t_icitem.FItemID=ICBOMCHILD.
                     {
                         updateCmd.Parameters[0].Value = reader[0];
                         updateCmd.Parameters[1].Value = reader[1];
-                        updateCmd.Parameters[2].Value = ConfigurationManager.AppSettings["SourceDB"];
+                        updateCmd.Parameters[2].Value = Source.Name;
                         updateCmd.ExecuteNonQuery();
                         result++;
                     }
@@ -185,7 +188,7 @@ select FEntryID,(select FNumber from t_icitem where t_icitem.FItemID=ICBOMCHILD.
             var relatedCmd = new OracleCommand
             {
                 Connection = RelatedConn,
-                CommandText = "select ID from BOM where BOMCode=:BOMCode and DetailCode=:DetailCode and SourceDb=:SourceDb"
+                CommandText = "select ID||','||HashCode from BOM where BOMCode=:BOMCode and DetailCode=:DetailCode and SourceDb=:SourceDb"
             };
             relatedCmd.Parameters.Add(new OracleParameter("BOMCode", OracleDbType.Char));
             relatedCmd.Parameters.Add(new OracleParameter("DetailCode", OracleDbType.Char));
@@ -223,12 +226,13 @@ select FEntryID,(select FNumber from t_icitem where t_icitem.FItemID=ICBOMCHILD.
                     bom.DetailUnit = reader["detailFUnitID"].ToString();
                     bom.Flag = 'C';
                     bom.K3TimeStamp = DateTime.Parse(reader["FEnterTime"].ToString());
-                    bom.SourceDb = ConfigurationManager.AppSettings["SourceDB"];
+                    bom.SourceDb = Source.Name;
+                    bom.CalculateHashCode();
                     relatedCmd.Parameters[0].Value = bom.BOMCode;
                     relatedCmd.Parameters[1].Value = bom.DetailCode;
                     relatedCmd.Parameters[2].Value = bom.SourceDb;
-                    var id = relatedCmd.ExecuteScalar();
-                    if (id == null)
+                    var obj = relatedCmd.ExecuteScalar();
+                    if (obj==null)
                     {
                         bom.ID = Guid.NewGuid().ToString();
                         insertModels[i] = bom;
@@ -243,16 +247,20 @@ select FEntryID,(select FNumber from t_icitem where t_icitem.FItemID=ICBOMCHILD.
                     }
                     else
                     {
-                        bom.ID = id.ToString();
-                        bom.Flag = 'U';
-                        updateModels[j] = bom;
-                        j++;
-                        if (j == BatchNum)
+                        if (bom.HashCode != obj.ToString().Split(',')[1].ToString())
                         {
-                            CommitBatch(updateCmd, updateModels);
-                            result += j;
-                            j = 0;
-                            updateModels = new BaseModel[BatchNum];//重置批
+                            log4net.LogManager.GetLogger("Logger").Info($"检测到BOM更新【{bom.BOMCode}】");
+                            bom.ID = obj.ToString().Split(',')[0].ToString();
+                            bom.Flag = 'U';
+                            updateModels[j] = bom;
+                            j++;
+                            if (j == BatchNum)
+                            {
+                                CommitBatch(updateCmd, updateModels);
+                                result += j;
+                                j = 0;
+                                updateModels = new BaseModel[BatchNum];//重置批
+                            }
                         }
                     }
                 }
@@ -309,7 +317,7 @@ select FEntryID,(select FNumber from t_icitem where t_icitem.FItemID=ICBOMCHILD.
                 var cmd = new OracleCommand
                 {
                     Connection = RelatedConn,
-                    CommandText = $@"select t2 from LastUpdateTime where id={ConfigurationManager.AppSettings["SourceDB"]}"
+                    CommandText = $@"select t2 from LastUpdateTime where id={Source.Name}"
                 };
                 return (DateTime)(cmd.ExecuteScalar());
             }
@@ -328,7 +336,7 @@ select FEntryID,(select FNumber from t_icitem where t_icitem.FItemID=ICBOMCHILD.
                 var cmd = new OracleCommand
                 {
                     Connection = RelatedConn,
-                    CommandText = $@"update LastUpdateTime set t2=sysdate where id={ConfigurationManager.AppSettings["SourceDB"]}",
+                    CommandText = $@"update LastUpdateTime set t2=sysdate where id={Source.Name}",
                     Transaction = tx
                 };
                 cmd.ExecuteNonQuery();

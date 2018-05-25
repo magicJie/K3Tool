@@ -1,4 +1,8 @@
-﻿namespace ZYJC.Model
+﻿using System.Security.Cryptography;
+using System.Linq;
+using System.Text;
+
+namespace ZYJC.Model
 {
     /// <summary>
     /// 物料

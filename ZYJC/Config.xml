@@ -1,0 +1,13 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<sources cycle="5" backCycle="24">
+  <source name="WH">
+    <connectionString value="data source=192.168.7.73;initial catalog=AIS20090714202245;user id=zxt;password=Genuineznzd@2016"></connectionString>
+    <planCodePrefix value="JP"></planCodePrefix>
+    <line value="HW"></line>
+  </source>
+  <!--<source name="XG">
+    <connectionString value="data source=192.168.7.73;initial catalog=AIS20160422085723;user id=zxt;password=Genuineznzd@2016"></connectionString>
+    <planCodePrefix value="BB"></planCodePrefix>
+    <line value="FH"></line>
+  </source>-->
+</sources>
