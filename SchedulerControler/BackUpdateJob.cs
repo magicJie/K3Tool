@@ -24,10 +24,13 @@ namespace ZYJC
                 Scheduler.Instance.SetExecuting(id);
                 foreach (Source source in Configuration.Current.Sources)
                 {
-                    logger.Info($"标记删除物料 {new MaterielImporter(source).BackUpdate(new DateTime(1970, 1, 1), DateTime.Now)}条");
-                    logger.Info($"标记删除BOM {new BOMImporter(source).BackUpdate(new DateTime(1970, 1, 1), DateTime.Now)}条");
-                    logger.Info($"标记删除生产计划 {new ProductionPlanImporter(source).BackUpdate(new DateTime(1970, 1, 1), DateTime.Now)}条");
+                    new MaterielImporter(source).BackUpdate(new DateTime(1970, 1, 1), DateTime.Now);
+                    new BOMImporter(source).BackUpdate(new DateTime(1970, 1, 1), DateTime.Now);
+                    new ProductionPlanImporter(source).BackUpdate(new DateTime(1970, 1, 1), DateTime.Now);
                 }
+                logger.Info($"标记删除物料{new MaterielImporter().LogicDelete()}条");
+                logger.Info($"标记删除BOM{new BOMImporter().LogicDelete()}条");
+                logger.Info($"标记删除生产计划{new ProductionPlanImporter().LogicDelete()}条");
             }
             catch (Exception ex)
             {

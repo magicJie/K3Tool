@@ -12,10 +12,12 @@ namespace ZYJC
     {
         public string Cycle { get => _cycle; }
         public string BackCycle { get => _backCycle; }
+        public string MainData { get => _mainData; }
         private static Configuration _configuration;
         private List<Source> _sources;
         private string _cycle;
         private string _backCycle;
+        private string _mainData;
 
         public List<Source> Sources
         {
@@ -50,6 +52,7 @@ namespace ZYJC
             var root = doc.SelectSingleNode("sources");
             _configuration._cycle = root.Attributes["cycle"].Value;
             _configuration._backCycle = root.Attributes["backCycle"].Value;
+            _configuration._mainData = root.Attributes["mainData"].Value;
             var nodes = doc.SelectNodes("sources/source");
             foreach (XmlNode node in nodes)
             {

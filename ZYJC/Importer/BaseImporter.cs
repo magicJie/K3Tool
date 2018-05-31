@@ -21,6 +21,8 @@ namespace ZYJC.Importer
             return typeof(BaseModel);
         }
 
+        public BaseImporter() { }
+
         public BaseImporter(Source dataSource)
         {
             SourceConn = new SqlConnection(dataSource.ConnectionString);
@@ -182,6 +184,24 @@ namespace ZYJC.Importer
         public virtual void SetLastUpdateTime()
         {
             throw new NotImplementedException();
+        }
+
+        public int LogicDelete()
+        {
+            var updateCmd = new OracleCommand
+            {
+                Connection = RelatedConn,
+                CommandText = $"update {GetModelType().Name} set flag='D' where whdel=1 and xgdel=1"
+            };
+            try
+            {
+                RelatedConn.Open();
+                return updateCmd.ExecuteNonQuery();
+            }
+            finally
+            {
+                RelatedConn.Close();
+            }
         }
     }
 }

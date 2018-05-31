@@ -9,6 +9,7 @@ namespace ZYJC.Importer
 {
     public class ProductionPlanImporter : BaseImporter
     {
+        public ProductionPlanImporter() { }
         public ProductionPlanImporter(Source source) : base(source) { }
         public override Type GetModelType()
         {
@@ -126,10 +127,9 @@ FPlanCommitDate,FPlanFinishDate,(select FName from t_Department where t_Departme
                 var updateCmd = new OracleCommand
                 {
                     Connection = RelatedConn,
-                    CommandText = $@"update ProductionPlan set flag='D' where PlanCode=:PlanCode and SourceDb=:SourceDb"
+                    CommandText = $@"update ProductionPlan set {Source.Name}del=1 where PlanCode=:PlanCode"
                 };
                 updateCmd.Parameters.Add(new OracleParameter("PlanCode", OracleDbType.Char));
-                updateCmd.Parameters.Add(new OracleParameter("SourceDb", OracleDbType.Char));
                 updateCmd.Prepare();
                 var reader = readCmd.ExecuteReader();
                 var sourceCmd = new SqlCommand
@@ -187,10 +187,9 @@ FPlanCommitDate,FPlanFinishDate,(select FName from t_Department where t_Departme
             var relatedCmd = new OracleCommand
             {
                 Connection = RelatedConn,
-                CommandText = "select ID||','||HashCode from ProductionPlan where PlanCode=:PlanCode and SourceDb=:SourceDb"
+                CommandText = "select ID||','||HashCode||','||SourceDb from ProductionPlan where PlanCode=:PlanCode"
             };
             relatedCmd.Parameters.Add(new OracleParameter("PlanCode", OracleDbType.Char));
-            relatedCmd.Parameters.Add(new OracleParameter("SourceDb", OracleDbType.Char));
             relatedCmd.Prepare();
             var reader = sourceCmd.ExecuteReader();
             var insertCmd = new OracleCommand()
@@ -201,7 +200,7 @@ FPlanCommitDate,FPlanFinishDate,(select FName from t_Department where t_Departme
             var updateCmd = new OracleCommand()
             {
                 Connection = RelatedConn,
-                CommandText = GetUpdateCmdText() + $@" where PlanCode=:PlanCode and SourceDb=:SourceDb"
+                CommandText = GetUpdateCmdText() + $@" where PlanCode=:PlanCode"
             };
             try
             {
@@ -234,10 +233,9 @@ FPlanCommitDate,FPlanFinishDate,(select FName from t_Department where t_Departme
                     plan.Flag = 'C';
                     plan.K3TimeStamp = DateTime.Parse(reader["FCheckDate"].ToString());
                     plan.SourceDb = Source.Name;
-                    plan.Line = ConfigurationManager.AppSettings["Line"];
+                    plan.Line = Source.Line;
                     plan.CalculateHashCode();
                     relatedCmd.Parameters[0].Value = plan.PlanCode;
-                    relatedCmd.Parameters[1].Value = plan.SourceDb;
                     var obj = relatedCmd.ExecuteScalar();
                     if (obj==null)
                     {
@@ -254,8 +252,11 @@ FPlanCommitDate,FPlanFinishDate,(select FName from t_Department where t_Departme
                     }
                     else
                     {
-                        if (plan.HashCode != obj.ToString().Split(',')[1].ToString())
+                        var arr = obj.ToString().Split(',');
+                        if (plan.HashCode != arr[1])
                         {
+                            if (arr[2] != Source.Name && Source.Name != Configuration.Current.MainData)
+                                continue;
                             log4net.LogManager.GetLogger("Logger").Info($"检测到生产计划更新【{plan.PlanCode}】");
                             plan.Flag = 'U';
                             plan.ID = obj.ToString().Split(',')[0].ToString();
@@ -306,10 +307,6 @@ FPlanCommitDate,FPlanFinishDate,(select FName from t_Department where t_Departme
             return result;
         }
 
-        protected override string GetDeleteCmdText()
-        {
-            return $@"update ProductionPlan set flag='D' where PlanCode=:PlanCode and SourceDb=:SourceDb";
-        }
         protected override void AddDeleteParameter(OracleCommand cmd, BaseModel model)
         {
             cmd.Parameters.Add(new OracleParameter("PlanCode", ((ProductionPlan)model).PlanCode));

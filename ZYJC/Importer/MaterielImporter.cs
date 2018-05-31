@@ -10,6 +10,7 @@ namespace ZYJC.Importer
 {
     public class MaterielImporter : BaseImporter
     {
+        public MaterielImporter() { }
         public MaterielImporter(Source source):base(source) {
         }
 
@@ -113,10 +114,9 @@ namespace ZYJC.Importer
                 var updateCmd = new OracleCommand
                 {
                     Connection = RelatedConn,
-                    CommandText = GetDeleteCmdText()
+                    CommandText = $"update materiel set {Source.Name}del = 1 where Code =:Code"
                 };
                 updateCmd.Parameters.Add(new OracleParameter("Code", OracleDbType.Char));
-                updateCmd.Parameters.Add(new OracleParameter("SourceDb", OracleDbType.Char));
                 updateCmd.Prepare();
                 var reader = readCmd.ExecuteReader();
                 var sourceCmd = new SqlCommand
@@ -133,7 +133,6 @@ namespace ZYJC.Importer
                     if (sourceCmd.ExecuteScalar() == null)//如果找不到了，则说明源对应的行被删除，需要标记中间表数据为删除状态
                     {
                         updateCmd.Parameters[0].Value = reader[0];
-                        updateCmd.Parameters[1].Value = Source.Name;
                         updateCmd.ExecuteNonQuery();
                         result++;
                     }
@@ -172,10 +171,9 @@ namespace ZYJC.Importer
             var relatedCmd = new OracleCommand
             {
                 Connection = RelatedConn,
-                CommandText = "select ID||','||HashCode from Materiel where Code=:Code and SourceDb=:SourceDb"
+                CommandText = "select ID||','||HashCode||','||sourceDb from Materiel where Code=:Code"
             };
             relatedCmd.Parameters.Add(new OracleParameter("Code", OracleDbType.Char));
-            relatedCmd.Parameters.Add(new OracleParameter("SourceDb", OracleDbType.Char));
             relatedCmd.Prepare();
             var reader = sourceCmd.ExecuteReader();
             var insertCmd = new OracleCommand()
@@ -186,7 +184,7 @@ namespace ZYJC.Importer
             var updateCmd = new OracleCommand()
             {
                 Connection = RelatedConn,
-                CommandText = GetUpdateCmdText()+ $@" where Code=:Code  and SourceDb=:SourceDb"
+                CommandText = GetUpdateCmdText()+ $@" where Code=:Code"
             };
             try
             {
@@ -207,7 +205,6 @@ namespace ZYJC.Importer
                     materiel.SourceDb = Source.Name;
                     materiel.CalculateHashCode();
                     relatedCmd.Parameters[0].Value = materiel.Code;
-                    relatedCmd.Parameters[1].Value = materiel.SourceDb;
                     var obj = relatedCmd.ExecuteScalar();
                     if (obj==null)
                     {
@@ -224,9 +221,12 @@ namespace ZYJC.Importer
                     }
                     else
                     {
+                        var arr = obj.ToString().Split(',');
                         //对比哈希值决定是否需要更新
-                        if (materiel.HashCode != obj.ToString().Split(',')[1].ToString())
+                        if (materiel.HashCode != arr[1])
                         {
+                            if (arr[2] != Source.Name && Source.Name != Configuration.Current.MainData)
+                                continue;
                             log4net.LogManager.GetLogger("Logger").Info($"检测到物料更新【{materiel.Code}】");
                             materiel.ID = obj.ToString().Split(',')[0].ToString();
                             materiel.Flag = 'U';
@@ -277,61 +277,11 @@ namespace ZYJC.Importer
             return result;
         }
 
-        protected override string GetDeleteCmdText()
-        {
-            return $@"update materiel set flag = 'D' where Code =:Code and SourceDb=:SourceDb";
-        }
-
         protected override void AddDeleteParameter(OracleCommand cmd, BaseModel model)
         {
             cmd.Parameters.Add(new OracleParameter("Code", ((Materiel)model).Code));
         }
 
-        public override DateTime GetLastUpdateTime()
-        {
-            RelatedConn.Open();
-            try
-            {
-                var cmd = new OracleCommand
-                {
-                    Connection = RelatedConn,
-                    CommandText = $@"select t1 from LastUpdateTime where id={Source.Name}"
-                };
-                var time = cmd.ExecuteScalar();
-                if (time == null)
-                    return new DateTime(1970,1,1);
-                return (DateTime)(time);
-            }
-            finally
-            {
-                RelatedConn.Close();
-            }
-        }
 
-        public override void SetLastUpdateTime()
-        {
-            RelatedConn.Open();
-            var tx = RelatedConn.BeginTransaction();
-            try
-            {
-                var cmd = new OracleCommand
-                {
-                    Connection = RelatedConn,
-                    CommandText = $@"update LastUpdateTime set t1=sysdate where id={Source.Name}",
-                    Transaction = tx
-                };
-                cmd.ExecuteNonQuery();
-                tx.Commit();
-            }
-            catch
-            {
-                tx.Rollback();
-                throw;
-            }
-            finally
-            {
-                RelatedConn.Close();
-            }
-        }
     }
 }

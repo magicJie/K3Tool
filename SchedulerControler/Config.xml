@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <!-- cycle 检查新增/更新的周期，backCycle 检查删除周期。单位均为小时（h）-->
-<sources  cycle="1" backCycle="5">
+<sources  cycle="1" backCycle="5" mainData="WH">
   <source name="WH">
     <connectionString value="data source=192.168.7.73;initial catalog=AIS20090714202245;user id=zxt;password=Genuineznzd@2016"></connectionString>
     <!--生产计划Code的前缀过滤条件-->
