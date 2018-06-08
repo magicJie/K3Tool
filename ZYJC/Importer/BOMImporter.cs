@@ -5,6 +5,7 @@ using System.Data.SqlClient;
 using System.Linq;
 using Oracle.DataAccess.Client;
 using System.Configuration;
+using System.Threading;
 
 namespace ZYJC.Importer
 {
@@ -135,17 +136,20 @@ select FEntryID,(select FNumber from t_icitem where t_icitem.FItemID=ICBOMCHILD.
 (select FBOMNumber,(select FNumber from t_icitem where t_icitem.FItemID=icbom.FItemID) fshortnumber,FVersion,FStatus,FQty, (SELECT FName FROM T_MeasureUnit where T_MeasureUnit.FMeasureUnitID=icbom.FUnitID) FUnitID
 ,FInterID,FEnterTime from icbom) a right join (
 select FEntryID,(select FNumber from t_icitem where t_icitem.FItemID=ICBOMCHILD.FItemID) detailfshortnumber,(select (SELECT FName FROM T_MeasureUnit where T_MeasureUnit.FMeasureUnitID=t_icitem.FUnitID) from t_icitem where t_icitem.FItemID=ICBOMCHILD.FItemID) detailFUnitID,FQty as detailfqty,FInterID from  ICBOMCHILD ) b on a.FInterID=b.FInterID where fshortnumber like '30%' and detailfshortnumber like '30%'
-                       and (FBOMNumber=@FBOMNumber and FEntryID=@FEntryID and FVersion=@FVersion)"
+                       and (FBOMNumber=@FBOMNumber and FEntryID=@FEntryID and FVersion=@FVersion)",
+                    CommandTimeout=0
                 };
                 sourceCmd.Parameters.Add(new SqlParameter("FBOMNumber", System.Data.SqlDbType.Char, 8000));
                 sourceCmd.Parameters.Add(new SqlParameter("FEntryID", System.Data.SqlDbType.Char, 8000));
                 sourceCmd.Parameters.Add(new SqlParameter("FVersion", System.Data.SqlDbType.Char, 8000));
                 sourceCmd.Prepare();
+                var a = 0;
                 while (reader.Read())
                 {
                     sourceCmd.Parameters[0].Value = reader[0];
                     sourceCmd.Parameters[1].Value = reader[1];
                     sourceCmd.Parameters[2].Value = reader[2];
+                    //log4net.LogManager.GetLogger("logger").Info($"a:{++a}BOMNumber:{reader[0]}");
                     if (sourceCmd.ExecuteScalar() == null)//如果找不到了，则说明源对应的行被删除，需要标记中间表数据为删除状态
                     {
                         updateCmd.Parameters[0].Value = reader[0];
@@ -185,8 +189,9 @@ select FEntryID,(select FNumber from t_icitem where t_icitem.FItemID=ICBOMCHILD.
 (select FBOMNumber,(select FNumber from t_icitem where t_icitem.FItemID=icbom.FItemID) fshortnumber,FVersion,FStatus,FQty, (SELECT FName FROM T_MeasureUnit where T_MeasureUnit.FMeasureUnitID=icbom.FUnitID) FUnitID
 ,FInterID,FEnterTime from icbom) a right join (
 select FEntryID,(select FNumber from t_icitem where t_icitem.FItemID=ICBOMCHILD.FItemID) detailfshortnumber,(select (SELECT FName FROM T_MeasureUnit where T_MeasureUnit.FMeasureUnitID=t_icitem.FUnitID) from t_icitem where t_icitem.FItemID=ICBOMCHILD.FItemID) detailFUnitID,FQty as detailfqty,FInterID from  ICBOMCHILD ) b on a.FInterID=b.FInterID where fshortnumber like '30%' and detailfshortnumber like '30%'
-                       "
-                //and FEnterTime between CONVERT(datetime, '{startTime}') and CONVERT(datetime, '{endTime}')
+                       ",
+                CommandTimeout=0
+                //and FEnterTime between CONVERT(datetime, '{startTime}') and CONVERT(datetime, '{endTime}'),
             };
             var relatedCmd = new OracleCommand
             {

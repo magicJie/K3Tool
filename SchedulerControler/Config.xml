@@ -2,14 +2,14 @@
 <!-- cycle 检查新增/更新的周期，backCycle 检查删除周期。单位均为小时（h）-->
 <sources  cycle="1" backCycle="5" mainData="WH">
   <source name="WH">
-    <connectionString value="data source=192.168.7.73;initial catalog=AIS20090714202245;user id=zxt;password=Genuineznzd@2016"></connectionString>
+    <connectionString value="data source=192.168.7.73;initial catalog=AIS20090714202245;user id=zxt;password=Genuineznzd@2016 Max Pool Size=150;Connect Timeout=18000;"></connectionString>
     <!--生产计划Code的前缀过滤条件-->
     <planCodePrefix value="JP"></planCodePrefix>
     <!--生产计划产线标识-->
     <line value="HW"></line>
   </source>
   <source name="XG">
-    <connectionString value="data source=192.168.7.73;initial catalog=AIS20160422085723;user id=zxt;password=Genuineznzd@2016"></connectionString>
+    <connectionString value="data source=192.168.7.73;initial catalog=AIS20160422085723;user id=zxt;password=Genuineznzd@2016 Max Pool Size=150;Connect Timeout=18000;"></connectionString>
     <planCodePrefix value="BB"></planCodePrefix>
     <line value="FH"></line>
   </source>

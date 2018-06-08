@@ -5,6 +5,7 @@ using System.Data.SqlClient;
 using System.Linq;
 using Oracle.DataAccess.Client;
 using System.Configuration;
+using System.Threading;
 
 namespace ZYJC.Importer
 {
@@ -123,14 +124,16 @@ namespace ZYJC.Importer
                 {
                     Connection = SourceConn,
                     CommandText = $@"select FNumber,FName,(select FName from t_SubMessage where t_SubMessage.FInterID=t_icitem.FErpClsID) FTypeName,(SELECT FName FROM T_MeasureUnit where T_MeasureUnit.FMeasureUnitID=t_icitem.FUnitID) unit,
-                                 FModel, FLastCheckDate, FItemID from t_icitem where FNumber like '30%' and FNumber=@FNumber"
+                                 FModel, FLastCheckDate, FItemID from t_icitem where FNumber like '30%' and FNumber=@FNumber",
+                    CommandTimeout = 0
                 };
                 sourceCmd.Parameters.Add(new SqlParameter("FNumber", System.Data.SqlDbType.Char,8000));
                 sourceCmd.Prepare();
                 while (reader.Read())
                 {
                     sourceCmd.Parameters[0].Value = reader[0];
-                    if (sourceCmd.ExecuteScalar() == null)//如果找不到了，则说明源对应的行被删除，需要标记中间表数据为删除状态
+                    var obj = sourceCmd.ExecuteScalar();
+                    if (obj == null)//如果找不到了，则说明源对应的行被删除，需要标记中间表数据为删除状态
                     {
                         updateCmd.Parameters[0].Value = reader[0];
                         updateCmd.ExecuteNonQuery();
@@ -165,8 +168,9 @@ namespace ZYJC.Importer
                 CommandText =
                     $@"select FNumber,FName,(select FName from t_SubMessage where t_SubMessage.FInterID=t_icitem.FErpClsID) FTypeName,(SELECT FName FROM T_MeasureUnit where T_MeasureUnit.FMeasureUnitID=t_icitem.FUnitID) unit,
                                  FModel,FLastCheckDate,FItemID from t_icitem 
-                                    where FNumber like '30%' "
-                // and FLastCheckDate between CONVERT(datetime, '{startTime}') and CONVERT(datetime, '{endTime}')
+                                    where FNumber like '30%' ",
+                // and FLastCheckDate between CONVERT(datetime, '{startTime}') and CONVERT(datetime, '{endTime}'),
+                CommandTimeout=0
             };
             var relatedCmd = new OracleCommand
             {

@@ -138,7 +138,8 @@ FPlanCommitDate,FPlanFinishDate,(select FName from t_Department where t_Departme
                     CommandText = $@"SELECT FBillNo,(select FNumber from t_icitem where t_icitem.FItemID=ICmo.FItemID) as FShortNumber,
 (select FName from t_User where t_User.FUserID=ICmo.FBillerID) FBillerID,FCheckDate,(select FBOMNumber from icbom where icbom.FInterID= ICmo.FBomInterID) as FBOMNumber,(select FVersion from icbom where icbom.FInterID= ICmo.FBomInterID) as FVersion,FStatus,FAuxQty,(SELECT FName FROM T_MeasureUnit where T_MeasureUnit.FMeasureUnitID=ICmo.FUnitID)  FUnitID,FType,
 FPlanCommitDate,FPlanFinishDate,(select FName from t_Department where t_Department.FItemID=ICmo.FWorkShop) FWorkShop,FWorkTypeID,FConfirmDate,FGMPBatchNo FROM ICmo   
-                                    where FStatus=1 and FBillNo=@FBillNo"
+                                    where FStatus=1 and FBillNo=@FBillNo",
+                    CommandTimeout = 10
                 };
                 sourceCmd.Parameters.Add(new SqlParameter("FBillNo", System.Data.SqlDbType.Char, 8000));
                 sourceCmd.Prepare();
@@ -181,7 +182,8 @@ FPlanCommitDate,FPlanFinishDate,(select FName from t_Department where t_Departme
                     $@"SELECT FBillNo,(select FNumber from t_icitem where t_icitem.FItemID=ICmo.FItemID) as FShortNumber,
 (select FName from t_User where t_User.FUserID=ICmo.FBillerID) FBillerID,FCheckDate,(select FBOMNumber from icbom where icbom.FInterID= ICmo.FBomInterID) as FBOMNumber,(select FVersion from icbom where icbom.FInterID= ICmo.FBomInterID) as FVersion,FStatus,FAuxQty,(SELECT FName FROM T_MeasureUnit where T_MeasureUnit.FMeasureUnitID=ICmo.FUnitID)  FUnitID,FType,
 FPlanCommitDate,FPlanFinishDate,(select FName from t_Department where t_Department.FItemID=ICmo.FWorkShop) FWorkShop,FWorkTypeID,FConfirmDate,FGMPBatchNo FROM ICmo   
-                                    where FStatus=1 "
+                                    where FStatus=1 ",
+                CommandTimeout=0
                 //and FConfirmDate between CONVERT(datetime, '{startTime}') and CONVERT(datetime, '{endTime}')
             };
             var relatedCmd = new OracleCommand

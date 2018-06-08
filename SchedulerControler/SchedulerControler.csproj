@@ -87,6 +87,10 @@
     </None>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\MagicBox\MagicBox.Common\MagicBox.Common.csproj">
+      <Project>{4539136E-2F6C-4E72-BE3A-9DE59E1337EF}</Project>
+      <Name>MagicBox.Common</Name>
+    </ProjectReference>
     <ProjectReference Include="..\ZYJC\ZYJC.csproj">
       <Project>{2a63a8f7-0d63-4784-b59b-f1e17f1e29f2}</Project>
       <Name>ZYJC</Name>
@@ -94,6 +98,9 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="license.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
