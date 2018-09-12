@@ -203,5 +203,15 @@ namespace ZYJC.Importer
                 RelatedConn.Close();
             }
         }
+
+        public bool CheckHasNull(params string[] values)
+        {
+            foreach (var item in values)
+            {
+                if (string.IsNullOrWhiteSpace(item))
+                    return true;
+            }
+            return false;
+        }
     }
 }

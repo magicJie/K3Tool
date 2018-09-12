@@ -211,7 +211,8 @@ FPlanCommitDate,FPlanFinishDate,(select FName from t_Department where t_Departme
                 while (reader.Read())
                 {
                     var plan = new ProductionPlan();
-                    if (reader["FBillNo"] == DBNull.Value)
+                    if (reader["FBillNo"] == DBNull.Value|| reader["FGMPBatchNo"] == DBNull.Value|| reader["fshortnumber"] == DBNull.Value|| reader["FBillerID"] == DBNull.Value||
+                        reader["FCheckDate"] == DBNull.Value|| reader["FBOMNumber"] == DBNull.Value|| reader["FVersion"] == DBNull.Value|| reader["FStatus"] == DBNull.Value)
                         continue;
                     //武汉华为只要"JP"开头单据，孝感烽火只需要“BB”开头单据
                     if (!reader["FBillNo"].ToString().ToUpper().StartsWith(Source.PlanCodePrefix))
@@ -237,6 +238,8 @@ FPlanCommitDate,FPlanFinishDate,(select FName from t_Department where t_Departme
                     plan.SourceDb = Source.Name;
                     plan.Line = Source.Line;
                     plan.CalculateHashCode();
+                    if (CheckHasNull(plan.PlanCode, plan.WorkOrder, plan.MaterielCode, plan.Planner, plan.BOMCode, plan.BOMVersion, plan.OrderState))
+                        continue;
                     relatedCmd.Parameters[0].Value = plan.PlanCode;
                     var obj = relatedCmd.ExecuteScalar();
                     if (obj==null)
