@@ -17,6 +17,8 @@ namespace ZYJC.Model
         public string SourceDb { set; get; }
         public string ID { set; get; }
         public string HashCode { set; get; }
+        public DateTime K3WriteTime { set; get; }
+        public DateTime MESReadTime { set; get; }
         public void CalculateHashCode()
         {
             var md5Hasher = MD5.Create();

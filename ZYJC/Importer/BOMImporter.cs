@@ -234,6 +234,7 @@ select FEntryID,(select FNumber from t_icitem where t_icitem.FItemID=ICBOMCHILD.
                     bom.DetailUnit = reader["detailFUnitID"].ToString();
                     bom.Flag = 'C';
                     bom.K3TimeStamp = DateTime.Parse(reader["FEnterTime"].ToString());
+                    bom.K3WriteTime = DateTime.Now;
                     bom.SourceDb = Source.Name;
                     bom.CalculateHashCode();
                     relatedCmd.Parameters[0].Value = bom.BOMCode;

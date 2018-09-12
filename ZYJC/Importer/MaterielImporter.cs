@@ -208,6 +208,7 @@ namespace ZYJC.Importer
                     materiel.K3TimeStamp = DateTime.Now;
                     materiel.SourceDb = Source.Name;
                     materiel.CalculateHashCode();
+                    materiel.K3WriteTime = DateTime.Now;
                     relatedCmd.Parameters[0].Value = materiel.Code;
                     var obj = relatedCmd.ExecuteScalar();
                     if (obj==null)

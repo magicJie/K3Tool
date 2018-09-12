@@ -235,6 +235,7 @@ FPlanCommitDate,FPlanFinishDate,(select FName from t_Department where t_Departme
                     plan.WorkShop = reader["FWorkShop"].ToString();
                     plan.Flag = 'C';
                     plan.K3TimeStamp = DateTime.Parse(reader["FCheckDate"].ToString());
+                    plan.K3WriteTime = DateTime.Now;
                     plan.SourceDb = Source.Name;
                     plan.Line = Source.Line;
                     plan.CalculateHashCode();
