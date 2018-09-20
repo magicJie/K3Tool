@@ -1,0 +1,89 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1">
+  <Class Name="DataTool.Batcher.OracleBatcher" Collapsed="true">
+    <Position X="2.75" Y="1.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAQAAGAAAAAAAAAAAAAAAAAAgAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Batcher\OracleBatcher.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="DataTool.Batcher.SqlBatcher" Collapsed="true">
+    <Position X="4.25" Y="1.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAQAAGAAAAAAAAAAAAAAAAAAgAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Batcher\SqlBatcher.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="DataTool.Importer.Importer" Collapsed="true">
+    <Position X="0.5" Y="1" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>ACgAACAEAAAAAAAQIAAAAECAIgAAgABgoAAACAAAAAA=</HashCode>
+      <FileName>Importer\Importer.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="DataTool.Model.Scheme" Collapsed="true">
+    <Position X="0.5" Y="2.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAQoKIAACAAAAAAgCAAAAQEAAAgJCIAAQAAAAAABAI=</HashCode>
+      <FileName>Model\Scheme.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="DataTool.Model.DumpTask" Collapsed="true">
+    <Position X="3" Y="2.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAgAAAAACAAAAAAAAAQEgAAAAAACAAAAAAEAgAA=</HashCode>
+      <FileName>Model\DumpTask.cs</FileName>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Property Name="Scheme1" />
+    </ShowAsAssociation>
+  </Class>
+  <Class Name="DataTool.Model.Mapping" Collapsed="true">
+    <Position X="5.5" Y="2.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAgAAAAEAAAAAAAAAAAQAAAgAAAAQgA=</HashCode>
+      <FileName>Model\Mapping.cs</FileName>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Property Name="DumpTask" />
+    </ShowAsAssociation>
+  </Class>
+  <Interface Name="DataTool.Batcher.IBatchProvider" Collapsed="true">
+    <Position X="4.25" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAQAAGAAAAAAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Batcher\IBatchProvider.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Enum Name="DataTool.Model.DatabaseType" Collapsed="true">
+    <Position X="4" Y="4" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAACAAAAAAEAAAAAAAAAAAA=</HashCode>
+      <FileName>Model\Scheme.cs</FileName>
+    </TypeIdentifier>
+  </Enum>
+  <Enum Name="DataTool.Model.UpdateMode" Collapsed="true">
+    <Position X="2.25" Y="4" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAQAAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Model\Scheme.cs</FileName>
+    </TypeIdentifier>
+  </Enum>
+  <Enum Name="DataTool.Model.DeleteMode" Collapsed="true">
+    <Position X="5.75" Y="4" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAACAAAAAAAAAAAAACAAAEAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Model\Scheme.cs</FileName>
+    </TypeIdentifier>
+  </Enum>
+  <Enum Name="DataTool.Model.DumpMode" Collapsed="true">
+    <Position X="0.5" Y="4" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACAAAAAAA=</HashCode>
+      <FileName>Model\Scheme.cs</FileName>
+    </TypeIdentifier>
+  </Enum>
+  <Font Name="Microsoft YaHei UI" Size="9" />
+</ClassDiagram>

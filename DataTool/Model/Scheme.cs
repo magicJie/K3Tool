@@ -1,6 +1,7 @@
 ﻿using System;
 using System.CodeDom;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.IO;
 using System.Net;
 using System.Xml.Serialization;
@@ -12,22 +13,16 @@ namespace DataTool.Model
     {
         public string Name { set; get; }
         public string Author { set; get; }
-        public DateTime LastModifiedTime { set; get; }
+        public DateTime LastModifiedTime { set; get; } = DateTime.Now;
         public UpdateMode UpdateMode { set; get; }
         public DumpMode DumpMode { set; get; }
         public DeleteMode DeleteMode { set; get; }
-        public int? BatchNum { set; get; }
+        public int? BatchNum { set; get; } = 3000;
         public DatabaseType SourceDbType { set; get; }
-        public IPAddress SourceDbIP { set; get; }
-        public int SourceDbPort { set; get; }
-        public string SourceDbUserName { set; get; }
-        public string SourceDbPassword { set; get; }
+        public string SourceConnStr { set; get; }
         public DatabaseType TargetDbType { set; get; }
-        public IPAddress TargetDbIP { set; get; }
-        public int TargetDbPort { set; get; }
-        public string TargetDbUserName { set; get; }
-        public string TargetDbPassword { set; get; }
-        public List<DumpTask> TaskList { set; get; }
+        public string TargetConnStr { set; get; }
+        public List<DumpTask> TaskList { set; get; } = new List<DumpTask>();
 
         /// <summary>
         /// 将方案持久化到xml文件
@@ -45,7 +40,7 @@ namespace DataTool.Model
         }
 
         /// <summary>
-        /// 
+        /// 从指定位置加载方案文件
         /// </summary>
         /// <param name="fileName"></param>
         public static Scheme Load(string fileName)
@@ -59,8 +54,10 @@ namespace DataTool.Model
 
     public enum DatabaseType
     {
-        Oracle,
-        SqlServer
+        [Description("Oracle")]
+        Oracle=0,
+        [Description("SqlServer")]
+        SqlServer=1
     }
 
     /// <summary>
@@ -71,11 +68,13 @@ namespace DataTool.Model
         /// <summary>
         /// 根据主键，导入时强制覆盖已存在于目标表中的数据
         /// </summary>
-        Override,
+        [Description("Override")]
+        Override=0,
         /// <summary>
         /// 目标表要对比和源数据的修改时间，只有数据过期才会更新
         /// </summary>
-        Update
+        [Description("Update")]
+        Update=1
     }
 
     /// <summary>
@@ -86,15 +85,18 @@ namespace DataTool.Model
         /// <summary>
         /// 目标表对比源表，如果源表没有对应行，标识为删除
         /// </summary>
-        Flag,
+        [Description("Flag")]
+        Flag=0,
         /// <summary>
         /// 目标表对比源表，如果源表没有对应行，删除目标表中数据
         /// </summary>
-        Delete,
+        [Description("Delete")]
+        Delete=1,
         /// <summary>
         /// 目标数据库不对源数据库进行反向对比
         /// </summary>
-        Ignore
+        [Description("Ignore")]
+        Ignore=2
     }
 
     /// <summary>
@@ -106,10 +108,12 @@ namespace DataTool.Model
         /// <summary>
         /// 数据初始化模式
         /// </summary>
-        Init,
+        [Description("Init")]
+        Init = 0,
         /// <summary>
         /// 数据更新模式
         /// </summary>
-        Update
+        [Description("Update")]
+        Update =1
     }
 }

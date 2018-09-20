@@ -1,224 +1,254 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Data;
 using System.Data.Common;
-using System.Data.SqlClient;
 using System.Linq;
-using Oracle.DataAccess.Client;
+using DataTool.Batcher;
 using DataTool.Model;
 
-namespace DataTool
+namespace DataTool.Importer
 {
     public class Importer
     {
-        public readonly DbConnection _sourceConn;
-        public readonly DbConnection _targetConn;
-        private readonly DbCommand _sourceCmd;
-        private readonly DbCommand _targetCmd;
+        private readonly DumpTask _task;
+        private readonly Scheme _scheme;
+        private readonly DbProviderFactory _sourceFactory;//抽象工厂模式一套代码支持多种数据库
+        private readonly DbProviderFactory _targeFactory;
+        private readonly DbConnection _sourceConn;
+        private readonly DbConnection _targetConn;
         private const int DefaultBatchNum = 2000;
         private readonly int _batchNum = DefaultBatchNum;
-        private DumpTask _task;
-        private Scheme _scheme;
 
         public Importer(DumpTask dumpTask)
         {
             _task = dumpTask;
             _scheme = dumpTask.Scheme;
-            _sourceConn = GetSourceConn();
-            _targetConn = GetTargetConn();
-            _sourceCmd = GetSourceCmd();
-            _targetCmd = GetTargetCmd();
-            _sourceCmd.Connection = _sourceConn;
-            _targetCmd.Connection = _targetConn;
+            _sourceFactory = GetFactory(_scheme.SourceDbType);
+            _targeFactory = GetFactory(_scheme.TargetDbType);
+            _sourceConn = _sourceFactory.CreateConnection();
+            _sourceConn.ConnectionString = _scheme.SourceConnStr;
+            _targetConn = _targeFactory.CreateConnection();
+            _targetConn.ConnectionString = _scheme.TargetConnStr;
             if (_scheme.BatchNum.HasValue)
                 _batchNum = _scheme.BatchNum.Value;
         }
 
-        public int Import()
+        public void Import()
         {
-            var result = 0;
-            //定义批处理的
-            var models = new object[_task.MappingList.Count][];
-            _sourceConn.Open();
-            _targetConn.Open();
             //反向对比数据
             if (_scheme.DeleteMode != DeleteMode.Ignore)
             {
                 BackUpdate();
             }
+            Update();
+        }
 
-            var i = 0;
-            try
+        private int Update()
+        {
+            var result = 0;
+            var batcher = GetBatcher(_scheme.TargetDbType);
+            var readCmd = _sourceConn.CreateCommand();
+            readCmd.Connection = _sourceConn;
+            readCmd.CommandText = _task.SourceSqlStr;
+            var reader = readCmd.ExecuteReader();
+            var targetQueryCmd = _targeFactory.CreateCommand();
+            targetQueryCmd.Connection = _targetConn;
+            var a = 0;//对新增批计数
+            var b = 0;//对更新批计数
+            var insertDt = new DataTable(_task.TargetTableName);//新增数据
+            var updateDt = new DataTable(_task.TargetTableName);//更新数据
+            _task.MappingList.ForEach(x =>
             {
-                while (sourceCmd.Read())
+                insertDt.Columns.Add(x.TargetColumn);
+                updateDt.Columns.Add(x.TargetColumn);
+            });
+            //构造查询文本以及参数
+            var whereStr = "";
+            for (int j = 0; j < _task.PrimaryKey.Length; j++)
+            {
+                var para = targetQueryCmd.CreateParameter();
+                para.ParameterName = _task.PrimaryKey[j].ColumnName;
+                targetQueryCmd.Parameters.Add(para);
+                whereStr += $@"{_task.PrimaryKey[j].ColumnName}={GetDbParameterChar(_scheme.SourceDbType)}{_task.PrimaryKey[j].ColumnName}";
+                if (j != reader.FieldCount - 1)
+                    whereStr += " and ";
+            }
+            targetQueryCmd.CommandText = $@"select 0 from {_task.TargetTableName} where {whereStr}";
+            targetQueryCmd.Prepare();
+            while (reader.Read())
+            {
+                for (int j = 0; j < reader.FieldCount; j++)
                 {
-                    var objs = new object[DefaultBatchNum];
-                    
-                    models[i] = objs;
-                    i++;
-                    if (i == batchNum)
-                    {
-                        CommitBatch(models, relatedCmd);
-                        result += i;
-                        i = 0;
-                        models = new object[batchNum][];//重置批
-                    }
+                    targetQueryCmd.Parameters[j].Value = reader[j];
                 }
-                if (i > 0)
+                var obj = targetQueryCmd.ExecuteScalar();
+                var objs = new List<object>();
+                for (int j = 0; j < reader.FieldCount; j++)
                 {
-                    var oddModels = new object[batchNum][];
-                    for (int j = 0; j < i; j++)
-                    {
-                        oddModels[j] = models[i - 1];
-                    }
-                    CommitBatch(oddModels, relatedCmd);
-                    result += i;
+                    objs.Add(reader[j]);//TODO 采用Mapping转换数值
                 }
-                reader.Close();
+                if (obj == DBNull.Value)
+                {
+                    insertDt.Rows.Add(objs.ToArray());
+                    a++;
+                }
+                else
+                {
+                    updateDt.Rows.Add(objs.ToArray());
+                    b++;
+                }
+
+                if (a == _batchNum)
+                {
+                    batcher.Insert(insertDt);
+                    insertDt.Rows.Clear();
+                    result += a;
+                    a = 0;
+                }
+                if (b == _batchNum)
+                {
+                    batcher.Update(updateDt);
+                    updateDt.Rows.Clear();
+                    result += b;
+                    b = 0;
+                }
             }
-            catch (Exception e)
+            if (a > 0)
             {
-                log4net.LogManager.GetLogger("Logger").Error(e.Message + "\r\n" + _sourceCmd.CommandText + "\r\n" + _targetCmd.CommandText);
-                throw;
+                batcher.Insert(insertDt);
+                result += a;
+                a = 0;
             }
-            finally
+            if (b > 0)
             {
-                _sourceConn.Close();
-                _targetConn.Close();
+                batcher.Update(updateDt);
+                result += b;
+                b = 0;
             }
+            reader.Close();
             return result;
         }
 
         /// <summary>
         /// 反向更新
         /// </summary>
-        /// <param name="cmd"></param>
         /// <returns></returns>
         private int BackUpdate()
         {
             var result = 0;
-            if (_scheme.DeleteMode == DeleteMode.Flag)
-            {
-                _targetCmd.CommandText = $@"update {_task.TargetTableName} set xxx=xxx where xxx=xxx";
-            }
-            else if(_scheme.DeleteMode==DeleteMode.Delete)
-            {
-                _targetCmd.CommandText = $@"delete from  {_task.TargetTableName} where xxx=xxx";
-            }
-            var readCmd = GetTargetCmd();
+            var sourceCmd = _sourceFactory.CreateCommand();
+            sourceCmd.Connection = _sourceConn;
+            var batcher = GetBatcher(_scheme.TargetDbType);
+            var readCmd = _targeFactory.CreateCommand();
             readCmd.Connection = _targetConn;
-            readCmd.CommandText = $@"select {string.Join(",",_task.PrimaryKey.Select(x=>x.ColumnName))} from {_task.TargetTableName}";
+            readCmd.CommandText = $@"select {string.Join(",", _task.PrimaryKey.Select(x => x.ColumnName))} from {_task.TargetTableName}";
             var reader = readCmd.ExecuteReader();
             var i = 0;
-            var models=new object[_task.PrimaryKey.Length][];
-            for (int j = 0; j < models.Length; j++)
+            //构造表结构，区分删除模式
+            var dt = new DataTable(_task.TargetTableName);
+            dt.Columns.AddRange(_task.PrimaryKey);
+            if (_scheme.DeleteMode == DeleteMode.Flag)
             {
-                models[j]=new object[_batchNum];
+                dt.Columns.Add(_task.MappingList.Find(x => x.IsRowState).TargetColumn);
             }
+            var whereStr = "";
+            for (int j = 0; j < reader.FieldCount; j++)
+            {
+                var para = sourceCmd.CreateParameter();
+                para.ParameterName = _task.PrimaryKey[j].ColumnName;
+                sourceCmd.Parameters.Add(para);
+                whereStr += $@"{_task.PrimaryKey[j].ColumnName}={GetDbParameterChar(_scheme.SourceDbType)}{reader[j]}";
+                if (j != reader.FieldCount - 1)
+                    whereStr += " and ";
+            }
+            sourceCmd.CommandText = $@"select 0 from {_task.SourceTableName} where {whereStr}";
+            sourceCmd.Prepare();
             while (reader.Read())
             {
-                _sourceCmd.CommandText = $@"select 0 from xxx where xxx in({string.Join(",", reader)})";
-                var obj = _sourceCmd.ExecuteScalar();
+                for (int j = 0; j < reader.FieldCount; j++)
+                {
+                    sourceCmd.Parameters[j].Value = reader[j];
+                }
+                var obj = sourceCmd.ExecuteScalar();
                 if (obj == DBNull.Value)
                 {
-                    var objs = new object[_batchNum];
-                    for (int j = 0; j < models.Length; j++)
+                    var objs = new List<object>();
+                    for (int j = 0; j < reader.FieldCount; j++)
                     {
-                        models[j][i] = reader[j];
+                        objs.Add(reader[j]);
                     }
-                    models[i] = objs;
+                    if (_scheme.DeleteMode == DeleteMode.Flag)
+                    {
+                        objs.Add(_task.MappingList.Find(x => x.IsRowState).GetMappingValue(reader));
+                    }
+                    dt.Rows.Add(objs.ToArray());
                     i++;
                 }
-                
+
                 if (i == _batchNum)
                 {
-                    CommitBatch(models, _targetCmd);
+                    BackUpdateCommitBatch(batcher, dt);
                     result += i;
                     i = 0;
-                    models = new object[_task.PrimaryKey.Length][];//重置批
                 }
             }
             if (i > 0)
             {
-                var oddModels = new object[_task.PrimaryKey.Length][];
-                for (int j = 0; j < i; j++)
-                {
-                    oddModels[j] = models[j];
-                }
-                CommitBatch(oddModels, _targetCmd);
+                BackUpdateCommitBatch(batcher, dt);
                 result += i;
+                i = 0;
             }
             reader.Close();
             return result;
         }
 
-        protected virtual void CommitBatch(object[][] objects, DbCommand cmd)
+        private void BackUpdateCommitBatch(IBatchProvider batcher, DataTable dt)
         {
-            var tx = _sourceConn.BeginTransaction();
-            try
+            if (_scheme.DeleteMode == DeleteMode.Flag)
             {
-                cmd.Transaction = tx;
-                for (var i = 0; i < objects.Length; i++)
-                {
-                    DbParameter para = GetDbParameter();
-                    para.Value = objects[i];
-                    cmd.Parameters.Add(para);
-                }
-
-                cmd.ExecuteNonQuery();
-                tx.Commit();
-                cmd.Parameters.Clear();
+                batcher.Update(dt);
             }
-            catch (Exception)
+            else if (_scheme.DeleteMode == DeleteMode.Delete)
             {
-                tx.Rollback();
-                log4net.LogManager.GetLogger("Logger").Error(cmd.CommandText);
-                throw;
+                batcher.Delete(dt);
             }
+            dt.Rows.Clear();
         }
 
-        protected virtual string GetInsertCmdText()
+        private IBatchProvider GetBatcher(DatabaseType databaseType)
         {
-            var propInfos = type.GetProperties().Where(x => x.Name != "MESTimeStamp").ToArray();
-            return
-                $"insert into {type.Name} ({string.Join(",", propInfos.Select(x => x.Name))}) values({string.Join(",", propInfos.Select(x => ":" + x.Name))})";
+            switch (databaseType)
+            {
+                case DatabaseType.Oracle:
+                    return new OracleBatcher();
+                case DatabaseType.SqlServer:
+                    return new SqlBatcher();
+            }
+            throw new Exception($@"未指定{databaseType}的ClientFactory");
         }
 
-        private DbCommand GetSourceCmd()
+        private DbProviderFactory GetFactory(DatabaseType databaseType)
         {
-            if(_scheme.SourceDbType==DatabaseType.SqlServer)
-                return new SqlCommand();
-            else if(_scheme.SourceDbType == DatabaseType.Oracle)
-                return new OracleCommand();
-            throw new Exception("不支持的数据库"+_scheme.SourceDbType.ToString());
+            switch (databaseType)
+            {
+                case DatabaseType.Oracle:
+                    return DbProviderFactories.GetFactory("OracleClientFactory");
+                case DatabaseType.SqlServer:
+                    return DbProviderFactories.GetFactory("SqlClientFactory");
+            }
+            throw new Exception($@"未指定{databaseType}的ClientFactory");
         }
 
-        private DbCommand GetTargetCmd()
+        private char GetDbParameterChar(DatabaseType databaseType)
         {
-            if (_scheme.TargetDbType == DatabaseType.SqlServer)
-                return new SqlCommand();
-            else if (_scheme.TargetDbType == DatabaseType.Oracle)
-                return new OracleCommand();
-            throw new Exception("不支持的数据库" + _scheme.TargetDbType.ToString());
+            switch (databaseType)
+            {
+                case DatabaseType.Oracle:
+                    return ':';
+                case DatabaseType.SqlServer:
+                    return '@';
+            }
+            throw new Exception($@"不支持的数据库{databaseType}");
         }
-
-        private DbConnection GetSourceConn()
-        {
-            if (_scheme.SourceDbType == DatabaseType.SqlServer)
-                return new SqlConnection();
-            else if (_scheme.SourceDbType == DatabaseType.Oracle)
-                return new OracleConnection();
-            throw new Exception("不支持的数据库" + _scheme.SourceDbType.ToString());
-        }
-
-        private DbConnection GetTargetConn()
-        {
-            if (_scheme.TargetDbType == DatabaseType.SqlServer)
-                return new SqlConnection();
-            else if (_scheme.TargetDbType == DatabaseType.Oracle)
-                return new OracleConnection();
-            throw new Exception("不支持的数据库" + _scheme.TargetDbType.ToString());
-        }
-
-        
     }
 }
