@@ -4,6 +4,7 @@ using System.Configuration;
 using ZYJC.Model;
 using System.Data.SqlClient;
 using Oracle.DataAccess.Client;
+using System.Linq;
 
 namespace ZYJC.Importer
 {
@@ -47,7 +48,8 @@ FPlanCommitDate,FPlanFinishDate,(select FName from t_Department where t_Departme
                     if (reader["FBillNo"] == DBNull.Value)
                         continue;
                     //华为只要"JP"开头单据，烽火套账只需要“BB”开头单据
-                    if (!reader["FBillNo"].ToString().ToUpper().StartsWith(Source.PlanCodePrefix))
+                    var prefixs = Source.PlanCodePrefix.Split(',');
+                    if (!prefixs.Any(x=> reader["FBillNo"].ToString().ToUpper().StartsWith(x)))
                         continue;
                     plan.PlanCode = reader["FBillNo"].ToString();
                     plan.WorkOrder = reader["FGMPBatchNo"].ToString();
